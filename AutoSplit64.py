@@ -4,12 +4,12 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from as64_common.resource_utils import resource_path
-from as64_ui.app import App
+from as64core.resource_utils import resource_path
+from as64gui.app import App
 
-import as64_core
-from as64_core.processing import Processor, Transition
-from as64_core.processes import (
+import as64core
+from as64core.processing import Processor, Transition
+from as64core.processes import (
     ProcessFadein,
     ProcessFadeout,
     ProcessPostFadeout,
@@ -41,7 +41,7 @@ class AutoSplit64(QtCore.QObject):
         self.error.connect(self.app.display_error_message)
 
     def start(self):
-        as64_core.init()
+        as64core.init()
 
         # TODO: Generate transitions from file
         main_processor = Processor()
@@ -182,19 +182,18 @@ class AutoSplit64(QtCore.QObject):
         lblj_processor.add_transition(Transition(process_fadeout, ProcessFadeout.RESET, process_reset))
         lblj_processor.add_transition(Transition(process_reset, ProcessReset.RESET, process_lblj))
 
-
-        as64_core.register_split_processor(as64_core.SPLIT_NORMAL, main_processor)
-        as64_core.register_split_processor("SPLIT_LBLJ", lblj_processor)
-        as64_core.register_split_processor(as64_core.SPLIT_MIPS, ddd_processor)
-        as64_core.register_split_processor(as64_core.SPLIT_FINAL, final_processor)
-        as64_core.set_update_listener(self.on_update)
-        as64_core.set_error_listener(self.on_error)
-        as64_core.start()
+        as64core.register_split_processor(as64core.SPLIT_NORMAL, main_processor)
+        as64core.register_split_processor("SPLIT_LBLJ", lblj_processor)
+        as64core.register_split_processor(as64core.SPLIT_MIPS, ddd_processor)
+        as64core.register_split_processor(as64core.SPLIT_FINAL, final_processor)
+        as64core.set_update_listener(self.on_update)
+        as64core.set_error_listener(self.on_error)
+        as64core.start()
 
         self.app.set_started(True)
 
     def stop(self):
-        as64_core.stop()
+        as64core.stop()
 
     def on_update(self, index, star_count, split_star):
         self.app.update_display(index, star_count, split_star)
@@ -213,7 +212,6 @@ if __name__ == "__main__":
 
     palette = QtGui.QPalette()
     palette.setColor(QtGui.QPalette.Window, QtGui.QColor(36, 38, 50))
-    #palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(152, 163, 191))
     palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(182, 193, 221))
     palette.setColor(QtGui.QPalette.Base, QtGui.QColor(15, 23, 30))
     palette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(53, 55, 57))
