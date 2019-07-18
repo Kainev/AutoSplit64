@@ -1,3 +1,8 @@
 {
-  "version": "0.2.0-alpha"
+  "version": "0.2.0-alpha",
+  "compatibility": "0.2.0-alpha",
+  "location": "https://github.com/synozure/AutoSplit64/releases/download/0.1.2.1/AutoSplit64_WIN10_PATCH_V0.1.2.1.7z",
+  "patch_size": 12,
+  "version_features": [],
+  "version_post": ""
 }
