@@ -13,6 +13,7 @@ from .constants import (
     RESET_REGION_RATIO,
     NO_HUD_REGION_RATIO,
     POWER_REGION_RATIO,
+    XCAM_REGION_RATIO,
     GAME_REGION,
     STAR_REGION,
     LIFE_REGION,
@@ -20,7 +21,8 @@ from .constants import (
     FADEIN_REGION,
     RESET_REGION,
     NO_HUD_REGION,
-    POWER_REGION
+    POWER_REGION,
+    XCAM_REGION
 )
 
 
@@ -61,6 +63,7 @@ class GameCapture(object):
         self._regions[RESET_REGION] = calc_region(calc_ratio(RESET_REGION_RATIO, GAME_REGION_BASE))
         self._regions[NO_HUD_REGION] = calc_region(calc_ratio(NO_HUD_REGION_RATIO, GAME_REGION_BASE))
         self._regions[POWER_REGION] = calc_region(calc_ratio(POWER_REGION_RATIO, GAME_REGION_BASE))
+        self._regions[XCAM_REGION] = calc_region(calc_ratio(XCAM_REGION_RATIO, GAME_REGION_BASE))
 
     def is_valid(self) -> bool:
         return bool(self._hwnd)
@@ -68,6 +71,9 @@ class GameCapture(object):
     def capture(self) -> None:
         self._window_image = capture_window.capture(self._hwnd)
         self._region_images = {}
+
+    def get_capture_size(self):
+        return capture_window.get_capture_size(self._hwnd)
 
     def get_region(self, region):
         if self._window_image is None:
