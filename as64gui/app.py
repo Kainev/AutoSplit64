@@ -1,6 +1,10 @@
 import os
+from threading import Thread
 from functools import partial
 import re
+import json
+
+import requests
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -8,13 +12,16 @@ from as64core import route_loader, config
 from as64core.resource_utils import base_path, resource_path, absolute_path, rel_to_abs
 from . import constants
 from .widgets import PictureButton, StateButton, StarCountDisplay, SplitListWidget
-from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog
+from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, UpdateDialog
 
 
 class App(QtWidgets.QMainWindow):
     start = QtCore.pyqtSignal()
     stop = QtCore.pyqtSignal()
     closed = QtCore.pyqtSignal()
+    check_update = QtCore.pyqtSignal()
+    ignore_update = QtCore.pyqtSignal()
+    install_update = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -56,7 +63,8 @@ class App(QtWidgets.QMainWindow):
             "capture_editor": CaptureEditor(self),
             "settings_dialog": SettingsDialog(self),
             "route_editor": RouteEditor(self),
-            "reset_dialog": ResetGeneratorDialog(self)
+            "reset_dialog": ResetGeneratorDialog(self),
+            "update_dialog": UpdateDialog(self)
         }
 
         self._routes = {}
@@ -109,6 +117,9 @@ class App(QtWidgets.QMainWindow):
         self.start_btn.clicked.connect(self.start_clicked)
         self.dialogs["route_editor"].route_updated.connect(self._on_route_update)
         self.dialogs["settings_dialog"].applied.connect(self._stop)
+        self.dialogs["capture_editor"].applied.connect(self._stop)
+        self.dialogs["update_dialog"].ignore_btn.clicked.connect(lambda: self.ignore_update.emit())
+        self.dialogs["update_dialog"].update_btn.clicked.connect(lambda: self.install_update.emit())
 
     def update_display(self, split_index, current_star, split_star):
         if split_index > len(self.split_list.splits) - 1:
@@ -136,6 +147,7 @@ class App(QtWidgets.QMainWindow):
             self.start_btn.set_state("stop")
         else:
             self.start_btn.set_state("start")
+            # TODO: Set split list index to 0?
 
         self.start_btn.repaint()
 
@@ -193,6 +205,10 @@ class App(QtWidgets.QMainWindow):
         if file_path:
             self._save_open_route(file_path)
 
+    def update_found(self, info):
+        self.dialogs["update_dialog"].set_update_info(info)
+        self.dialogs["update_dialog"].show()
+
     def contextMenuEvent(self, event):
         context_menu = QtWidgets.QMenu(self)
         route_menu = QtWidgets.QMenu("Open Route")
@@ -232,6 +248,8 @@ class App(QtWidgets.QMainWindow):
         reset_gen_action = context_menu.addAction("Generate Reset Templates")
         context_menu.addSeparator()
         about_action = context_menu.addAction("About")
+        update_action = context_menu.addAction("Check for Updates..")
+        context_menu.addSeparator()
         exit_action = context_menu.addAction("Exit")
 
         action = context_menu.exec_(self.mapToGlobal(event.pos()))
@@ -253,6 +271,8 @@ class App(QtWidgets.QMainWindow):
             self.dialogs["reset_dialog"].show()
         elif action == about_action:
             self.dialogs["about_dialog"].show()
+        elif action == update_action:
+            self.check_update.emit()
         elif action == exit_action:
             self.close()
         else:
@@ -274,7 +294,10 @@ class App(QtWidgets.QMainWindow):
     def mouseMoveEvent(self, event):
         try:
             if event.buttons() == QtCore.Qt.LeftButton:
-                self.move(event.globalPos() - self._drag_position)
+                try:
+                    self.move(event.globalPos() - self._drag_position)
+                except TypeError:
+                    pass
                 event.accept()
         except AttributeError:
             pass
