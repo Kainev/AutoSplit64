@@ -121,6 +121,13 @@ class Base(Thread):
             self._error_occurred("Could not capture " + config.get("game", "process_name"))
             return False
 
+        current_capture_size = self._game_capture.get_capture_size()
+
+        if current_capture_size[0] != config.get("game", "capture_size")[0] or current_capture_size[1] != config.get("game", "capture_size")[1]:
+            self._error_occurred("Capture windows dimensions have changed since last configuring coordinates. Please reconfigure capture coordinates.")
+            # TODO: Decide if we should then save the current capture dimensions so if they want to force the splitter to run like this they can.. but why would you need to?
+            return False
+
         if not livesplit.check_connection(self._ls_socket):
             self._error_occurred("Could not connect to LiveSplit.")
             return False
