@@ -65,12 +65,14 @@ def get_hwnd_from_list(process_name, process_list):
 
 
 def capture(hwnd):
+    # TODO: Don't capture full window? Possible perf increase.
     """
     https://stackoverflow.com/a/24352388
     """
     left, top, right, bot = win32gui.GetWindowRect(hwnd)
     w = right - left
     h = bot - top
+
 
     hwnd_dc = win32gui.GetWindowDC(hwnd)
     mfc_dc = win32ui.CreateDCFromHandle(hwnd_dc)
@@ -94,4 +96,10 @@ def capture(hwnd):
     win32gui.ReleaseDC(hwnd, hwnd_dc)
 
     return image
+
+
+def get_capture_size(hwnd):
+    left, top, right, bot = win32gui.GetWindowRect(hwnd)
+
+    return [right - left, bot - top]
 
