@@ -1,4 +1,139 @@
 import time
+import json
+
+
+processes = {}
+
+
+def register_process(name, process):
+    processes[name] = process
+
+
+class ProcessorGenerator(object):
+    INITIAL_PROCESS = "initial_process"
+    INHERIT = "inherit"
+    OVERRIDE = "override"
+    TRANSITIONS = "transitions"
+    SUB_PROCESSORS = "sub_processors"
+
+    @staticmethod
+    def generate(file_path):
+        # Load processor file
+        file = ProcessorGenerator._open_file(file_path)
+        transitions = {}
+
+        #
+        sub_processors = {}
+
+        for sub_processor_key in file[ProcessorGenerator.SUB_PROCESSORS]:
+            sub_processor = ProcessorGenerator.generate(file[ProcessorGenerator.SUB_PROCESSORS][sub_processor_key])
+
+            if not sub_processor:
+                print(file["name"], "1")
+                return None
+
+            sub_processors[sub_processor_key] = sub_processor
+
+        if not file:
+            print(file["name"], "2")
+            return None
+
+        # Create blank processor instance
+        processor = Processor()
+
+        # Set initial process
+        try:
+            processor.initial_process = processes[file[ProcessorGenerator.INITIAL_PROCESS]]
+        except KeyError:
+            try:
+                processor.initial_process = sub_processors[file[ProcessorGenerator.INITIAL_PROCESS]]
+            except KeyError:
+                print(file["name"], "3")
+                return None
+
+        # Copy all transitions from inherited processor (single inheritance only)
+        if file[ProcessorGenerator.INHERIT]:
+            inherit_file = ProcessorGenerator._open_file(file[ProcessorGenerator.INHERIT])
+
+            if not inherit_file:
+                print(file["name"], "4")
+                return None
+
+            transitions = inherit_file[ProcessorGenerator.TRANSITIONS]
+
+        # Set/override with all local transitions
+        for transition in file[ProcessorGenerator.TRANSITIONS]:
+            transitions[transition] = file[ProcessorGenerator.TRANSITIONS][transition]
+
+        # Add transitions to processor
+        for process_key in transitions:
+            for signal in transitions[process_key]:
+                signal_location = signal.split(".")[0]
+                signal_value = signal.split(".")[1]
+
+                # Define Transition
+                try:
+                    t_process = processes[process_key]
+                except KeyError:
+                    try:
+                        t_process = sub_processors[process_key]
+                    except KeyError:
+                        print(file["name"], "5")
+                        return None
+
+                try:
+                    t_signal = processes[signal_location].signals[signal_value]
+                except KeyError:
+                    try:
+                        t_signal = sub_processors[signal_location].signals[signal_value]
+                    except KeyError:
+                        print(file["name"], "6")
+                        return None
+
+                try:
+                    t_next = processes[transitions[process_key][signal]]
+                except KeyError:
+                    try:
+                        t_next = sub_processors[transitions[process_key][signal]]
+                    except KeyError:
+                        print(file["name"], "7")
+                        return None
+
+                t = Transition(t_process, t_signal, t_next)
+
+                # Add Transition
+                processor.add_transition(t)
+
+        return processor
+
+    @staticmethod
+    def _open_file(file_path):
+        try:
+            with open(file_path) as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            return None
+        except PermissionError:
+            return None
+
+        return data
+
+def generate_processor(file_path):
+    with open(file_path) as file:
+        data = json.load(file)
+
+    # Create Processor Instance
+    processor = Processor()
+
+    # Set initial process
+    processor.initial_process = processes[data["initial_process"]]
+
+    # Create Transitions
+    for proc in data["transitions"]:
+        for signal in data["transitions"][proc]:
+            processor.add_transition(Transition(processes[proc], processes[proc].signals[signal], processes[data["transitions"][proc][signal]]))
+
+    return processor
 
 
 class Signal(object):
@@ -29,16 +164,20 @@ class Process(object):
     LOOP = Signal()
 
     def __init__(self):
+        self.signals = {"LOOP": Signal()}
         self._transition_time = time.time()
 
     def execute(self):
-        return Process.LOOP
+        return self.signals["LOOP"]
 
     def on_transition(self):
         self._transition_time = time.time()
 
     def loop_time(self):
         return time.time() - self._transition_time
+
+    def register_signal(self, name):
+        self.signals[name] = Signal()
 
 
 class Processor(Process):
@@ -77,7 +216,7 @@ class Processor(Process):
         next_process = None
 
         # Automatically process LOOP signal transitions, setting the next process to be the current process, otherwise check for transitions
-        if result == Process.LOOP:
+        if result == self._current_process.signals["LOOP"]:
             next_process = self._current_process
         else:
             for transition in self._transitions:
@@ -93,7 +232,7 @@ class Processor(Process):
         if not next_process:
             return result
         else:
-            return Process.LOOP
+            return self.signals["LOOP"]
 
     def on_transition(self):
         """ On transition ensure processor is started from its initial process. """
