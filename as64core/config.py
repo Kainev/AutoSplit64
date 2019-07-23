@@ -145,6 +145,3 @@ def generate_config():
     load_defaults()
     _config = copy.deepcopy(_defaults)
     save_config()
-
-
-
