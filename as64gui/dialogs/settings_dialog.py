@@ -168,6 +168,12 @@ class GeneralMenu(BaseMenu):
         self.mid_run_lb = QtWidgets.QLabel("Allow Mid-Run Starts:")
         self.mid_run_cb = QtWidgets.QCheckBox()
 
+        self.mode_lb = QtWidgets.QLabel("Operation Mode:")
+        self.mode_combo = QtWidgets.QComboBox()
+
+        self.on_top_lb = QtWidgets.QLabel("Always On Top:")
+        self.on_top_cb = QtWidgets.QCheckBox()
+
         self.init()
 
     def init(self):
@@ -175,6 +181,11 @@ class GeneralMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
+        self.mode_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.mode_lb.setMaximumWidth(120)
+        self.mode_combo.setMaximumWidth(120)
+        self.mode_combo.addItems(["Probability", "X-Cam"])
+
         self.override_ver_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.override_ver_lb.setMaximumWidth(120)
         self.override_ver_cb.setMaximumWidth(20)
@@ -185,25 +196,51 @@ class GeneralMenu(BaseMenu):
         self.mid_run_lb.setMaximumWidth(120)
         self.mid_run_cb.setMaximumWidth(20)
 
+        self.on_top_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.on_top_lb.setMaximumWidth(120)
+        self.on_top_cb.setMaximumWidth(20)
+
         # Add Widgets
-        self.menu_layout.addWidget(self.mid_run_lb, 0, 0)
-        self.menu_layout.addWidget(self.mid_run_cb, 0, 1)
+        self.menu_layout.addWidget(self.on_top_lb, 2, 0)
+        self.menu_layout.addWidget(self.on_top_cb, 2, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 2, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 3, 0)
 
-        self.menu_layout.addWidget(HLine(), 3, 0, 1, 3)
+        self.menu_layout.addWidget(HLine(), 4, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 5, 0)
 
-        self.menu_layout.addWidget(self.override_ver_lb, 5, 0)
-        self.menu_layout.addWidget(self.override_ver_cb, 5, 1)
+        self.menu_layout.addWidget(self.mode_lb, 6, 0)
+        self.menu_layout.addWidget(self.mode_combo, 6, 1)
+
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 5, 2)
-        self.menu_layout.addWidget(self.override_ver_combo, 6, 1)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 7, 0)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 10, 0)
+        self.menu_layout.addWidget(HLine(), 8, 0, 1, 3)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 9, 0)
+
+        self.menu_layout.addWidget(self.mid_run_lb, 10, 0)
+        self.menu_layout.addWidget(self.mid_run_cb, 10, 1)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 11, 0)
+
+        self.menu_layout.addWidget(HLine(), 12, 0, 1, 3)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 13, 0)
+
+        self.menu_layout.addWidget(self.override_ver_lb, 14, 0)
+        self.menu_layout.addWidget(self.override_ver_cb, 14, 1)
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 14, 2)
+        self.menu_layout.addWidget(self.override_ver_combo, 15, 1)
+
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 30, 0)
 
         # Connections
         self.override_ver_cb.clicked.connect(self.override_clicked)
@@ -214,8 +251,10 @@ class GeneralMenu(BaseMenu):
         self.override_ver_combo.setDisabled(not checked)
 
     def load_preferences(self):
+        self.mode_combo.setCurrentIndex(config.get("general", "operation_mode"))
         self.override_ver_cb.setChecked(config.get("game", "override_version"))
         self.mid_run_cb.setChecked(config.get("general", "mid_run_start_enabled"))
+        self.on_top_cb.setChecked(config.get("general", "on_top"))
 
         if config.get("game", "version") == "US":
             self.override_ver_combo.setCurrentIndex(1)
@@ -228,6 +267,8 @@ class GeneralMenu(BaseMenu):
         config.set_key("game", "override_version", self.override_ver_cb.isChecked())
         config.set_key("general", "mid_run_start_enabled", self.mid_run_cb.isChecked())
         config.set_key("game", "version", self.override_ver_combo.itemText(self.override_ver_combo.currentIndex()))
+        config.set_key("general", "operation_mode", self.mode_combo.currentIndex())
+        config.set_key("general", "on_top", self.on_top_cb.isChecked())
 
 
 class ThresholdsMenu(BaseMenu):
@@ -250,8 +291,16 @@ class ThresholdsMenu(BaseMenu):
         self.white_lb = QtWidgets.QLabel("White Threshold:")
         self.white_le = QtWidgets.QLineEdit("")
 
+        self.xcam_bg_lb = QtWidgets.QLabel("X-Cam B-G Threshold:")
+        self.xcam_bg_le = QtWidgets.QLineEdit("")
+        self.xcam_rg_lb = QtWidgets.QLabel("X-Cam R-G Threshold:")
+        self.xcam_rg_le = QtWidgets.QLineEdit("")
+        self.xcam_pixel_lb = QtWidgets.QLabel("X-Cam Pixel Threshold:")
+        self.xcam_pixel_le = QtWidgets.QLineEdit("")
+
         self.double_validator = QtGui.QDoubleValidator(0, 1, 3)
         self.double_validator.setRange(0, 1, 3)
+        self.int_validator = QtGui.QIntValidator()
 
         self.init()
 
@@ -264,6 +313,9 @@ class ThresholdsMenu(BaseMenu):
         self.reset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.confirmation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.black_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xcam_bg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xcam_rg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xcam_pixel_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.prob_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.reset_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -271,6 +323,9 @@ class ThresholdsMenu(BaseMenu):
         self.white_lb.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.black_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.white_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.xcam_bg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.xcam_rg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.xcam_pixel_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         # Add Widgets
         self.menu_layout.addItem(
@@ -296,13 +351,31 @@ class ThresholdsMenu(BaseMenu):
         self.menu_layout.addWidget(self.white_lb, 10, 2)
         self.menu_layout.addWidget(self.white_le, 10, 3)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 15, 0)
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 11, 0)
+
+        self.menu_layout.addWidget(HLine(), 12, 0, 1, 4)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 13, 0)
+
+        self.menu_layout.addWidget(self.xcam_bg_lb, 14, 0)
+        self.menu_layout.addWidget(self.xcam_bg_le, 14, 1)
+        self.menu_layout.addWidget(self.xcam_rg_lb, 14, 2)
+        self.menu_layout.addWidget(self.xcam_rg_le, 14, 3)
+        self.menu_layout.addWidget(self.xcam_pixel_lb, 15, 0)
+        self.menu_layout.addWidget(self.xcam_pixel_le, 15, 1)
+
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 16, 0)
 
         self.prob_le.setValidator(self.double_validator)
         self.reset_le.setValidator(self.double_validator)
         self.confirmation_le.setValidator(self.double_validator)
         self.black_le.setValidator(self.double_validator)
         self.white_le.setValidator(self.double_validator)
+        self.xcam_bg_le.setValidator(self.int_validator)
+        self.xcam_rg_le.setValidator(self.int_validator)
+        self.xcam_pixel_le.setValidator(self.double_validator)
 
         self.load_preferences()
 
@@ -314,6 +387,10 @@ class ThresholdsMenu(BaseMenu):
         self.black_le.setText(str(config.get('thresholds', 'black_threshold')))
         self.white_le.setText(str(config.get('thresholds', 'white_threshold')))
 
+        self.xcam_bg_le.setText(str(config.get('thresholds', 'xcam_bg_threshold')))
+        self.xcam_rg_le.setText(str(config.get('thresholds', 'xcam_rg_threshold')))
+        self.xcam_pixel_le.setText(str(config.get('thresholds', 'xcam_pixel_threshold')))
+
     def update_preferences(self):
         config.set_key('thresholds', 'probability_threshold', float(self.prob_le.text()))
         config.set_key('thresholds', 'reset_threshold', float(self.reset_le.text()))
@@ -321,6 +398,10 @@ class ThresholdsMenu(BaseMenu):
 
         config.set_key('thresholds', 'black_threshold', float(self.black_le.text()))
         config.set_key('thresholds', 'white_threshold', float(self.white_le.text()))
+
+        config.set_key('thresholds', 'xcam_bg_threshold', int(self.xcam_bg_le.text()))
+        config.set_key('thresholds', 'xcam_rg_threshold', int(self.xcam_rg_le.text()))
+        config.set_key('thresholds', 'xcam_pixel_threshold', float(self.xcam_pixel_le.text()))
 
 
 class ColourThresholdsMenu(BaseMenu):
@@ -331,7 +412,7 @@ class ColourThresholdsMenu(BaseMenu):
         self.menu_layout = QtWidgets.QGridLayout()
 
         # Widgets
-        self.split_type_lb = QtWidgets.QLabel("Split Type:")
+        self.split_type_lb = QtWidgets.QLabel("Threshold:")
         self.split_type_cb = QtWidgets.QComboBox()
         self.stacked_widget = QtWidgets.QStackedWidget()
 
@@ -353,6 +434,12 @@ class ColourThresholdsMenu(BaseMenu):
         self.star_lower_bound = SettingsColourWidget("Star Lower Bound:", "split_final_star", "star_lower_bound", self.final_bowser_widget)
         self.star_upper_bound = SettingsColourWidget("Star Upper Bound:", "split_final_star", "star_upper_bound", self.final_bowser_widget)
 
+        # X-Cam
+        self.xcam_widget = QtWidgets.QWidget()
+        self.xcam_widget.setLayout(QtWidgets.QGridLayout())
+        self.xcam_lower_bound = SettingsColourWidget("Lower Bound:", "split_xcam", "lower_bound", self.xcam_widget)
+        self.xcam_upper_bound = SettingsColourWidget("Upper Bound:", "split_xcam", "upper_bound", self.xcam_widget)
+
         self.init()
 
     def init(self):
@@ -361,6 +448,7 @@ class ColourThresholdsMenu(BaseMenu):
 
         # Configure Widgets
         self.split_type_cb.setFixedWidth(100)
+        self.split_type_cb.addItem("X-Cam")
         self.split_type_cb.addItem("DDD Enter")
         self.split_type_cb.addItem("Final Bowser")
         split_type_widget = QtWidgets.QWidget()
@@ -368,6 +456,7 @@ class ColourThresholdsMenu(BaseMenu):
         split_type_widget.layout().addWidget(self.split_type_lb)
         split_type_widget.layout().addWidget(self.split_type_cb)
 
+        self.stacked_widget.addWidget(self.xcam_widget)
         self.stacked_widget.addWidget(self.ddd_enter_widget)
         self.stacked_widget.addWidget(self.final_bowser_widget)
 
@@ -386,6 +475,13 @@ class ColourThresholdsMenu(BaseMenu):
         self.final_bowser_widget.layout().addWidget(self.stage_upper_bound, 1, 0)
         self.final_bowser_widget.layout().addWidget(self.star_lower_bound, 2, 0)
         self.final_bowser_widget.layout().addWidget(self.star_upper_bound, 3, 0)
+
+        # X-Cam
+        self.xcam_widget.layout().addWidget(self.xcam_lower_bound, 0, 0)
+        self.xcam_widget.layout().addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 1)
+        self.xcam_widget.layout().addWidget(self.xcam_upper_bound, 1, 0)
+        self.xcam_widget.layout().addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 2, 0)
 
 
         # Layout
@@ -422,6 +518,8 @@ class ColourThresholdsMenu(BaseMenu):
         self.stage_upper_bound.load_config()
         self.star_lower_bound.load_config()
         self.star_upper_bound.load_config()
+        self.xcam_lower_bound.load_config()
+        self.xcam_upper_bound.load_config()
 
     def update_preferences(self):
         self.portal_lower_bound.save_config()
@@ -432,6 +530,8 @@ class ColourThresholdsMenu(BaseMenu):
         self.stage_upper_bound.save_config()
         self.star_lower_bound.save_config()
         self.star_upper_bound.save_config()
+        self.xcam_lower_bound.save_config()
+        self.xcam_upper_bound.save_config()
 
 
 class SettingsColourWidget(QtWidgets.QWidget):
@@ -559,6 +659,13 @@ class ErrorCorrectionMenu(BaseMenu):
         self.undo_threshold_lb = QtWidgets.QLabel("Undo Average Threshold:")
         self.undo_threshold_le = QtWidgets.QLineEdit("")
 
+        self.star_skip_lb = QtWidgets.QLabel("Star Skip Enabled:")
+        self.star_skip_cb = QtWidgets.QCheckBox()
+        self.max_skip_lb = QtWidgets.QLabel("Max Star Skip:")
+        self.max_skip_le = QtWidgets.QLineEdit("")
+        self.skip_count_lb = QtWidgets.QLabel("Consecutive Predictions:")
+        self.skip_count_le = QtWidgets.QLineEdit("")
+
         self.double_validator = QtGui.QDoubleValidator(0, 1, 3)
         self.double_validator.setRange(0, 1, 3)
         self.int_validator = QtGui.QIntValidator()
@@ -573,14 +680,21 @@ class ErrorCorrectionMenu(BaseMenu):
         self.processing_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.undo_count_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.undo_threshold_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.star_skip_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.max_skip_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.skip_count_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.processing_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.undo_count_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.undo_threshold_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.max_skip_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.skip_count_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
         self.processing_le.setMaximumWidth(50)
         self.undo_count_le.setMaximumWidth(50)
         self.undo_threshold_le.setMaximumWidth(50)
+        self.max_skip_le.setMaximumWidth(50)
+        self.skip_count_le.setMaximumWidth(50)
 
         # Add Widgets
         self.menu_layout.addItem(
@@ -595,11 +709,28 @@ class ErrorCorrectionMenu(BaseMenu):
         self.menu_layout.addWidget(self.undo_threshold_lb, 7, 0)
         self.menu_layout.addWidget(self.undo_threshold_le, 7, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 15, 0)
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 8, 0)
+
+        self.menu_layout.addWidget(HLine(), 9, 0, 1, 4)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 10, 0)
+
+        self.menu_layout.addWidget(self.star_skip_lb, 11, 0)
+        self.menu_layout.addWidget(self.star_skip_cb, 11, 1)
+        self.menu_layout.addWidget(self.max_skip_lb, 12, 0)
+        self.menu_layout.addWidget(self.max_skip_le, 12, 1)
+        self.menu_layout.addWidget(self.skip_count_lb, 13, 0)
+        self.menu_layout.addWidget(self.skip_count_le, 13, 1)
+
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 20, 0)
 
         self.processing_le.setValidator(self.int_validator)
         self.undo_count_le.setValidator(self.int_validator)
         self.undo_threshold_le.setValidator(self.double_validator)
+        self.max_skip_le.setValidator(self.int_validator)
+        self.skip_count_le.setValidator(self.int_validator)
 
         self.load_preferences()
 
@@ -607,11 +738,17 @@ class ErrorCorrectionMenu(BaseMenu):
         self.processing_le.setText(str(config.get('error', 'processing_length')))
         self.undo_count_le.setText(str(config.get('error', 'minimum_undo_count')))
         self.undo_threshold_le.setText(str(config.get('error', 'undo_threshold')))
+        self.skip_count_le.setText(str(config.get('error', 'minimum_consecutive_prediction')))
+        self.max_skip_le.setText(str(config.get('error', 'max_star_skip')))
+        self.star_skip_cb.setChecked(config.get('error', 'star_skip'))
 
     def update_preferences(self):
         config.set_key('error', 'processing_length', int(self.processing_le.text()))
         config.set_key('error', 'minimum_undo_count', int(self.undo_count_le.text()))
         config.set_key('error', 'undo_threshold', float(self.undo_threshold_le.text()))
+        config.set_key('error', 'minimum_consecutive_prediction', int(self.skip_count_le.text()))
+        config.set_key('error', 'max_star_skip', int(self.max_skip_le.text()))
+        config.set_key('error', 'star_skip', self.star_skip_cb.isChecked())
 
 
 class AdvancedMenu(BaseMenu):

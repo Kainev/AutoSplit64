@@ -20,7 +20,7 @@ class Updater(QtCore.QObject):
 
         # Initialize GUI
         self.gui = UpdaterGUI()
-        self.core = UpdaterCore(master_version_url="https://autosplit64.com/.version",
+        self.core = UpdaterCore(master_version_url="https://autosplit64.com/.master_version",
                                 local_version_path=".version")
 
         self.core.set_listener(self)

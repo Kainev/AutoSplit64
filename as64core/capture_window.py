@@ -31,7 +31,6 @@ def get_visible_processes():
             # Get process name & pid from process object.
             process_name = proc.name()
             process_id = proc.pid
-            # print(processName, ' ::: ', processID)
 
             if process_id is not None:
                 def callback(h, additional):
@@ -65,7 +64,6 @@ def get_hwnd_from_list(process_name, process_list):
 
 
 def capture(hwnd):
-    # TODO: Don't capture full window? Possible perf increase.
     """
     https://stackoverflow.com/a/24352388
     """

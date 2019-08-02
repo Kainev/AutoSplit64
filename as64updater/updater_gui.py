@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from resource_utils import base_path
+from as64core.resource_utils import base_path
 
 
 class UpdaterGUI(QtWidgets.QMainWindow):

@@ -5,11 +5,11 @@
   "sub_processors": {},
   "transitions": {
     "RUN_START": {
-      "RUN_START.FADEOUT": "FADEOUT"
+      "RUN_START.FADEOUT": "FADEOUT_RESET_ONLY"
     },
-    "FADEOUT": {
-      "FADEOUT.COMPLETE": "RUN_START",
-      "FADEOUT.RESET": "RESET"
+    "FADEOUT_RESET_ONLY": {
+      "FADEOUT_RESET_ONLY.COMPLETE": "RUN_START",
+      "FADEOUT_RESET_ONLY.RESET": "RESET"
     },
     "RESET": {
       "RESET.RESET": "RUN_START"

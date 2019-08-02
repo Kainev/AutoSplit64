@@ -1,0 +1,17 @@
+{
+  "name": "standard",
+  "initial_process": "INITIAL",
+  "inherit": null,
+  "sub_processors": {
+    "INITIAL": "logic/standard/initial.processor",
+    "STAR_FADE": "logic/standard/star_fade.processor"
+  },
+  "transitions": {
+    "INITIAL": {
+      "RUN_START.START": "STAR_FADE"
+    },
+    "STAR_FADE": {
+      "RESET.RESET": "INITIAL"
+    }
+  }
+}

@@ -13,9 +13,15 @@ DEFAULT_LS_HOST = constants.DEFAULT_LS_HOST
 DEFAULT_LS_PORT = constants.DEFAULT_LS_PORT
 GAME_JP = constants.GAME_JP
 GAME_US = constants.GAME_US
+TIMING_RTA = constants.TIMING_RTA
+TIMING_UP_RTA = constants.TIMING_UP_RTA
+PREDICTION_MODE = constants.PREDICTION_MODE
+CONFIRMATION_MODE = constants.CONFIRMATION_MODE
+SPLIT_INITIAL = constants.SPLIT_INITIAL
 SPLIT_NORMAL = constants.SPLIT_NORMAL
 SPLIT_FINAL = constants.SPLIT_FINAL
-SPLIT_MIPS = constants.SPLIT_MIPS
+SPLIT_MIPS = constants.SPLIT_DDD
+SPLIT_XCAM = constants.SPLIT_XCAM
 NO_FADE = constants.NO_FADE
 FADEOUT_PARTIAL = constants.FADEOUT_PARTIAL
 FADEOUT_COMPLETE = constants.FADEOUT_COMPLETE
@@ -59,16 +65,22 @@ ls_host: str = DEFAULT_LS_HOST
 ls_port: int = DEFAULT_LS_PORT
 
 fps: float = DEFAULT_FRAME_RATE
+current_time: float = 0.0
 game_version: str = GAME_JP
 route = Route()
 route_length: int = 0
 star_count: int = 0
-last_split:int = 0
+previous_split_initial_star: int = 0
+next_split_split_star: int = 0
+last_split: int = 0
 collection_time: int = 0
+xcam_count: int = 0
+in_xcam: bool = False
 fadeout_count: int = 0
 fadein_count: int = 0
 fade_status: str = NO_FADE
 prediction_info = None
+execution_time: float = 0.0
 
 
 def init() -> None:
@@ -99,6 +111,13 @@ def enable_predictions(enable: bool) -> None:
 def enable_fade_count(enable: bool) -> None:
     pass
 
+
+def enable_xcam_count(enable: bool) -> None:
+    pass
+
+
+def set_intro_ended(ended: bool) -> None:
+    pass
 
 def get_region(region):
     pass

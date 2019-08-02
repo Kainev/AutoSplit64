@@ -36,10 +36,8 @@ class ProcessFinalStageEntry(Process):
             return self.signals["LOOP"]
 
     def on_transition(self):
-        print("PROCESS FINAL STAGE ENTRY")
-
         as64core.fps = 10
-
+        as64core.enable_xcam_count(False)
         super().on_transition()
 
 
@@ -60,11 +58,11 @@ class ProcessFinalStarSpawn(Process):
 
         if self._star_visible() and self.loop_time() > 30:
             if self._looping_iteration == len(self._iteration_value):
-                print("spawned :)")
+                print("Star Spawned")
                 return self.signals["SPAWNED"]
             else:
                 try:
-                    print("iter", self._looping_iteration)
+                    print("Found Iteration:", self._looping_iteration)
                     time.sleep(self._iteration_value[self._looping_iteration])
                 except IndexError:
                     pass
@@ -78,7 +76,6 @@ class ProcessFinalStarSpawn(Process):
         return self.signals["LOOP"]
 
     def on_transition(self):
-        print("PROCESS FINAL STAR SPAWN")
         as64core.fps = 29.97
         self._looping_iteration = 0
 
@@ -109,15 +106,13 @@ class ProcessFinalStarGrab(Process):
             return self.signals["FADEOUT"]
 
         if not self._star_visible():
-            print("Grabbed!")
             as64core.split()
+            print("Grabbed!")
             return self.signals["COMPLETE"]
 
         return self.signals["LOOP"]
 
     def on_transition(self):
-        print("PROCESS FINAL STAR GRAB")
-
         as64core.fps = 29.97
 
         super().on_transition()

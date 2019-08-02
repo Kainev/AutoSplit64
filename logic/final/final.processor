@@ -6,7 +6,7 @@
     "FINAL_ENTRY": "logic/final/final_entry.processor",
     "FINAL_SPAWN": "logic/final/final_spawn.processor",
     "FINAL_GRAB": "logic/final/final_grab.processor",
-    "IDLE": "logic/idle.processor"
+    "IDLE": "logic/standard/idle.processor"
   },
   "transitions": {
     "FINAL_ENTRY": {

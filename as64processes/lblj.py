@@ -37,14 +37,12 @@ class ProcessLBLJ2(Process):
             return ProcessLBLJ.FADEOUT
 
         if cv2.inRange(no_hud, self.green_lower_bound, self.green_upper_bound).any():
-            print("GREEN FOUND!")
             portal_mask = cv2.inRange(no_hud, self.green_lower_bound, self.green_upper_bound)
             output = cv2.bitwise_and(no_hud, no_hud, mask=portal_mask)
             cv2.imwrite("green.png", output)
             self.green_found = True
 
         if cv2.inRange(no_hud, self.purple_lower_bound, self.purple_upper_bound).any() and cv2.inRange(no_hud, self.green_lobby_lower_bound, self.green_lobby_upper_bound).any() and not self.green_found:
-            print("HELLO!")
             #portal_mask = cv2.inRange(no_hud, self.purple_lower_bound, self.purple_upper_bound)
             #output = cv2.bitwise_and(no_hud, no_hud, mask=portal_mask)
             #cv2.imwrite("purple.png", output)
@@ -53,8 +51,6 @@ class ProcessLBLJ2(Process):
         return Process.LOOP
 
     def on_transition(self):
-        print("PROCESS LBLJ")
-
         self.orange_found = False
         self.green_found = False
 

@@ -34,9 +34,8 @@ class ProcessFindDDDPortal(Process):
             return self.signals["LOOP"]
 
     def on_transition(self):
-        print("PROCESS FIND DDD PORTAL")
         as64core.fps = 10
-
+        as64core.enable_xcam_count(False)
         super().on_transition()
 
 
@@ -61,8 +60,6 @@ class ProcessDDDEntry(Process):
             return self.signals["LOOP"]
 
     def on_transition(self):
-        #
-        print("PROCESS DDD ENTRY")
         as64core.fps = 10
 
         super().on_transition()

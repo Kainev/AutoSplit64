@@ -14,6 +14,9 @@ from ..constants import (
 
 
 class CaptureEditor(QtWidgets.QDialog):
+
+    applied = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
 
@@ -22,8 +25,8 @@ class CaptureEditor(QtWidgets.QDialog):
 
         # File Paths
         # TODO: ADD TO CONSTANTS
-        self.preview_image_path = r'resources/images/game_preview.png'
-        self.preview_not_found_image_path = r'resources/images/game_preview_not_found.png'
+        self.preview_image_path = r'resources/game_preview.png'
+        self.preview_not_found_image_path = r'resources/game_preview_not_found.png'
 
         # Layouts
         self.main_layout = QtWidgets.QHBoxLayout()
@@ -140,9 +143,25 @@ class CaptureEditor(QtWidgets.QDialog):
         super().show()
 
     def apply_clicked(self):
+        if not self._is_correct_ratio():
+             if self.display_warning("A non 4:3 game ratio was detected, you may experience sub-optimal performance."):
+                 return
+
+        if not self._is_minimum_size():
+            if self.display_warning("Game width and height are below the recommended minimum (614, 448). You may experience sub-optimal performance."):
+                return
+
+        # Config
         config.set_key("game", "game_region", self.game_region_panel.get_data())
         config.set_key("game", "process_name", self.process_combo.currentText())
+
+        try:
+            config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
+        except:
+            pass
+
         config.save_config()
+        self.applied.emit()
         self.close()
 
     def cancel_clicked(self):
@@ -191,9 +210,48 @@ class CaptureEditor(QtWidgets.QDialog):
         self.graphics_scene.addPixmap(self.preview_pixmap)
         self.graphics_scene.addItem(self.game_region_selector)
 
+    def _is_correct_ratio(self):
+        ideal_ratio = 4/3
+        threshold = 0.093
+
+        region_data = self.game_region_panel.get_data()
+        if ideal_ratio - threshold <= region_data[2]/region_data[3] <= ideal_ratio + threshold:
+            return True
+        else:
+            return False
+
+    def _is_minimum_size(self):
+        region_data = self.game_region_panel.get_data()
+
+        minimum_width = 612
+        minimum_height = 448
+
+        if region_data[2] < minimum_width or region_data[3] < minimum_height:
+            return False
+        else:
+            return True
+
     def closeEvent(self, e):
         config.rollback()
         super().closeEvent(e)
+
+    def display_warning(self, message, title="Warning"):
+
+        ignore_btn = QtWidgets.QPushButton(r'Ignore Warning and Apply')
+        back_btn = QtWidgets.QPushButton("Continue Editing")
+        ignore_btn.setFixedSize(150, 30)
+        back_btn.setFixedSize(150, 30)
+
+        msg = QtWidgets.QMessageBox(self)
+        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setWindowTitle(title)
+        msg.setText(message)
+        msg.addButton(ignore_btn, QtWidgets.QMessageBox.NoRole)
+        msg.addButton(back_btn, QtWidgets.QMessageBox.YesRole)
+
+        result = msg.exec_()
+
+        return result
 
 
 class RectangleCapturePanel(QtWidgets.QWidget):

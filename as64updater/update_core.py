@@ -23,12 +23,14 @@ class UpdaterCore(Thread):
 
     PATCH_FILE = "patch.zip"
     DEFAULT_VERSION_KEY = "version"
+    DEFAULT_PATCH_URL_KEY = "patch_url"
 
     def __init__(self,
                  master_version_url,
                  local_version_path,
                  master_version_key=DEFAULT_VERSION_KEY,
-                 local_version_key=DEFAULT_VERSION_KEY):
+                 local_version_key=DEFAULT_VERSION_KEY,
+                 patch_url_key=DEFAULT_PATCH_URL_KEY):
         super().__init__()
 
         # Version Data Locations
@@ -42,6 +44,8 @@ class UpdaterCore(Thread):
         # Version Number Keys
         self.master_version_key = master_version_key
         self.local_version_key = local_version_key
+
+        self.patch_url_key = patch_url_key
 
         # Listeners
         self._listener = None
@@ -84,9 +88,24 @@ class UpdaterCore(Thread):
 
         return True
 
+    def get_master(self):
+        if not self.master_version:
+            self.acquire_master()
+
+        return self.master_version
+
+    def get_local(self):
+        if not self.local_version:
+            self.load_local()
+
+        return self.local_version
+
     def acquire_master(self):
-        master_raw = requests.get(self.master_version_url)
-        self.master_version = json.loads(master_raw.text)
+        try:
+            master_raw = requests.get(self.master_version_url)
+            self.master_version = json.loads(master_raw.text)
+        except (requests.exceptions.ConnectionError, json.decoder.JSONDecodeError):
+            pass
 
     def load_local(self):
         with open(resource_utils.resource_path(self.local_version_path)) as local:
@@ -99,6 +118,9 @@ class UpdaterCore(Thread):
         if not self.local_version:
             self.load_local()
 
+        if not self.master_version or self.local_version:
+            return False
+
         if LooseVersion(self.local_version[self.local_version_key]) < LooseVersion(self.master_version[self.master_version_key]):
             return True
         else:
@@ -106,7 +128,7 @@ class UpdaterCore(Thread):
 
     def download_patch(self):
         with open(UpdaterCore.PATCH_FILE, 'wb') as file:
-            response = urllib.request.urlopen(self.master_version["location"])
+            response = urllib.request.urlopen(self.master_version[self.patch_url_key])
             data = self._chunk_read(response, report_hook=self._chunk_report)
 
             file.write(data)
@@ -165,6 +187,14 @@ class UpdaterCore(Thread):
             pass
         except PermissionError:
             pass
+
+    def set_ignore_update(self, ignore):
+        self.load_local()
+
+        self.local_version["ignore_updates"] = ignore
+
+        with open(self.local_version_path, "w") as file:
+            json.dump(self.local_version, file, indent=4)
 
     def _chunk_report(self, current_bytes, total_size):
         percent = float(current_bytes) / total_size

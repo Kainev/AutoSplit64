@@ -8,16 +8,22 @@ from .route import (
     TITLE,
     CATEGORY,
     INITIAL_STAR,
+    TIMING,
     STAR_COUNT,
     VERSION,
     FADEOUT,
     FADEIN,
+    XCAM,
     SPLITS,
     SPLIT_TYPE,
     ICON
 )
 
-from .constants import SPLIT_NORMAL
+from .constants import (
+    SPLIT_NORMAL,
+    TIMING_RTA,
+    TIMING_UP_RTA
+)
 
 
 def load(file_path):
@@ -56,6 +62,7 @@ class RouteDecoder(json.JSONDecoder):
                                     split_dict[STAR_COUNT],
                                     split_dict[FADEOUT],
                                     split_dict[FADEIN],
+                                    split_dict[XCAM],
                                     split_dict[SPLIT_TYPE],
                                     split_dict[ICON]))
 
@@ -64,7 +71,8 @@ class RouteDecoder(json.JSONDecoder):
                           splits,
                           data[INITIAL_STAR],
                           data[VERSION],
-                          data[CATEGORY])
+                          data[CATEGORY],
+                          data[TIMING])
 
             return route
         else:
@@ -80,6 +88,7 @@ class RouteEncoder(json.JSONEncoder):
                                STAR_COUNT: split.star_count,
                                FADEOUT: split.on_fadeout,
                                FADEIN: split.on_fadein,
+                               XCAM: split.on_xcam,
                                SPLIT_TYPE: split.split_type,
                                ICON: split.icon_path})
 
@@ -88,6 +97,7 @@ class RouteEncoder(json.JSONEncoder):
                     CATEGORY: o.category,
                     INITIAL_STAR: o.initial_star,
                     VERSION: o.version,
+                    TIMING: o.timing,
                     SPLITS: splits}
         else:
             super().default(self, o)
@@ -102,6 +112,9 @@ def validate_route(route):
 
     if route.initial_star > route.splits[0].star_count:
         return "Initial star must be lower than first split star."
+
+    if route.timing not in (TIMING_RTA, TIMING_UP_RTA):
+        return "Invalid timing method."
 
     prev_star_count = 0
 

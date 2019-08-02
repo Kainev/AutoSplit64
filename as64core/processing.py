@@ -3,10 +3,19 @@ import json
 
 
 processes = {}
+subprocess_hooks = {}
 
 
 def register_process(name, process):
     processes[name] = process
+
+
+def insert_global_hook(name, process):
+    processes[name] = process
+
+
+def insert_global_processor_hook(old_path, new_path):
+    subprocess_hooks[old_path] = new_path
 
 
 class ProcessorGenerator(object):
@@ -19,7 +28,12 @@ class ProcessorGenerator(object):
     @staticmethod
     def generate(file_path):
         # Load processor file
-        file = ProcessorGenerator._open_file(file_path)
+        try:
+            p = subprocess_hooks[file_path]
+        except KeyError:
+            p = file_path
+
+        file = ProcessorGenerator._open_file(p)
         transitions = {}
 
         #
@@ -29,13 +43,13 @@ class ProcessorGenerator(object):
             sub_processor = ProcessorGenerator.generate(file[ProcessorGenerator.SUB_PROCESSORS][sub_processor_key])
 
             if not sub_processor:
-                print(file["name"], "1")
+                print(file["name"], "1: Sub-Processor Generation Error")
                 return None
 
             sub_processors[sub_processor_key] = sub_processor
 
         if not file:
-            print(file["name"], "2")
+            print(file["name"], "2: File Error")
             return None
 
         # Create blank processor instance
@@ -48,7 +62,7 @@ class ProcessorGenerator(object):
             try:
                 processor.initial_process = sub_processors[file[ProcessorGenerator.INITIAL_PROCESS]]
             except KeyError:
-                print(file["name"], "3")
+                print(file["name"], "3: [KeyError] Unable to set initial process")
                 return None
 
         # Copy all transitions from inherited processor (single inheritance only)
@@ -118,6 +132,7 @@ class ProcessorGenerator(object):
 
         return data
 
+
 def generate_processor(file_path):
     with open(file_path) as file:
         data = json.load(file)
@@ -173,6 +188,9 @@ class Process(object):
     def on_transition(self):
         self._transition_time = time.time()
 
+    def relinquish(self):
+        return True
+
     def loop_time(self):
         return time.time() - self._transition_time
 
@@ -206,16 +224,14 @@ class Processor(Process):
         # If transitioning from a different process, call on_transition
         if self._current_process != self._prev_process:
             self._current_process.on_transition()
+            print("Transition:", type(self._current_process).__name__)
 
         # Execute current process
         result = self._current_process.execute()
 
-        if result.name():
-            print(result.name())
-
         next_process = None
 
-        # Automatically process LOOP signal transitions, setting the next process to be the current process, otherwise check for transitions
+        # Process LOOP signals, setting the next process to be the current process, otherwise check for transitions
         if result == self._current_process.signals["LOOP"]:
             next_process = self._current_process
         else:
@@ -243,7 +259,10 @@ class Processor(Process):
         self._transitions.append(t)
 
     def relinquish(self):
-        return True
+        try:
+            return self._current_process.relinquish()
+        except AttributeError:
+            return True
 
 
 class ProcessorSwitch(object):
@@ -255,9 +274,7 @@ class ProcessorSwitch(object):
     def execute(self, process_name):
         try:
             if process_name != self._current_processor:
-                print("!=")
                 if self._processors[self._current_processor].relinquish():
-                    print("relinquish")
                     self._current_processor = process_name
 
             if process_name != self._prev_processor:

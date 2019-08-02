@@ -31,6 +31,8 @@ MANIFEST
 
 # Custom
 config.ini
+.master_version
+misc/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

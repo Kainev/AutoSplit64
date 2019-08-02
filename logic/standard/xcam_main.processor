@@ -1,0 +1,17 @@
+{
+  "name": "xcam_main",
+  "initial_process": "INITIAL",
+  "inherit": null,
+  "sub_processors": {
+    "INITIAL": "logic/standard/initial_xcam.processor",
+    "XCAM_SPLIT": "logic/standard/xcam_split.processor"
+  },
+  "transitions": {
+    "INITIAL": {
+      "RUN_START.START": "XCAM_SPLIT"
+    },
+    "XCAM_SPLIT": {
+      "RESET.RESET": "INITIAL"
+    }
+  }
+}

@@ -12,7 +12,7 @@ from as64core import route_loader, config
 from as64core.resource_utils import base_path, resource_path, absolute_path, rel_to_abs
 from . import constants
 from .widgets import PictureButton, StateButton, StarCountDisplay, SplitListWidget
-from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, UpdateDialog
+from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, UpdateDialog, OutputDialog
 
 
 class App(QtWidgets.QMainWindow):
@@ -64,7 +64,8 @@ class App(QtWidgets.QMainWindow):
             "settings_dialog": SettingsDialog(self),
             "route_editor": RouteEditor(self),
             "reset_dialog": ResetGeneratorDialog(self),
-            "update_dialog": UpdateDialog(self)
+            "update_dialog": UpdateDialog(self),
+            "output_dialog": OutputDialog(self)
         }
 
         self._routes = {}
@@ -73,10 +74,18 @@ class App(QtWidgets.QMainWindow):
         self.initialize()
         self.show()
 
+    def set_always_on_top(self, on_top):
+        if on_top:
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+
+        self.show()
+
     def initialize(self):
         # Configure window
         self.setWindowTitle(self.title)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setFixedSize(self.width, self.height)
 
         # Configure Central Widget
@@ -116,10 +125,14 @@ class App(QtWidgets.QMainWindow):
         self.minimize_btn.clicked.connect(self.showMinimized)
         self.start_btn.clicked.connect(self.start_clicked)
         self.dialogs["route_editor"].route_updated.connect(self._on_route_update)
-        self.dialogs["settings_dialog"].applied.connect(self._stop)
-        self.dialogs["capture_editor"].applied.connect(self._stop)
+        self.dialogs["settings_dialog"].applied.connect(self.settings_updated)
+        self.dialogs["capture_editor"].applied.connect(self._stop_or_reset)
         self.dialogs["update_dialog"].ignore_btn.clicked.connect(lambda: self.ignore_update.emit())
         self.dialogs["update_dialog"].update_btn.clicked.connect(lambda: self.install_update.emit())
+
+    def settings_updated(self):
+        self.set_always_on_top(config.get("general", "on_top"))
+        self._stop_or_reset()
 
     def update_display(self, split_index, current_star, split_star):
         if split_index > len(self.split_list.splits) - 1:
@@ -152,7 +165,7 @@ class App(QtWidgets.QMainWindow):
         self.start_btn.repaint()
 
     def open_route(self):
-        self._stop()
+        self._stop_or_reset()
 
         if config.get("route", "path") == "":
             return
@@ -247,6 +260,12 @@ class App(QtWidgets.QMainWindow):
         context_menu.addSeparator()
         reset_gen_action = context_menu.addAction("Generate Reset Templates")
         context_menu.addSeparator()
+        output_action = context_menu.addAction("Show Output")
+        context_menu.addSeparator()
+        on_top_action = QtWidgets.QAction("Always On Top", self, checkable=True)
+        context_menu.addAction(on_top_action)
+        on_top_action.setChecked(config.get("general", "on_top"))
+        context_menu.addSeparator()
         about_action = context_menu.addAction("About")
         update_action = context_menu.addAction("Check for Updates..")
         context_menu.addSeparator()
@@ -269,6 +288,13 @@ class App(QtWidgets.QMainWindow):
             self.dialogs["settings_dialog"].show()
         elif action == reset_gen_action:
             self.dialogs["reset_dialog"].show()
+        elif action == output_action:
+            self.dialogs["output_dialog"].show()
+        elif action == on_top_action:
+            checked = on_top_action.isChecked()
+            config.set_key("general", "on_top", checked)
+            config.save_config()
+            self.set_always_on_top(config.get("general", "on_top"))
         elif action == about_action:
             self.dialogs["about_dialog"].show()
         elif action == update_action:
@@ -286,6 +312,8 @@ class App(QtWidgets.QMainWindow):
             self._drag = True
             self._drag_position = event.globalPos()-self.pos()
             event.accept()
+
+        self.dialogs["about_dialog"].close()
 
     def mouseReleaseEvent(self, event):
         self._drag = False
@@ -347,6 +375,14 @@ class App(QtWidgets.QMainWindow):
             config.set_key("route", "path", prev_route)
             config.save_config()
             self.open_route()
+
+    def _stop_or_reset(self):
+        if self.start_btn.get_state() == "stop":
+            self._stop()
+            self.start_btn.set_state("init")
+            self.start.emit()
+        else:
+            self._stop()
 
     def _stop(self):
         self.stop.emit()

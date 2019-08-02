@@ -4,15 +4,15 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from as64core.resource_utils import resource_path
 from as64gui.app import App
 
 import as64core
-from as64core.processing import register_process, ProcessorGenerator
+from as64core.processing import register_process, insert_global_hook, insert_global_processor_hook, ProcessorGenerator
+from as64core.route_loader import load
 from as64core.updater import Updater
 
 from as64processes.standard import *
-from as64processes.lblj import *
+from as64processes.xcam import *
 from as64processes.ddd import *
 from as64processes.final import *
 
@@ -53,12 +53,18 @@ class AutoSplit64(QtCore.QObject):
 
         register_process("WAIT", ProcessWait())
         register_process("RUN_START", ProcessRunStart())
+        register_process("RUN_START_UP_RTA", ProcessRunStartUpSegment())
         register_process("STAR_COUNT", ProcessStarCount())
         register_process("FADEIN", ProcessFadein())
         register_process("FADEOUT", ProcessFadeout())
+        register_process("FADEOUT_RESET_ONLY", ProcessFadeoutResetOnly())
         register_process("POST_FADEOUT", ProcessPostFadeout())
         register_process("FLASH_CHECK", ProcessFlashCheck())
         register_process("RESET", ProcessReset())
+        register_process("DUMMY", ProcessDummy())
+
+        register_process("XCAM", ProcessXCam())
+        register_process("XCAM_UP_RTA", ProcessXCamStartUpSegment())
 
         register_process("FIND_DDD_PORTAL", ProcessFindDDDPortal())
         register_process("DDD_SPLIT", ProcessDDDEntry())  # TODO: RENAME ProcessDDDEntry to ProcessDDDSplit
@@ -67,13 +73,27 @@ class AutoSplit64(QtCore.QObject):
         register_process("FINAL_DETECT_SPAWN", ProcessFinalStarSpawn())  # TODO: RENAME
         register_process("FINAL_STAR_SPLIT", ProcessFinalStarGrab())  # TODO: RENAME to FINAL_STAR_SPLIT
 
-        standard_processor = ProcessorGenerator.generate("logic/standard.processor")
+        try:
+            timing = load(config.get("route", "path")).timing
+        except AttributeError:
+            timing = None
+
+        if timing == as64core.TIMING_UP_RTA:
+            insert_global_hook("RESET", ProcessResetNoStart())
+            initial_processor = ProcessorGenerator.generate("logic/up_rta/initial_up_rta.processor")
+        else:
+            initial_processor = ProcessorGenerator.generate("logic/standard/initial.processor")
+
+        standard_processor = ProcessorGenerator.generate("logic/standard/star_fade.processor")
+        xcam_processor = ProcessorGenerator.generate("logic/standard/xcam_split.processor")
         ddd_processor = ProcessorGenerator.generate("logic/ddd/ddd.processor")
         final_processor = ProcessorGenerator.generate("logic/final/final.processor")
 
+        as64core.register_split_processor(as64core.SPLIT_INITIAL, initial_processor)
         as64core.register_split_processor(as64core.SPLIT_NORMAL, standard_processor)
         as64core.register_split_processor(as64core.SPLIT_MIPS, ddd_processor)
         as64core.register_split_processor(as64core.SPLIT_FINAL, final_processor)
+        as64core.register_split_processor(as64core.SPLIT_XCAM, xcam_processor)
 
         as64core.set_update_listener(self.on_update)
         as64core.set_error_listener(self.on_error)
@@ -92,7 +112,6 @@ class AutoSplit64(QtCore.QObject):
         self.app.set_started(False)
 
     def exit(self):
-        print("EXIT!")
         self.stop()
         self.app.close()
 
@@ -131,7 +150,7 @@ if __name__ == "__main__":
 
 
     def exception_hook(exc_type, value, traceback):
-        print(exc_type, value, traceback)
+        (exc_type, value, traceback)
         sys._excepthook(exc_type, value, traceback)
         sys.exit(1)
 
