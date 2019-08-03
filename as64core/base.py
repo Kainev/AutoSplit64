@@ -243,22 +243,17 @@ class Base(Thread):
                 pass
 
     def analyze_xcam_status(self):
-
         xcam = self._game_capture.get_region(XCAM_REGION)
 
+        # Initial threshold mask
         mask = cv2.inRange(xcam, self._xcam_lower_bound, self._xcam_upper_bound)
         output = cv2.bitwise_and(xcam, xcam, mask=mask)
 
-        for x in range(self._xcam_region_width-1):
-            for y in range(self._xcam_region_height-1):
-                blue = output[x, y, 0]
-                green = output[x, y, 1]
-                red = output[x, y, 2]
-
-                # Below calculations may raise RuntimeWarnings for an ubyte overflow, as the values can result in a
-                # number outside 0-255. Letting these go unhandled as there are no adverse effects.
-                if (abs(green - blue) > self._xcam_bg_threshold and green > 30) or abs(red - green) < self._xcam_rg_threshold:
-                    output[x, y] = [0, 0, 0]
+        # Axis relationship mask
+        xcam_int = xcam.astype(int)
+        xcam_int_b, xcam_int_g, xcam_int_r = xcam_int.transpose(2, 0, 1)
+        mask = ((np.abs(xcam_int_g - xcam_int_b) > self._xcam_bg_threshold) & (xcam_int_g > 30)) | (np.abs(xcam_int_r - xcam_int_g) < self._xcam_rg_threshold)
+        output[mask] = [0, 0, 0]
 
         if not is_black(output, 0.1, self._xcam_threshold):
             as64.in_xcam = True
