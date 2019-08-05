@@ -155,7 +155,7 @@ if __name__ == "__main__":
     QtGui.QFontDatabase.addApplicationFont(resource_path("resources/font/TCM_____.ttf"))
 
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.WARNING,
         format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
         filename=".log",
         filemode='a'
