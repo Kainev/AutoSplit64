@@ -608,6 +608,8 @@ class RouteEditor(QtWidgets.QMainWindow):
                 if int(numbers[len(numbers)-1]) == 16:
                     is_16 = True
                     break
+                elif int(numbers[len(numbers)-1]) > 16:
+                    break
             except (IndexError, ValueError):
                 pass
 
@@ -781,7 +783,7 @@ class RouteEditor(QtWidgets.QMainWindow):
         self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem(""))
 
         self._add_split_combo(index, row_type)
-        self._set_disable_columns(index, row_type, fadeouts, fadeins, xcam)
+        self._set_disable_columns(index, row_type, fadeouts, fadeins, xcam, star_count)
         self.split_table.selectRow(index)
 
     def _add_split_combo(self, row, default=SPLIT_NORMAL):
