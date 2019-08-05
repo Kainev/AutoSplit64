@@ -1,7 +1,6 @@
 import time
 from threading import Thread
 import logging
-import sys
 
 import cv2
 import numpy as np
