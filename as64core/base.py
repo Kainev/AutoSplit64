@@ -1,5 +1,7 @@
 import time
 from threading import Thread
+import logging
+import sys
 
 import cv2
 import numpy as np
@@ -166,6 +168,8 @@ class Base(Thread):
         as64.current_split = self.current_split
         as64.split_index = self.split_index
 
+        self.logger = logging.getLogger(".log")
+
     def validity_check(self):
         if not self._game_capture.is_valid():
             self._error_occurred("Could not find " + config.get("game", "process_name"))
@@ -203,48 +207,51 @@ class Base(Thread):
         livesplit.disconnect(self._ls_socket)
 
     def run(self):
-        self._running = True
+        try:
+            self._running = True
 
-        valid = self.validity_check()
+            valid = self.validity_check()
 
-        if not valid:
-            self.stop()
+            if not valid:
+                self.stop()
 
-        self._processor_switch._current_processor = self._current_split.split_type
+            self._processor_switch._current_processor = self._current_split.split_type
 
-        while self._running:
-            as64.current_time = time.time()
+            while self._running:
+                as64.current_time = time.time()
 
-            try:
-                self._game_capture.capture()
-            except:
-                self._error_occurred("Unable to capture " + config.get("game", "process_name"))
+                try:
+                    self._game_capture.capture()
+                except:
+                    self._error_occurred("Unable to capture " + config.get("game", "process_name"))
 
-            ls_index = max(livesplit.split_index(self._ls_socket), 0)
-            if ls_index != self.split_index():
-                self.set_split_index(ls_index)
+                ls_index = max(livesplit.split_index(self._ls_socket), 0)
+                if ls_index != self.split_index():
+                    self.set_split_index(ls_index)
 
-            self.analyze_fade_status()
+                self.analyze_fade_status()
 
-            if self._make_predictions:
-                self.analyze_star_count()
+                if self._make_predictions:
+                    self.analyze_star_count()
 
-            if self._count_xcams:
-                self.analyze_xcam_status()
+                if self._count_xcams:
+                    self.analyze_xcam_status()
 
-            try:
-                if self._intro_ended:
-                    self._processor_switch.execute(self._current_split.split_type)
-                else:
-                    self._processor_switch.execute(SPLIT_INITIAL)
-            except ConnectionAbortedError:
-                self._error_occurred("LiveSplit connection failed")
+                try:
+                    if self._intro_ended:
+                        self._processor_switch.execute(self._current_split.split_type)
+                    else:
+                        self._processor_switch.execute(SPLIT_INITIAL)
+                except ConnectionAbortedError:
+                    self._error_occurred("LiveSplit connection failed")
 
-            try:
-                as64.execution_time = time.time() - as64.current_time
-                time.sleep(1 / as64.fps - as64.execution_time)
-            except ValueError:
-                pass
+                try:
+                    as64.execution_time = time.time() - as64.current_time
+                    time.sleep(1 / as64.fps - as64.execution_time)
+                except ValueError:
+                    pass
+        except Exception:
+            self.logger.error("Fatal Error", exc_info=True)
 
     def analyze_xcam_status(self):
         xcam = self._game_capture.get_region(XCAM_REGION)

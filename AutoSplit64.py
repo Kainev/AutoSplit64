@@ -105,6 +105,7 @@ class AutoSplit64(QtCore.QObject):
 
         as64core.set_update_listener(self.on_update)
         as64core.set_error_listener(self.on_error)
+
         as64core.start()
 
         self.app.set_started(True)
@@ -153,45 +154,12 @@ if __name__ == "__main__":
     # Add font to database
     QtGui.QFontDatabase.addApplicationFont(resource_path("resources/font/TCM_____.ttf"))
 
-    # Print silent exceptions. DEBUGGING PURPOSES.
-    """sys._excepthook = sys.excepthook
-
-
-    def exception_hook(exc_type, value, traceback):
-        (exc_type, value, traceback)
-        sys._excepthook(exc_type, value, traceback)
-        sys.exit(1)
-
-
-    sys.excepthook = exception_hook"""
-
-
-    class StreamToLogger(object):
-        def __init__(self, logger, log_level=logging.INFO):
-            self.logger = logger
-            self.log_level = log_level
-            self.linebuf = ''
-
-        def write(self, buf):
-            for line in buf.rstrip().splitlines():
-                self.logger.log(self.log_level, line.rstrip())
-
-            sys.exit(1)
-
-        def flush(self):
-            pass
-
-
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
         filename=".log",
         filemode='a'
     )
-
-    stderr_logger = logging.getLogger('STDERR')
-    sl = StreamToLogger(stderr_logger, logging.ERROR)
-    #sys.stderr = sl
 
     # Create main application
     autosplit64 = AutoSplit64(qt_app)
