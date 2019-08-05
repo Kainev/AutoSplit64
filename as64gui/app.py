@@ -45,6 +45,10 @@ class App(QtWidgets.QMainWindow):
         # Widgets
         self.central_widget = QtWidgets.QWidget(self)
         self.star_count = StarCountDisplay(parent=self.central_widget)
+        self.star_btn = PictureButton(QtGui.QPixmap(base_path(constants.STAR_PATH)),
+                                      pixmap_pressed=QtGui.QPixmap(base_path(constants.STAR_HOVER_PATH)),
+                                      pixmap_hover=QtGui.QPixmap(base_path(constants.STAR_HOVER_PATH)),
+                                      parent=self.central_widget)
         self.start_btn = StateButton(self.start_pixmap, self.start_pixmap, parent=self.central_widget)
         self.close_btn = PictureButton(QtGui.QPixmap(base_path(constants.CLOSE_PATH)), parent=self.central_widget)
         self.minimize_btn = PictureButton(QtGui.QPixmap(base_path(constants.MINIMIZE_PATH)), parent=self.central_widget)
@@ -100,6 +104,8 @@ class App(QtWidgets.QMainWindow):
         self.close_btn.move(340, 8)
         self.minimize_btn.move(320, 8)
 
+        self.star_btn.move(250, 68)
+
         self.star_count.setFixedWidth(150)
         self.star_count.move(197, 115)
         self.star_count.setFont(self.start_count_font)
@@ -124,15 +130,16 @@ class App(QtWidgets.QMainWindow):
         self.close_btn.clicked.connect(self.close)
         self.minimize_btn.clicked.connect(self.showMinimized)
         self.start_btn.clicked.connect(self.start_clicked)
+        self.star_btn.clicked.connect(self._reset)
         self.dialogs["route_editor"].route_updated.connect(self._on_route_update)
         self.dialogs["settings_dialog"].applied.connect(self.settings_updated)
-        self.dialogs["capture_editor"].applied.connect(self._stop_or_reset)
+        self.dialogs["capture_editor"].applied.connect(self._reset)
         self.dialogs["update_dialog"].ignore_btn.clicked.connect(lambda: self.ignore_update.emit())
         self.dialogs["update_dialog"].update_btn.clicked.connect(lambda: self.install_update.emit())
 
     def settings_updated(self):
         self.set_always_on_top(config.get("general", "on_top"))
-        self._stop_or_reset()
+        self._reset()
 
     def update_display(self, split_index, current_star, split_star):
         if split_index > len(self.split_list.splits) - 1:
@@ -165,7 +172,7 @@ class App(QtWidgets.QMainWindow):
         self.start_btn.repaint()
 
     def open_route(self):
-        self._stop_or_reset()
+        self._reset()
 
         if config.get("route", "path") == "":
             return
@@ -284,6 +291,7 @@ class App(QtWidgets.QMainWindow):
             self.open_route_browser()
         elif action == cords_action:
             self.dialogs["capture_editor"].show()
+            self.dialogs["output_dialog"].close()
         elif action == advanced_action:
             self.dialogs["settings_dialog"].show()
         elif action == reset_gen_action:
@@ -376,7 +384,7 @@ class App(QtWidgets.QMainWindow):
             config.save_config()
             self.open_route()
 
-    def _stop_or_reset(self):
+    def _reset(self):
         if self.start_btn.get_state() == "stop":
             self._stop()
             self.start_btn.set_state("init")

@@ -60,6 +60,28 @@ class ProcessDDDEntry(Process):
             return self.signals["LOOP"]
 
     def on_transition(self):
-        as64core.fps = 10
+        as64core.fps = 29.97
+        super().on_transition()
 
+
+class ProcessDDDEntryX(Process):
+    def __init__(self,):
+        super().__init__()
+        self.register_signal("ENTERED")
+        self.register_signal("FADEOUT")
+
+    def execute(self):
+        if as64core.fade_status in (as64core.FADEOUT_PARTIAL, as64core.FADEOUT_COMPLETE):
+            return self.signals["FADEOUT"]
+
+        if as64core.xcam_count == 1:
+            as64core.split()
+            return self.signals["ENTERED"]
+        else:
+            return self.signals["LOOP"]
+
+    def on_transition(self):
+        as64core.fps = 29.97
+        as64core.enable_xcam_count(True)
+        as64core.xcam_count = 0
         super().on_transition()

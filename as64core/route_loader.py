@@ -21,6 +21,7 @@ from .route import (
 
 from .constants import (
     SPLIT_NORMAL,
+    SPLIT_FADE_ONLY,
     TIMING_RTA,
     TIMING_UP_RTA
 )
@@ -110,25 +111,26 @@ def validate_route(route):
     if route.initial_star < 0 or route.initial_star > 120:
         return "Invalid initial star."
 
-    if route.initial_star > route.splits[0].star_count:
-        return "Initial star must be lower than first split star."
-
     if route.timing not in (TIMING_RTA, TIMING_UP_RTA):
         return "Invalid timing method."
 
-    prev_star_count = 0
+    prev_star_count = -1
 
     for split in route.splits:
         # Check Split Title
         if type(split.title) != str:
             return "Invalid split title."
 
+        if route.initial_star > split.star_count != -1:
+            return "Initial star must be lower than first split star."
+
         # Check split star
         if type(split.star_count) != int:
             return "Split Star is not a valid integer"
 
         if split.star_count < 0 or split.star_count > 120:
-            return "Split: {} - Invalid Split Star.".format(split.title)
+            if split.split_type != SPLIT_FADE_ONLY:
+                return "Split: {} - Invalid Split Star.".format(split.title)
 
         if split.star_count < prev_star_count:
             return "Split: {} - Split star must be greater than previous split.".format(split.title)

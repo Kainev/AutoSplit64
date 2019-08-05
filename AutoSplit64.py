@@ -57,6 +57,7 @@ class AutoSplit64(QtCore.QObject):
         register_process("STAR_COUNT", ProcessStarCount())
         register_process("FADEIN", ProcessFadein())
         register_process("FADEOUT", ProcessFadeout())
+        register_process("FADEOUT_NO_STAR", ProcessFadeoutNoStar())
         register_process("FADEOUT_RESET_ONLY", ProcessFadeoutResetOnly())
         register_process("POST_FADEOUT", ProcessPostFadeout())
         register_process("FLASH_CHECK", ProcessFlashCheck())
@@ -68,6 +69,7 @@ class AutoSplit64(QtCore.QObject):
 
         register_process("FIND_DDD_PORTAL", ProcessFindDDDPortal())
         register_process("DDD_SPLIT", ProcessDDDEntry())  # TODO: RENAME ProcessDDDEntry to ProcessDDDSplit
+        register_process("DDD_SPLIT_X", ProcessDDDEntryX())  # TODO: RENAME ProcessDDDEntryX to ProcessDDDSplitX
 
         register_process("FINAL_DETECT_ENTRY", ProcessFinalStageEntry())  # TODO: RENAME
         register_process("FINAL_DETECT_SPAWN", ProcessFinalStarSpawn())  # TODO: RENAME
@@ -85,13 +87,17 @@ class AutoSplit64(QtCore.QObject):
             initial_processor = ProcessorGenerator.generate("logic/standard/initial.processor")
 
         standard_processor = ProcessorGenerator.generate("logic/standard/star_fade.processor")
+        fade_only_processor = ProcessorGenerator.generate("logic/standard/fade_only.processor")
         xcam_processor = ProcessorGenerator.generate("logic/standard/xcam_split.processor")
         ddd_processor = ProcessorGenerator.generate("logic/ddd/ddd.processor")
+        mips_x_processor = ProcessorGenerator.generate("logic/ddd/mips_x.processor")
         final_processor = ProcessorGenerator.generate("logic/final/final.processor")
 
         as64core.register_split_processor(as64core.SPLIT_INITIAL, initial_processor)
         as64core.register_split_processor(as64core.SPLIT_NORMAL, standard_processor)
+        as64core.register_split_processor(as64core.SPLIT_FADE_ONLY, fade_only_processor)
         as64core.register_split_processor(as64core.SPLIT_MIPS, ddd_processor)
+        as64core.register_split_processor(as64core.SPLIT_MIPS_X, mips_x_processor)
         as64core.register_split_processor(as64core.SPLIT_FINAL, final_processor)
         as64core.register_split_processor(as64core.SPLIT_XCAM, xcam_processor)
 

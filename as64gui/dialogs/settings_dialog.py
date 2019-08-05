@@ -293,10 +293,17 @@ class ThresholdsMenu(BaseMenu):
 
         self.xcam_bg_lb = QtWidgets.QLabel("X-Cam B-G Threshold:")
         self.xcam_bg_le = QtWidgets.QLineEdit("")
+        self.xcam_bg_activation_lb = QtWidgets.QLabel("X-Cam B-G Activation:")
+        self.xcam_bg_activation_le = QtWidgets.QLineEdit("")
         self.xcam_rg_lb = QtWidgets.QLabel("X-Cam R-G Threshold:")
         self.xcam_rg_le = QtWidgets.QLineEdit("")
+        self.xcam_rg_activation_lb = QtWidgets.QLabel("X-Cam R-G Activation:")
+        self.xcam_rg_activation_le = QtWidgets.QLineEdit("")
         self.xcam_pixel_lb = QtWidgets.QLabel("X-Cam Pixel Threshold:")
         self.xcam_pixel_le = QtWidgets.QLineEdit("")
+
+        self.undo_lb = QtWidgets.QLabel("Undo Threshold:")
+        self.undo_le = QtWidgets.QLineEdit()
 
         self.double_validator = QtGui.QDoubleValidator(0, 1, 3)
         self.double_validator.setRange(0, 1, 3)
@@ -315,7 +322,10 @@ class ThresholdsMenu(BaseMenu):
         self.black_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.xcam_bg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.xcam_rg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xcam_bg_activation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xcam_rg_activation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.xcam_pixel_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.undo_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.prob_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.reset_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -325,7 +335,10 @@ class ThresholdsMenu(BaseMenu):
         self.white_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.xcam_bg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.xcam_rg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.xcam_bg_activation_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.xcam_rg_activation_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.xcam_pixel_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.undo_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         # Add Widgets
         self.menu_layout.addItem(
@@ -363,10 +376,25 @@ class ThresholdsMenu(BaseMenu):
         self.menu_layout.addWidget(self.xcam_bg_le, 14, 1)
         self.menu_layout.addWidget(self.xcam_rg_lb, 14, 2)
         self.menu_layout.addWidget(self.xcam_rg_le, 14, 3)
-        self.menu_layout.addWidget(self.xcam_pixel_lb, 15, 0)
-        self.menu_layout.addWidget(self.xcam_pixel_le, 15, 1)
+        self.menu_layout.addWidget(self.xcam_bg_activation_lb, 15, 0)
+        self.menu_layout.addWidget(self.xcam_bg_activation_le, 15, 1)
+        self.menu_layout.addWidget(self.xcam_rg_activation_lb, 15, 2)
+        self.menu_layout.addWidget(self.xcam_rg_activation_le, 15, 3)
+        self.menu_layout.addWidget(self.xcam_pixel_lb, 16, 0)
+        self.menu_layout.addWidget(self.xcam_pixel_le, 16, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 16, 0)
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 17, 0)
+
+        self.menu_layout.addWidget(HLine(), 18, 0, 1, 4)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 19, 0)
+
+        self.menu_layout.addWidget(self.undo_lb, 20, 0)
+        self.menu_layout.addWidget(self.undo_le, 20, 1)
+
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 21, 0)
 
         self.prob_le.setValidator(self.double_validator)
         self.reset_le.setValidator(self.double_validator)
@@ -375,7 +403,10 @@ class ThresholdsMenu(BaseMenu):
         self.white_le.setValidator(self.double_validator)
         self.xcam_bg_le.setValidator(self.int_validator)
         self.xcam_rg_le.setValidator(self.int_validator)
+        self.xcam_bg_activation_le.setValidator(self.int_validator)
+        self.xcam_rg_activation_le.setValidator(self.int_validator)
         self.xcam_pixel_le.setValidator(self.double_validator)
+        self.undo_le.setValidator(self.double_validator)
 
         self.load_preferences()
 
@@ -389,7 +420,11 @@ class ThresholdsMenu(BaseMenu):
 
         self.xcam_bg_le.setText(str(config.get('thresholds', 'xcam_bg_threshold')))
         self.xcam_rg_le.setText(str(config.get('thresholds', 'xcam_rg_threshold')))
+        self.xcam_bg_activation_le.setText(str(config.get('thresholds', 'xcam_bg_activation')))
+        self.xcam_rg_activation_le.setText(str(config.get('thresholds', 'xcam_rg_activation')))
         self.xcam_pixel_le.setText(str(config.get('thresholds', 'xcam_pixel_threshold')))
+
+        self.undo_le.setText(str(config.get('thresholds', 'undo_threshold')))
 
     def update_preferences(self):
         config.set_key('thresholds', 'probability_threshold', float(self.prob_le.text()))
@@ -401,7 +436,11 @@ class ThresholdsMenu(BaseMenu):
 
         config.set_key('thresholds', 'xcam_bg_threshold', int(self.xcam_bg_le.text()))
         config.set_key('thresholds', 'xcam_rg_threshold', int(self.xcam_rg_le.text()))
+        config.set_key('thresholds', 'xcam_bg_activation', int(self.xcam_bg_activation_le.text()))
+        config.set_key('thresholds', 'xcam_rg_activation', int(self.xcam_rg_activation_le.text()))
         config.set_key('thresholds', 'xcam_pixel_threshold', float(self.xcam_pixel_le.text()))
+
+        config.set_key('thresholds', 'undo_threshold', float(self.undo_le.text()))
 
 
 class ColourThresholdsMenu(BaseMenu):
@@ -416,14 +455,14 @@ class ColourThresholdsMenu(BaseMenu):
         self.split_type_cb = QtWidgets.QComboBox()
         self.stacked_widget = QtWidgets.QStackedWidget()
 
-        # DDD Enter
-        self.ddd_enter_widget = QtWidgets.QWidget()
-        self.ddd_enter_widget.setLayout(QtWidgets.QGridLayout())
-        self.ddd_enter_widget.layout().setAlignment(QtCore.Qt.AlignLeft)
-        self.portal_lower_bound = SettingsColourWidget("Portal Lower Bound:", "split_ddd_enter", "portal_lower_bound", self.ddd_enter_widget)
-        self.portal_upper_bound = SettingsColourWidget("Portal Upper Bound:", "split_ddd_enter", "portal_upper_bound", self.ddd_enter_widget)
-        self.hat_lower_bound = SettingsColourWidget("Hat Lower Bound:", "split_ddd_enter", "hat_lower_bound", self.ddd_enter_widget)
-        self.hat_upper_bound = SettingsColourWidget("Hat Upper Bound:", "split_ddd_enter", "hat_upper_bound", self.ddd_enter_widget)
+        # Mips Split
+        self.mips_widget = QtWidgets.QWidget()
+        self.mips_widget.setLayout(QtWidgets.QGridLayout())
+        self.mips_widget.layout().setAlignment(QtCore.Qt.AlignLeft)
+        self.portal_lower_bound = SettingsColourWidget("Portal Lower Bound:", "split_ddd_enter", "portal_lower_bound", self.mips_widget)
+        self.portal_upper_bound = SettingsColourWidget("Portal Upper Bound:", "split_ddd_enter", "portal_upper_bound", self.mips_widget)
+        self.hat_lower_bound = SettingsColourWidget("Hat Lower Bound:", "split_ddd_enter", "hat_lower_bound", self.mips_widget)
+        self.hat_upper_bound = SettingsColourWidget("Hat Upper Bound:", "split_ddd_enter", "hat_upper_bound", self.mips_widget)
 
         # Final Bowser
         self.final_bowser_widget = QtWidgets.QWidget()
@@ -449,7 +488,7 @@ class ColourThresholdsMenu(BaseMenu):
         # Configure Widgets
         self.split_type_cb.setFixedWidth(100)
         self.split_type_cb.addItem("X-Cam")
-        self.split_type_cb.addItem("DDD Enter")
+        self.split_type_cb.addItem("Mips")
         self.split_type_cb.addItem("Final Bowser")
         split_type_widget = QtWidgets.QWidget()
         split_type_widget.setLayout(QtWidgets.QHBoxLayout())
@@ -457,16 +496,16 @@ class ColourThresholdsMenu(BaseMenu):
         split_type_widget.layout().addWidget(self.split_type_cb)
 
         self.stacked_widget.addWidget(self.xcam_widget)
-        self.stacked_widget.addWidget(self.ddd_enter_widget)
+        self.stacked_widget.addWidget(self.mips_widget)
         self.stacked_widget.addWidget(self.final_bowser_widget)
 
         # DDD Split
-        self.ddd_enter_widget.layout().addWidget(self.portal_lower_bound, 0, 0)
-        self.ddd_enter_widget.layout().addItem(
+        self.mips_widget.layout().addWidget(self.portal_lower_bound, 0, 0)
+        self.mips_widget.layout().addItem(
             QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 1)
-        self.ddd_enter_widget.layout().addWidget(self.portal_upper_bound, 1, 0)
-        self.ddd_enter_widget.layout().addWidget(self.hat_lower_bound, 2, 0)
-        self.ddd_enter_widget.layout().addWidget(self.hat_upper_bound, 3, 0)
+        self.mips_widget.layout().addWidget(self.portal_upper_bound, 1, 0)
+        self.mips_widget.layout().addWidget(self.hat_lower_bound, 2, 0)
+        self.mips_widget.layout().addWidget(self.hat_upper_bound, 3, 0)
 
         # Final Bowser Split
         self.final_bowser_widget.layout().addWidget(self.stage_lower_bound, 0, 0)

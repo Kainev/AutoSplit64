@@ -16,7 +16,9 @@ from as64gui.constants import (
 )
 from as64core.constants import (
     SPLIT_NORMAL,
-    SPLIT_DDD,
+    SPLIT_FADE_ONLY,
+    SPLIT_MIPS,
+    SPLIT_MIPS_X,
     SPLIT_XCAM,
     SPLIT_FINAL,
     TIMING_RTA,
@@ -31,6 +33,11 @@ class RouteEditor(QtWidgets.QMainWindow):
 
     DOWN = 1
     UP = -1
+    DISABLE_NONE = 1
+    DISABLE_FADEOUT = 2
+    DISABLE_FADEIN = 4
+    DISABLE_XCAM = 8
+    DISABLE_STAR_COUNT = 16
 
     def __init__(self, parent=None):
         super(RouteEditor, self).__init__(parent)
@@ -44,7 +51,16 @@ class RouteEditor(QtWidgets.QMainWindow):
         self.height = 600
         self.setWindowIcon(QIcon(resource_utils.resource_path(ICON_PATH)))
 
-        self.split_types = [SPLIT_NORMAL, SPLIT_DDD, SPLIT_XCAM, SPLIT_FINAL]
+        self.split_types = [SPLIT_NORMAL, SPLIT_FADE_ONLY, SPLIT_MIPS, SPLIT_MIPS_X, SPLIT_XCAM, SPLIT_FINAL]
+
+        self.split_types_flags = {
+            SPLIT_NORMAL: RouteEditor.DISABLE_XCAM,
+            SPLIT_FADE_ONLY: RouteEditor.DISABLE_STAR_COUNT | RouteEditor.DISABLE_XCAM,
+            SPLIT_MIPS: RouteEditor.DISABLE_XCAM | RouteEditor.DISABLE_FADEOUT | RouteEditor.DISABLE_FADEIN,
+            SPLIT_MIPS_X: RouteEditor.DISABLE_XCAM | RouteEditor.DISABLE_FADEOUT | RouteEditor.DISABLE_FADEIN,
+            SPLIT_XCAM: RouteEditor.DISABLE_NONE,
+            SPLIT_FINAL: RouteEditor.DISABLE_XCAM | RouteEditor.DISABLE_FADEOUT | RouteEditor.DISABLE_FADEIN
+        }
 
         # Menu Bar
         self.menu_bar = None
@@ -318,39 +334,6 @@ class RouteEditor(QtWidgets.QMainWindow):
         item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
         self.split_table.setItem(x, 0, item)
 
-    def split_type_changed(self, combo):
-        row = -1
-        for i in range(self.split_table.rowCount()):
-            if combo == self.split_table.cellWidget(i, 6):
-                row = i
-                break
-
-        if row == -1:
-            return
-
-        text = self.split_table.cellWidget(row, 6).currentText()
-        if text in (SPLIT_FINAL, SPLIT_DDD):
-            self.split_table.item(row, 3).setText("-")
-            self.split_table.item(row, 4).setText("-")
-            self.split_table.item(row, 5).setText("-")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        elif text == SPLIT_XCAM:
-            self.split_table.item(row, 3).setText("1")
-            self.split_table.item(row, 4).setText("0")
-            self.split_table.item(row, 5).setText("1")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-        else:
-            self.split_table.item(row, 3).setText("1")
-            self.split_table.item(row, 4).setText("0")
-            self.split_table.item(row, 5).setText("-")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-
     def load_route(self, route_path=None):
         """
         Loads route from path specified in preferences
@@ -425,6 +408,11 @@ class RouteEditor(QtWidgets.QMainWindow):
             self.split_table.setItem(i, 4, QtWidgets.QTableWidgetItem(str(self.route.splits[i].on_fadein)))
             self.split_table.setItem(i, 5, QtWidgets.QTableWidgetItem(str(self.route.splits[i].on_xcam)))
             self._add_split_combo(i, self.route.splits[i].split_type)
+            self._set_disable_columns(i, self.route.splits[i].split_type,
+                                      str(self.route.splits[i].on_fadeout),
+                                      str(self.route.splits[i].on_fadein),
+                                      str(self.route.splits[i].on_xcam),
+                                      str(self.route.splits[i].star_count))
 
     def display_error_message(self, message, title):
         """
@@ -486,9 +474,12 @@ class RouteEditor(QtWidgets.QMainWindow):
             try:
                 star_count = int(self.split_table.item(row, 2).text())
             except (ValueError, AttributeError):
-                self.display_error_message("Invalid Star Count - Row: " + str(row + 1), "Route Error")
-                self.split_table.setCurrentCell(row, 2)
-                return -1
+                if not self.split_table.cellWidget(row, 6).currentText() == SPLIT_FADE_ONLY:
+                    self.display_error_message("Invalid Star Count - Row: " + str(row + 1), "Route Error")
+                    self.split_table.setCurrentCell(row, 2)
+                    return -1
+                else:
+                    star_count = -1
 
             try:
                 fadeouts = int(self.split_table.item(row, 3).text())
@@ -669,7 +660,7 @@ class RouteEditor(QtWidgets.QMainWindow):
 
             for s_name in MIPS_NAMES:
                 if s_name in name_delimited:
-                    split_type = SPLIT_DDD
+                    split_type = SPLIT_MIPS
 
             for s_name in BLJ_NAMES_IN:
                 if s_name in name_delimited:
@@ -719,6 +710,54 @@ class RouteEditor(QtWidgets.QMainWindow):
         elif final_star == "120":
             self.category_combo.lineEdit().setText("120 Star")
 
+    def split_type_changed(self, combo):
+        row = -1
+        for i in range(self.split_table.rowCount()):
+            if combo == self.split_table.cellWidget(i, 6):
+                row = i
+                break
+
+        if row == -1:
+            return
+
+        self._set_disable_columns(row, self.split_table.cellWidget(row, 6).currentText())
+
+    def _set_disable_columns(self, row, row_type, fadeouts="1", fadeins="0", xcam="1", star_count="0"):
+        try:
+            if self.split_types_flags[row_type] & RouteEditor.DISABLE_FADEOUT == RouteEditor.DISABLE_FADEOUT:
+                self.split_table.item(row, 3).setText("-")
+                self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                self.split_table.item(row, 3).setText(fadeouts)
+                self.split_table.item(row, 3).setFlags(
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+
+            if self.split_types_flags[row_type] & RouteEditor.DISABLE_FADEIN == RouteEditor.DISABLE_FADEIN:
+                self.split_table.item(row, 4).setText("-")
+                self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                self.split_table.item(row, 4).setText(fadeins)
+                self.split_table.item(row, 4).setFlags(
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+
+            if self.split_types_flags[row_type] & RouteEditor.DISABLE_XCAM == RouteEditor.DISABLE_XCAM:
+                self.split_table.item(row, 5).setText("-")
+                self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                self.split_table.item(row, 5).setText(xcam)
+                self.split_table.item(row, 5).setFlags(
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+
+            if self.split_types_flags[row_type] & RouteEditor.DISABLE_STAR_COUNT == RouteEditor.DISABLE_STAR_COUNT:
+                self.split_table.item(row, 2).setText("-")
+                self.split_table.item(row, 2).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                self.split_table.item(row, 2).setText(star_count)
+                self.split_table.item(row, 2).setFlags(
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+        except KeyError:
+            pass
+
     def _insert_row(self, index=None, icon_path=None, title="", star_count="", fadeouts="1", fadeins="0", xcam="-1", row_type=SPLIT_NORMAL):
         if index is None:
             index = self.split_table.rowCount()
@@ -737,28 +776,12 @@ class RouteEditor(QtWidgets.QMainWindow):
 
         self.split_table.setItem(index, 1, QtWidgets.QTableWidgetItem(title))
         self.split_table.setItem(index, 2, QtWidgets.QTableWidgetItem(str(star_count)))
-        # if row_type == SPLIT_NORMAL:
-        #     self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem(str(fadeouts)))
-        #     self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem(str(fadeins)))
-        #     self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem(str(row_type)))
-        # else:
-        #     self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem(row_type))
-        #     self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem(row_type))
-
-        if row_type in (SPLIT_FINAL, SPLIT_DDD):
-            self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem("-"))
-        elif row_type == SPLIT_XCAM:
-            self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem(str(fadeouts)))
-            self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem(str(fadeins)))
-            self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem(str(xcam)))
-        else:
-            self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem(str(fadeouts)))
-            self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem(str(fadeins)))
-            self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem("-"))
+        self.split_table.setItem(index, 3, QtWidgets.QTableWidgetItem(""))
+        self.split_table.setItem(index, 4, QtWidgets.QTableWidgetItem(""))
+        self.split_table.setItem(index, 5, QtWidgets.QTableWidgetItem(""))
 
         self._add_split_combo(index, row_type)
+        self._set_disable_columns(index, row_type, fadeouts, fadeins, xcam)
         self.split_table.selectRow(index)
 
     def _add_split_combo(self, row, default=SPLIT_NORMAL):
@@ -768,53 +791,10 @@ class RouteEditor(QtWidgets.QMainWindow):
             combo.addItem(split_type)
 
         self.split_table.setCellWidget(row, 6, combo)
-        self.split_table.cellWidget(row, 6).setCurrentIndex(self.split_types.index(default))
-
-        # if default != SPLIT_NORMAL:
-        #     self.split_table.setItem(row, 3, QtWidgets.QTableWidgetItem(default))
-        #     self.split_table.setItem(row, 4, QtWidgets.QTableWidgetItem(default))
-        #     self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        #     self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-
-        if default in (SPLIT_FINAL, SPLIT_DDD):
-            self.split_table.setItem(row, 3, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.setItem(row, 4, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.setItem(row, 5, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        elif default == SPLIT_XCAM:
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-        else:
-            self.split_table.setItem(row, 5, QtWidgets.QTableWidgetItem("-"))
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        try:
+            self.split_table.cellWidget(row, 6).setCurrentIndex(self.split_types.index(default))
+        except ValueError:
+            default = SPLIT_NORMAL
 
         combo.currentIndexChanged.connect(partial(self.split_type_changed, combo))
 
-    def _update_row_for_type(self, row):
-        text = self.split_table.cellWidget(row, 6).currentText()
-        if text in (SPLIT_FINAL, SPLIT_DDD):
-            self.split_table.item(row, 3).setText("-")
-            self.split_table.item(row, 4).setText("-")
-            self.split_table.item(row, 5).setText("-")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        elif text == SPLIT_XCAM:
-            self.split_table.item(row, 3).setText("1")
-            self.split_table.item(row, 4).setText("0")
-            self.split_table.item(row, 5).setText("1")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-        else:
-            self.split_table.item(row, 3).setText("1")
-            self.split_table.item(row, 4).setText("0")
-            self.split_table.item(row, 5).setText("-")
-            self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-            self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)

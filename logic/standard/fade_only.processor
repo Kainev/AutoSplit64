@@ -1,0 +1,30 @@
+{
+  "name": "star_fade",
+  "initial_process": "STAR_COUNT",
+  "inherit": null,
+  "sub_processors": {},
+  "transitions": {
+    "FADEOUT_NO_STAR": {
+      "FADEOUT_NO_STAR.COMPLETE": "POST_FADEOUT",
+      "FADEOUT_NO_STAR.RESET": "RESET"
+    },
+    "STAR_COUNT": {
+      "STAR_COUNT.FADEOUT": "FADEOUT_NO_STAR",
+      "STAR_COUNT.FADEIN": "FADEIN"
+    },
+    "FADEIN": {
+      "FADEIN.COMPLETE": "STAR_COUNT"
+    },
+    "POST_FADEOUT": {
+      "POST_FADEOUT.FADEOUT": "FADEOUT_NO_STAR",
+      "POST_FADEOUT.FADEIN": "FADEIN",
+      "POST_FADEOUT.FLASH": "FLASH_CHECK",
+      "POST_FADEOUT.COMPLETE": "STAR_COUNT"
+    },
+    "FLASH_CHECK": {
+      "FLASH_CHECK.FADEOUT": "FADEOUT_NO_STAR",
+      "FLASH_CHECK.FADEIN": "FADEIN",
+      "FLASH_CHECK.COMPLETE": "STAR_COUNT"
+    }
+  }
+}

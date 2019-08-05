@@ -8,6 +8,7 @@ import zipfile
 
 
 from as64core import resource_utils
+from as64core import config
 
 
 class UpdaterCore(Thread):
@@ -24,6 +25,7 @@ class UpdaterCore(Thread):
     PATCH_FILE = "patch.zip"
     DEFAULT_VERSION_KEY = "version"
     DEFAULT_PATCH_URL_KEY = "patch_url"
+    CONFIG_UPDATE_FILE = "config.update"
 
     def __init__(self,
                  master_version_url,
@@ -82,6 +84,8 @@ class UpdaterCore(Thread):
 
         self.apply_patch()
 
+        self.update_config()
+
         self.cleanup()
 
         self._listener.update_complete()
@@ -108,8 +112,11 @@ class UpdaterCore(Thread):
             pass
 
     def load_local(self):
-        with open(resource_utils.resource_path(self.local_version_path)) as local:
-            self.local_version = json.load(local)
+        try:
+            with open(resource_utils.resource_path(self.local_version_path)) as local:
+                self.local_version = json.load(local)
+        except FileNotFoundError:
+            pass
 
     def update_available(self):
         if not self.master_version:
@@ -118,7 +125,7 @@ class UpdaterCore(Thread):
         if not self.local_version:
             self.load_local()
 
-        if not self.master_version or self.local_version:
+        if self.master_version is None or self.local_version is None:
             return False
 
         if LooseVersion(self.local_version[self.local_version_key]) < LooseVersion(self.master_version[self.master_version_key]):
@@ -180,12 +187,30 @@ class UpdaterCore(Thread):
             except AttributeError:
                 pass
 
+    def update_config(self):
+        try:
+            with open(resource_utils.resource_path(self.CONFIG_UPDATE_FILE)) as file:
+                config_update = json.load(file)
+        except (FileNotFoundError, PermissionError):
+            return
+
+        try:
+            for update in config_update["Update"]:
+                config.set_key(update[0], update[1], config.get_default(update[0], update[1]))
+
+            config.save_config()
+        except:
+            pass
+
     def cleanup(self):
         try:
             os.remove(UpdaterCore.PATCH_FILE)
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             pass
-        except PermissionError:
+
+        try:
+            os.remove(self.CONFIG_UPDATE_FILE)
+        except (FileNotFoundError, PermissionError):
             pass
 
     def set_ignore_update(self, ignore):
@@ -226,6 +251,8 @@ class UpdaterCore(Thread):
 
     def abort_download(self):
         self._abort_download = True
+        self.cleanup()
+
 
     def set_listener(self, listener):
         self._listener = listener

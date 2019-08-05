@@ -76,6 +76,8 @@ class Base(Thread):
         # X-Cam Detection
         self._xcam_found_time = 0
         self._split_on_current_xcam = False
+        self._xcam_point_x_ratio = 5/23
+        self._xcam_point_y_ratio = 16/23
         _, _, self._xcam_region_width, self._xcam_region_height = self._game_capture.get_region_rect(XCAM_REGION)
 
         # Initialize ProcessorSwitch
@@ -112,7 +114,9 @@ class Base(Thread):
         self._xcam_upper_bound = np.array(config.get("split_xcam", "upper_bound"), dtype="uint8")
         self._xcam_threshold = config.get("thresholds", "xcam_pixel_threshold")
         self._xcam_bg_threshold = config.get("thresholds", "xcam_bg_threshold")
+        self._xcam_bg_activation = config.get("thresholds", "xcam_bg_activation")
         self._xcam_rg_threshold = config.get("thresholds", "xcam_rg_threshold")
+        self._xcam_rg_activation = config.get("thresholds", "xcam_rg_activation")
         self._split_cooldown = config.get("general", "split_cooldown")
         self._probability_threshold = config.get("thresholds", "probability_threshold")
         self._confirmation_threshold = config.get("thresholds", "confirmation_threshold")
@@ -252,10 +256,19 @@ class Base(Thread):
         # Axis relationship mask
         xcam_int = xcam.astype(int)
         xcam_int_b, xcam_int_g, xcam_int_r = xcam_int.transpose(2, 0, 1)
-        mask = ((np.abs(xcam_int_g - xcam_int_b) > self._xcam_bg_threshold) & (xcam_int_g > 30)) | (np.abs(xcam_int_r - xcam_int_g) < self._xcam_rg_threshold)
+        mask = ((np.abs(xcam_int_g - xcam_int_b) > self._xcam_bg_threshold) & (xcam_int_g > self._xcam_bg_activation)) |\
+               ((np.abs(xcam_int_r - xcam_int_g) < self._xcam_rg_threshold) & (xcam_int_g > self._xcam_rg_activation))
+
         output[mask] = [0, 0, 0]
 
-        if not is_black(output, 0.1, self._xcam_threshold):
+        non_black_pixels_mask = np.any(output != [0, 0, 0], axis=-1)
+        output[non_black_pixels_mask] = [255, 255, 255]
+
+        output_1d = output.flatten()
+
+        as64.xcam_percent = np.count_nonzero(output_1d) / output_1d.size
+
+        if as64.xcam_percent > self._xcam_threshold and output[int(self._xcam_point_x_ratio*self._xcam_region_width), int(self._xcam_point_y_ratio*self._xcam_region_height), 2] > 20:
             as64.in_xcam = True
             if as64.current_time - self._xcam_found_time > 0.5:
                 as64.xcam_count += 1
@@ -273,6 +286,7 @@ class Base(Thread):
         if is_black(star_region, self._black_threshold) and is_black(life_region, self._black_threshold):
             if as64.fade_status == NO_FADE and self._count_fades:
                 as64.fadeout_count += 1
+                as64.xcam_count = 0
 
             if is_black(self._game_capture.get_region(RESET_REGION), self._black_threshold) and as64.current_time - self._fade_start_time > self._minimum_fadeout_time:
                 as64.fade_status = FADEOUT_COMPLETE
@@ -281,6 +295,7 @@ class Base(Thread):
         elif is_white(star_region, self._white_threshold) and is_white(life_region, self._white_threshold):
             if as64.fade_status == NO_FADE and self._count_fades:
                 as64.fadein_count += 1
+                as64.xcam_count = 0
 
             if not is_white(self._game_capture.get_region(FADEIN_REGION), self._white_threshold):
                 as64.fade_status = FADEIN_COMPLETE
@@ -315,8 +330,32 @@ class Base(Thread):
 
                 if prev_two_probabilities[result ^ 1] >= self._confirmation_threshold:
                     self.set_star_count(as64.star_count + 1)
+                    if as64.in_xcam:
+                        as64.xcam_count = 1
             except (StopIteration, IndexError):
                 pass
+
+        self._star_error_check()
+
+    def _analyze_star_count_confirmation_mode(self):
+        try:
+            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
+        except cv2.error:
+            self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
+            return
+
+        total_predictions = len(self._predictions)
+
+        if as64.star_count - 1 <= as64.prediction_info.prediction <= as64.star_count + 1 or as64.prediction_info.prediction > 120:
+            self._predictions.append(as64.prediction_info)
+
+            # Limit number of predictions
+            if total_predictions > self._prediction_processing_length:
+                self._predictions.pop(0)
+
+            if as64.prediction_info.prediction == as64.star_count + 1 and as64.prediction_info.probability > self._confirmation_threshold:
+                if as64.current_time - self._xcam_found_time < 1:
+                    self.set_star_count(as64.star_count + 1)
 
         self._star_error_check()
 
@@ -356,30 +395,6 @@ class Base(Thread):
             pass
 
         self._previous_prediction = as64.prediction_info
-
-    def _analyze_star_count_confirmation_mode(self):
-        try:
-            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
-        except cv2.error:
-            self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
-            return
-
-        #print(as64.prediction_info.prediction, as64.prediction_info.probability)
-
-        total_predictions = len(self._predictions)
-
-        if as64.star_count - 1 <= as64.prediction_info.prediction <= as64.star_count + 1 or as64.prediction_info.prediction > 120:
-            self._predictions.append(as64.prediction_info)
-
-            # Limit number of predictions
-            if total_predictions > self._prediction_processing_length:
-                self._predictions.pop(0)
-
-            if as64.prediction_info.prediction == as64.star_count + 1 and as64.prediction_info.probability > self._confirmation_threshold:
-                if as64.current_time - self._xcam_found_time < 1:
-                    self.set_star_count(as64.star_count + 1)
-
-        self._star_error_check()
 
     def get_region(self, region):
         return self._game_capture.get_region(region)
@@ -440,15 +455,15 @@ class Base(Thread):
         except ValueError:
             print("ValueError: Current Split not found..")
 
-    def incoming_split(self):
-        if as64.star_count != self._current_split.star_count:
+    def incoming_split(self, star_count=True, fadeout=True, fadein=True):
+        if as64.star_count != self._current_split.star_count and star_count:
             return False
 
         # TODO: Make only one fade need to match
-        if as64.fadeout_count != self._current_split.on_fadeout:
+        if as64.fadeout_count != self._current_split.on_fadeout and fadeout:
             return False
 
-        if as64.fadein_count != self._current_split.on_fadein:
+        if as64.fadein_count != self._current_split.on_fadein and fadein:
             return False
 
         return True
@@ -466,6 +481,9 @@ class Base(Thread):
 
     def enable_xcam_count(self, enable):
         self._count_xcams = enable
+
+        if not enable:
+            self._split_on_current_xcam = False
 
     def set_intro_ended(self, ended):
         self._intro_ended = ended

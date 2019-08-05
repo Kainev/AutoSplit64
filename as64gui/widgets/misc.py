@@ -54,6 +54,9 @@ class StarCountDisplay(QtWidgets.QWidget):
 
     @split_star.setter
     def split_star(self, split):
-        self.right_lb.setText(str(split))
+        if split != -1:
+            self.right_lb.setText(str(split))
+        else:
+            self.right_lb.setText("-")
 
 

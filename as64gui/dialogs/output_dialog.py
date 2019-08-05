@@ -29,6 +29,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.fade_status_lb = QtWidgets.QLabel("Fade Status:")
         self.fade_out_lb = QtWidgets.QLabel("Fade-out Count:")
         self.fade_in_lb = QtWidgets.QLabel("Fade-in Count:")
+        self.xcam_percent_lb = QtWidgets.QLabel("X-Cam Percent:")
         self.xcam_lb = QtWidgets.QLabel("X-Cam Count:")
         self.xcam_status_lb = QtWidgets.QLabel("X-Cam Status:")
         self.prediction_lb = QtWidgets.QLabel("Prediction:")
@@ -39,6 +40,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.fade_status_le = QtWidgets.QLineEdit()
         self.fade_out_le = QtWidgets.QLineEdit()
         self.fade_in_le = QtWidgets.QLineEdit()
+        self.xcam_percent_le = QtWidgets.QLineEdit()
         self.xcam_le = QtWidgets.QLineEdit()
         self.xcam_status_le = QtWidgets.QLineEdit()
         self.prediction_le = QtWidgets.QLineEdit()
@@ -55,7 +57,7 @@ class OutputDialog(QtWidgets.QDialog):
 
     def initialize_window(self):
         self.setWindowTitle(self.window_title)
-        self.setFixedSize(240, 300)
+        self.setFixedSize(240, 400)
 
         # Create Layout
         self.setLayout(self.primary_layout)
@@ -64,6 +66,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.fade_status_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.fade_out_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.fade_in_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.xcam_percent_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.xcam_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.xcam_status_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.prediction_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
@@ -74,6 +77,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.fade_status_le.setDisabled(True)
         self.fade_out_le.setDisabled(True)
         self.fade_in_le.setDisabled(True)
+        self.xcam_percent_le.setDisabled(True)
         self.xcam_le.setDisabled(True)
         self.xcam_status_le.setDisabled(True)
         self.prediction_le.setDisabled(True)
@@ -83,6 +87,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.fade_status_lb.setFixedWidth(100)
         self.fade_out_lb.setFixedWidth(100)
         self.fade_in_lb.setFixedWidth(100)
+        self.xcam_percent_lb.setFixedWidth(100)
         self.xcam_lb.setFixedWidth(100)
         self.xcam_status_lb.setFixedWidth(100)
         self.prediction_lb.setFixedWidth(100)
@@ -92,6 +97,7 @@ class OutputDialog(QtWidgets.QDialog):
         self.execution_le.setFixedWidth(100)
         self.fade_out_le.setFixedWidth(100)
         self.fade_in_le.setFixedWidth(100)
+        self.xcam_percent_le.setFixedWidth(100)
         self.xcam_le.setFixedWidth(100)
         self.xcam_status_le.setFixedWidth(100)
         self.prediction_le.setFixedWidth(100)
@@ -111,24 +117,36 @@ class OutputDialog(QtWidgets.QDialog):
         self.primary_layout.addWidget(self.fade_out_le, 3, 0)
         self.primary_layout.addWidget(self.fade_in_le, 3, 1)
 
-        self.primary_layout.addWidget(self.xcam_lb, 7, 0)
-        self.primary_layout.addWidget(self.xcam_status_lb, 7, 1)
-        self.primary_layout.addWidget(self.xcam_le, 8, 0)
-        self.primary_layout.addWidget(self.xcam_status_le, 8, 1)
+        self.primary_layout.addItem(
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+        self.primary_layout.addWidget(HLine(), 5, 0, 1, 4)
+        self.primary_layout.addItem(
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 6, 0)
 
-        self.primary_layout.addWidget(self.prediction_lb, 12, 0)
-        self.primary_layout.addWidget(self.probability_lb, 12, 1)
-        self.primary_layout.addWidget(self.prediction_le, 13, 0)
-        self.primary_layout.addWidget(self.probability_le, 13, 1)
+        self.primary_layout.addWidget(self.xcam_percent_lb, 7, 0)
+        self.primary_layout.addWidget(self.xcam_percent_le, 8, 0)
+        self.primary_layout.addWidget(self.xcam_lb, 9, 0)
+        self.primary_layout.addWidget(self.xcam_status_lb, 9, 1)
+        self.primary_layout.addWidget(self.xcam_le, 10, 0)
+        self.primary_layout.addWidget(self.xcam_status_le, 10, 1)
 
-        self.primary_layout.addWidget(self.execution_lb, 17, 0)
-        self.primary_layout.addWidget(self.execution_le, 18, 0)
+        self.primary_layout.addWidget(HLine(), 11, 0, 1, 4)
 
-        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 19, 0)
-        self.primary_layout.addWidget(HLine(), 20, 0, 1, 4)
-        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 21, 0)
+        self.primary_layout.addWidget(self.prediction_lb, 13, 0)
+        self.primary_layout.addWidget(self.probability_lb, 13, 1)
+        self.primary_layout.addWidget(self.prediction_le, 14, 0)
+        self.primary_layout.addWidget(self.probability_le, 14, 1)
 
-        self.primary_layout.addLayout(update_rate_layout, 22, 1)
+        self.primary_layout.addWidget(HLine(), 16, 0, 1, 4)
+
+        self.primary_layout.addWidget(self.execution_lb, 18, 0)
+        self.primary_layout.addWidget(self.execution_le, 19, 0)
+
+        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 20, 0)
+        self.primary_layout.addWidget(HLine(), 21, 0, 1, 4)
+        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 22, 0)
+
+        self.primary_layout.addLayout(update_rate_layout, 23, 1)
 
         self.primary_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 40, 0)
 
@@ -166,6 +184,7 @@ class OutputDialog(QtWidgets.QDialog):
                 self.fade_status_le.setText(as64.fade_status)
                 self.fade_out_le.setText(str(as64.fadeout_count))
                 self.fade_in_le.setText(str(as64.fadein_count))
+                self.xcam_percent_le.setText(str(as64.xcam_percent)[:6])
                 self.xcam_le.setText(str(as64.xcam_count))
                 self.xcam_status_le.setText(str(as64.in_xcam))
 
@@ -187,7 +206,7 @@ class OutputDialog(QtWidgets.QDialog):
     def _update_rate_changed(self):
         try:
             self._update_rate = int(self.update_le.text())
-            config.set_key("general", "output_update_rate", int(self.update_le.text()))
+            config.set_key("general", "output_update_rate", self._update_rate)
             config.save_config()
         except ValueError:
             pass

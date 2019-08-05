@@ -62,8 +62,6 @@ class UpdaterGUI(QtWidgets.QMainWindow):
     def set_download_version(self, version):
         self._version = version
 
-
-
     def set_status(self, status):
         if status == UpdaterGUI.DOWNLOADING:
             self.label.setText("Downloading Version {}".format(self._version))
@@ -88,3 +86,6 @@ class UpdaterGUI(QtWidgets.QMainWindow):
         msg.setWindowTitle(title)
         msg.setText(message)
         msg.show()
+
+    def close(self):
+        super().close()

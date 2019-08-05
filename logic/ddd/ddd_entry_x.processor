@@ -1,0 +1,14 @@
+{
+  "name": "ddd_entry_x",
+  "initial_process": "DDD_SPLIT_X",
+  "inherit": null,
+  "sub_processors": {},
+  "transitions": {
+    "DDD_SPLIT_X": {
+      "DDD_SPLIT_X.FADEOUT": "FADEOUT"
+    },
+    "FADEOUT": {
+      "FADEOUT.RESET": "RESET"
+    }
+  }
+}

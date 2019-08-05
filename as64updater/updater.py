@@ -1,4 +1,5 @@
 import sys
+import win32api
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -27,6 +28,7 @@ class Updater(QtCore.QObject):
 
         # Connections
         self.gui.abort_button.clicked.connect(self.core.abort_download)
+        self.gui.destroyed.connect(self.exit)
 
         self.DOWNLOAD_REPORT.connect(self.gui.set_progress)
         self.INSTALL_REPORT.connect(self.gui.set_progress)
@@ -34,7 +36,7 @@ class Updater(QtCore.QObject):
         self.UPDATE_FOUND.connect(self.gui.set_download_version)
         self.DOWNLOAD_BEGIN.connect(lambda: self.gui.set_status(UpdaterGUI.DOWNLOADING))
         self.DOWNLOAD_COMPLETE.connect(lambda: self.gui.set_status(UpdaterGUI.INSTALLING))
-        self.UPDATE_COMPLETE.connect(self.exit)
+        self.UPDATE_COMPLETE.connect(self.gui.close)
 
         self.core.start()
 
@@ -61,7 +63,11 @@ class Updater(QtCore.QObject):
 
     def exit(self):
         self.core.abort_download()
-        self.gui.close()
+
+        try:
+            win32api.WinExec(r'AutoSplit64.exe')
+        except:
+            pass
 
 
 if __name__ == "__main__":
