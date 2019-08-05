@@ -1,5 +1,4 @@
 {
-    "version": "0.1",
-    "updater": "0.1.0",
-    "ignore_updates": true
+    "version": "0.2.0",
+    "ignore_updates": false
 }

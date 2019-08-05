@@ -59,13 +59,25 @@ class RouteDecoder(json.JSONDecoder):
 
             splits = []
             for split_dict in data[SPLITS]:
+                # TODO: Separated to keep backwards compatibility with v0.1.x routes. Remove this in next version.
+                try:
+                    xcam = split_dict[XCAM]
+                except KeyError:
+                    xcam = -1
+
                 splits.append(Split(split_dict[TITLE],
                                     split_dict[STAR_COUNT],
                                     split_dict[FADEOUT],
                                     split_dict[FADEIN],
-                                    split_dict[XCAM],
+                                    xcam,
                                     split_dict[SPLIT_TYPE],
                                     split_dict[ICON]))
+
+            # TODO: Separated to keep backwards compatibility with v0.1.x routes. Remove this in next version.
+            try:
+                timing = data[TIMING]
+            except KeyError:
+                timing = TIMING_RTA
 
             route = Route(data[FILE_PATH],
                           data[TITLE],
@@ -73,7 +85,7 @@ class RouteDecoder(json.JSONDecoder):
                           data[INITIAL_STAR],
                           data[VERSION],
                           data[CATEGORY],
-                          data[TIMING])
+                          timing)
 
             return route
         else:

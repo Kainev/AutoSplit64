@@ -46,7 +46,9 @@ class AutoSplit64(QtCore.QObject):
 
     def check_for_update(self, override_ignore=False):
         if self._updater.check_for_update(override_ignore):
-            self.update_found.emit({"current": self._updater.current_version_info(), "latest": self._updater.latest_version_info()})
+            self.update_found.emit({"found": True, "current": self._updater.current_version_info(), "latest": self._updater.latest_version_info(), "override_ignore": override_ignore})
+        else:
+            self.update_found.emit({"found": False, "current": None, "latest": None, "override_ignore": override_ignore})
 
     def start(self):
         as64core.init()

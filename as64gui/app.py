@@ -177,11 +177,11 @@ class App(QtWidgets.QMainWindow):
         if config.get("route", "path") == "":
             return
 
-        try:
-            route = route_loader.load(config.get("route", "path"))
-        except KeyError:
-            self.display_error_message("Key Error", "Route Error")
-            return False
+        #try:
+        route = route_loader.load(config.get("route", "path"))
+        # except KeyError:
+        #     self.display_error_message("Key Error", "Route Error")
+        #     return False
 
         if not route:
             self.display_error_message("Could not load route", "Route Error")
@@ -226,8 +226,17 @@ class App(QtWidgets.QMainWindow):
             self._save_open_route(file_path)
 
     def update_found(self, info):
-        self.dialogs["update_dialog"].set_update_info(info)
-        self.dialogs["update_dialog"].show()
+        # TODO: RENAME FUNCTION
+        if info["found"]:
+            self.dialogs["update_dialog"].set_update_info(info)
+            self.dialogs["update_dialog"].show()
+        elif info["override_ignore"]:
+            msg = QtWidgets.QMessageBox(self)
+            msg.setFixedWidth(200)
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setWindowTitle("Updater")
+            msg.setText("Up to date!")
+            msg.show()
 
     def contextMenuEvent(self, event):
         context_menu = QtWidgets.QMenu(self)
