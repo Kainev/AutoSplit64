@@ -33,6 +33,7 @@ MANIFEST
 config.ini
 .master_version
 misc/
+resources/game_preview.png
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

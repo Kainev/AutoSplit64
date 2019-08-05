@@ -57,7 +57,7 @@ class OutputDialog(QtWidgets.QDialog):
 
     def initialize_window(self):
         self.setWindowTitle(self.window_title)
-        self.setFixedSize(240, 400)
+        self.setFixedSize(240, 375)
 
         # Create Layout
         self.setLayout(self.primary_layout)
