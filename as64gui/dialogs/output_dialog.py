@@ -19,6 +19,9 @@ class OutputDialog(QtWidgets.QDialog):
         self.window_title = "Output"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
+        # Output Reader
+        self.output_reader = None
+
         #
         self._update_rate = config.get("general", "output_update_rate")
 
@@ -156,57 +159,88 @@ class OutputDialog(QtWidgets.QDialog):
         self.update_le.setValidator(self._int_validator)
 
     def show(self):
+        self.output_reader = OutputReader(parent=self)
+
         try:
             self.update_le.setText(str(self._update_rate))
         except ValueError:
             pass
 
-        self.update_enabled = True
-        Thread(target=self.update_output).start()
+        self.output_reader.start()
+        self.output_reader.output.connect(self.display_output)
 
         super().show()
 
+    def display_output(self, output):
+        self.fade_status_le.setText(output["fade_status"])
+        self.fade_out_le.setText(str(output["fadeout_count"]))
+        self.fade_in_le.setText(str(output["fadein_count"]))
+        self.xcam_percent_le.setText(str(output["xcam_percent"])[:6])
+        self.xcam_le.setText(str(output["xcam_count"]))
+        self.xcam_status_le.setText(str(output["xcam_status"]))
+
+        self.prediction_le.setText(str(output["prediction"]))
+        self.probability_le.setText(str(output["probability"])[:6])
+
+        self.execution_le.setText(str(output["execution"])[:6])
+
     def hide(self):
-        self.update_enabled = False
+        self.output_reader.running = False
         super().hide()
 
     def close(self):
-        self.update_enabled = False
+        self.output_reader.running = False
         super().close()
 
     def closeEvent(self, e):
-        self.update_enabled = False
+        self.output_reader.running = False
+        self.output_reader.exit()
         super().closeEvent(e)
-
-    def update_output(self):
-        while self.update_enabled:
-            try:
-                self.fade_status_le.setText(as64.fade_status)
-                self.fade_out_le.setText(str(as64.fadeout_count))
-                self.fade_in_le.setText(str(as64.fadein_count))
-                self.xcam_percent_le.setText(str(as64.xcam_percent)[:6])
-                self.xcam_le.setText(str(as64.xcam_count))
-                self.xcam_status_le.setText(str(as64.in_xcam))
-
-                try:
-                    self.prediction_le.setText(str(as64.prediction_info.prediction))
-                    self.probability_le.setText(str(as64.prediction_info.probability)[:6])
-                except AttributeError:
-                    pass
-
-                self.execution_le.setText(str(as64.execution_time)[:6])
-            except RuntimeError:
-                self.update_enabled = False
-
-            try:
-                time.sleep(1 / self._update_rate)
-            except ValueError:
-                pass
 
     def _update_rate_changed(self):
         try:
-            self._update_rate = int(self.update_le.text())
-            config.set_key("general", "output_update_rate", self._update_rate)
+            self.output_reader.update_rate = int(self.update_le.text())
+            config.set_key("general", "output_update_rate", self.output_reader.update_rate)
             config.save_config()
         except ValueError:
             pass
+
+
+class OutputReader(QtCore.QThread):
+    output = QtCore.pyqtSignal(dict)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.running = True
+        self.update_rate = config.get("general", "output_update_rate")
+
+    def run(self):
+        while self.running:
+            try:
+                prediction = as64.prediction_info.prediction
+                probability = as64.prediction_info.probability
+            except AttributeError:
+                prediction = None
+                probability = None
+
+            output_data = {
+                "fade_status": as64.fade_status,
+                "fadeout_count": as64.fadeout_count,
+                "fadein_count": as64.fadein_count,
+                "xcam_percent": as64.xcam_percent,
+                "xcam_count": as64.xcam_count,
+                "xcam_status": as64.in_xcam,
+                "prediction": prediction,
+                "probability": probability,
+                "execution": as64.execution_time
+            }
+
+            self.output.emit(output_data)
+
+            try:
+                time.sleep(1 / self.update_rate)
+            except ValueError:
+                pass
+
+

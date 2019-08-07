@@ -406,5 +406,6 @@ class App(QtWidgets.QMainWindow):
         self.set_started(False)
 
     def close(self):
+        self.dialogs["output_dialog"].close()
         self.stop.emit()
         super().close()
