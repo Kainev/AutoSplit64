@@ -92,7 +92,7 @@ class Base(Thread):
         self._star_skip_enabled = config.get("error", "star_skip")
 
         #
-        self._intro_ended = False
+        self._in_game = False
 
         # Load Route
         self._route = load_route(config.get("route", "path"))
@@ -152,7 +152,7 @@ class Base(Thread):
         as64.enable_predictions = self.enable_predictions
         as64.enable_fade_count = self.enable_fade_count
         as64.enable_xcam_count = self.enable_xcam_count
-        as64.set_intro_ended = self.set_intro_ended
+        as64.set_in_game = self.set_in_game
         as64.get_region = self.get_region
         as64.get_region_rect = self.get_region_rect
         as64.register_split_processor = self.register_split_processor
@@ -237,7 +237,7 @@ class Base(Thread):
                     self.analyze_xcam_status()
 
                 try:
-                    if self._intro_ended:
+                    if self._in_game:
                         self._processor_switch.execute(self._current_split.split_type)
                     else:
                         self._processor_switch.execute(SPLIT_INITIAL)
@@ -438,7 +438,7 @@ class Base(Thread):
 
         self.set_star_count(self._route.initial_star)
         as64.xcam_count = 0
-        self._intro_ended = False
+        self._in_game = False
         self._split_on_current_xcam = False
 
     def skip(self):
@@ -491,8 +491,8 @@ class Base(Thread):
         if not enable:
             self._split_on_current_xcam = False
 
-    def set_intro_ended(self, ended):
-        self._intro_ended = ended
+    def set_in_game(self, in_game):
+        self._in_game = in_game
 
     def set_star_count(self, star_count):
         self._reset_fade_count()

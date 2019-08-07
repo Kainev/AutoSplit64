@@ -66,7 +66,7 @@ class ProcessXCamStartUpSegment(Process):
                 as64core.split()
                 as64core.fps = 10
                 as64core.fadeout_count = 0
-                as64core.set_intro_ended(True)
+                as64core.set_in_game(True)
                 return self.signals["START"]
 
         return self.signals["LOOP"]

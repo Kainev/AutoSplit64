@@ -1,0 +1,17 @@
+{
+  "name": "initial_up_rta",
+  "initial_process": "INITIAL_UP_RTA_RUN_START",
+  "inherit": null,
+  "sub_processors": {
+    "INITIAL_UP_RTA_RUN_START": "logic/up_rta/initial_up_rta_run_start.processor",
+    "INITIAL_FILE_SELECT_START": "logic/file_select/initial_file_select_start.processor"
+  },
+  "transitions": {
+    "INITIAL_UP_RTA_RUN_START": {
+      "RUN_START_UP_RTA.START": "INITIAL_FILE_SELECT_START"
+    },
+    "INITIAL_FILE_SELECT_START": {
+      "RESET.RESET": "INITIAL_UP_RTA_RUN_START"
+    }
+  }
+}

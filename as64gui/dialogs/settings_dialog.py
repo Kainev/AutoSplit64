@@ -806,8 +806,11 @@ class AdvancedMenu(BaseMenu):
         self.reset_two_le = QtWidgets.QLineEdit("")
         self.reset_two_btn = QtWidgets.QPushButton("Browse")
 
-        self.restart_delay_lb = QtWidgets.QLabel("Restart Split Delay:")
-        self.restart_delay_le = QtWidgets.QLineEdit("")
+        self.restart_delay_lb = QtWidgets.QLabel("Restart Split Offset:")
+        self.restart_delay_sb = QtWidgets.QSpinBox()
+
+        self.file_select_offset_lb = QtWidgets.QLabel("File Select Offset:")
+        self.file_select_offset_sb = QtWidgets.QSpinBox()
 
         self.star_delay_lb = QtWidgets.QLabel("Star Frame Rate:")
         self.star_delay_le = QtWidgets.QLineEdit("")
@@ -837,22 +840,20 @@ class AdvancedMenu(BaseMenu):
 
         # Configure Widgets
         self.restart_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.file_select_offset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.reset_one_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.reset_two_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.star_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.fadeout_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
-        self.restart_delay_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.reset_one_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.reset_two_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.star_delay_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.fadeout_delay_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
-        self.restart_delay_le.setMaximumWidth(50)
         self.star_delay_le.setMaximumWidth(50)
         self.fadeout_delay_le.setMaximumWidth(50)
 
-        self.restart_delay_le.setValidator(self.double_validator)
         self.star_delay_le.setValidator(self.double_validator)
         self.fadeout_delay_le.setValidator(self.double_validator)
 
@@ -868,11 +869,20 @@ class AdvancedMenu(BaseMenu):
         self.model_width_le.setValidator(self.int_validator)
         self.model_height_le.setValidator(self.int_validator)
 
+        self.file_select_offset_sb.setMaximumWidth(50)
+        self.file_select_offset_sb.setMinimum(-35)
+
+        self.restart_delay_sb.setMaximumWidth(50)
+        self.restart_delay_sb.setMinimum(-48)
+
         # Add Widgets
         self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
 
         self.menu_layout.addWidget(self.restart_delay_lb, 5, 0)
-        self.menu_layout.addWidget(self.restart_delay_le, 5, 1, 1, 2)
+        self.menu_layout.addWidget(self.restart_delay_sb, 5, 1, 1, 2)
+
+        self.menu_layout.addWidget(self.file_select_offset_lb, 6, 0)
+        self.menu_layout.addWidget(self.file_select_offset_sb, 6, 1, 1, 2)
 
         self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 7, 0)
         self.menu_layout.addWidget(HLine(), 8, 0, 1, 4)
@@ -919,7 +929,8 @@ class AdvancedMenu(BaseMenu):
         self.load_preferences()
 
     def load_preferences(self):
-        self.restart_delay_le.setText(str(config.get('advanced', 'restart_split_delay')))
+        self.restart_delay_sb.setValue(config.get('advanced', 'restart_frame_offset'))
+        self.file_select_offset_sb.setValue(config.get('advanced', 'file_select_frame_offset'))
         self.reset_one_le.setText(str(config.get('advanced', 'reset_frame_one')))
         self.reset_two_le.setText(str(config.get('advanced', 'reset_frame_two')))
         self.star_delay_le.setText(str(config.get('advanced', 'star_process_frame_rate')))
@@ -929,7 +940,8 @@ class AdvancedMenu(BaseMenu):
         self.model_height_le.setText(str(config.get('model', 'height')))
 
     def update_preferences(self):
-        config.set_key('advanced', 'restart_split_delay', float(self.restart_delay_le.text()))
+        config.set_key('advanced', 'restart_frame_offset', self.restart_delay_sb.value())
+        config.set_key('advanced', 'file_select_frame_offset', self.file_select_offset_sb.value())
         config.set_key('advanced', 'reset_frame_one', resource_utils.abs_to_rel(self.reset_one_le.text()))
         config.set_key('advanced', 'reset_frame_two', resource_utils.abs_to_rel(self.reset_two_le.text()))
         config.set_key('advanced', 'star_process_frame_rate', float(self.star_delay_le.text()))

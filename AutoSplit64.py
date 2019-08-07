@@ -69,6 +69,8 @@ class AutoSplit64(QtCore.QObject):
         register_process("XCAM", ProcessXCam())
         register_process("XCAM_UP_RTA", ProcessXCamStartUpSegment())
 
+        register_process("FILE_SELECT_SPLIT", ProcessFileSelectSplit())
+
         register_process("FIND_DDD_PORTAL", ProcessFindDDDPortal())
         register_process("DDD_SPLIT", ProcessDDDEntry())  # TODO: RENAME ProcessDDDEntry to ProcessDDDSplit
         register_process("DDD_SPLIT_X", ProcessDDDEntryX())  # TODO: RENAME ProcessDDDEntryX to ProcessDDDSplitX
@@ -85,6 +87,9 @@ class AutoSplit64(QtCore.QObject):
         if timing == as64core.TIMING_UP_RTA:
             insert_global_hook("RESET", ProcessResetNoStart())
             initial_processor = ProcessorGenerator.generate("logic/up_rta/initial_up_rta.processor")
+        elif timing == as64core.TIMING_FILE_SELECT:
+            insert_global_hook("RESET", ProcessResetNoStart())
+            initial_processor = ProcessorGenerator.generate("logic/file_select/initial_file_select_start.processor")
         else:
             initial_processor = ProcessorGenerator.generate("logic/standard/initial.processor")
 

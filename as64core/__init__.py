@@ -14,6 +14,7 @@ GAME_JP = constants.GAME_JP
 GAME_US = constants.GAME_US
 TIMING_RTA = constants.TIMING_RTA
 TIMING_UP_RTA = constants.TIMING_UP_RTA
+TIMING_FILE_SELECT = constants.TIMING_FILE_SELECT
 PREDICTION_MODE = constants.PREDICTION_MODE
 CONFIRMATION_MODE = constants.CONFIRMATION_MODE
 SPLIT_INITIAL = constants.SPLIT_INITIAL
@@ -118,7 +119,7 @@ def enable_xcam_count(enable: bool) -> None:
     pass
 
 
-def set_intro_ended(ended: bool) -> None:
+def set_in_game(ended: bool) -> None:
     pass
 
 def get_region(region):

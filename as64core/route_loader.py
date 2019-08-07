@@ -23,7 +23,8 @@ from .constants import (
     SPLIT_NORMAL,
     SPLIT_FADE_ONLY,
     TIMING_RTA,
-    TIMING_UP_RTA
+    TIMING_UP_RTA,
+    TIMING_FILE_SELECT
 )
 
 
@@ -123,7 +124,7 @@ def validate_route(route):
     if route.initial_star < 0 or route.initial_star > 120:
         return "Invalid initial star."
 
-    if route.timing not in (TIMING_RTA, TIMING_UP_RTA):
+    if route.timing not in (TIMING_RTA, TIMING_UP_RTA, TIMING_FILE_SELECT):
         return "Invalid timing method."
 
     prev_star_count = -1

@@ -22,7 +22,8 @@ from as64core.constants import (
     SPLIT_XCAM,
     SPLIT_FINAL,
     TIMING_RTA,
-    TIMING_UP_RTA
+    TIMING_UP_RTA,
+    TIMING_FILE_SELECT
 )
 
 
@@ -142,9 +143,10 @@ class RouteEditor(QtWidgets.QMainWindow):
         self.version_combo.addItem("JP")
         self.version_combo.addItem("US")
 
-        self.timing_combo.setMaximumWidth(65)
+        self.timing_combo.setMaximumWidth(80)
         self.timing_combo.addItem(TIMING_RTA)
         self.timing_combo.addItem(TIMING_UP_RTA)
+        self.timing_combo.addItem(TIMING_FILE_SELECT)
 
         for category in self.CATEGORIES:
             self.category_combo.addItem(category)
@@ -392,6 +394,8 @@ class RouteEditor(QtWidgets.QMainWindow):
             self.timing_combo.setCurrentIndex(0)
         elif self.route.timing == TIMING_UP_RTA:
             self.timing_combo.setCurrentIndex(1)
+        elif self.route.timing == TIMING_FILE_SELECT:
+            self.timing_combo.setCurrentIndex(2)
 
         splits_length = len(self.route.splits)
         self.split_table.setRowCount(splits_length)
