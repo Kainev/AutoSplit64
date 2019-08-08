@@ -185,10 +185,12 @@ class OutputDialog(QtWidgets.QDialog):
 
     def hide(self):
         self.output_reader.running = False
+        self.output_reader.exit()
         super().hide()
 
     def close(self):
         self.output_reader.running = False
+        self.output_reader.exit()
         super().close()
 
     def closeEvent(self, e):

@@ -409,5 +409,12 @@ class App(QtWidgets.QMainWindow):
         self.set_started(False)
 
     def close(self):
+        import time
+        try:
+            self.dialogs["output_dialog"].close()
+            time.sleep(0.1)
+        except AttributeError:
+            pass
+
         self.stop.emit()
         super().close()
