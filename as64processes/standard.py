@@ -235,7 +235,7 @@ class ProcessFadeout(Process):
         as64core.enable_xcam_count(False)
         as64core.set_in_game(False)
         as64core.star_count = as64core.route.initial_star
-        as64core.force_update()
+        #as64core.force_update()
 
     def _is_reset(self, region, template):
         match = cv2.minMaxLoc(cv2.matchTemplate(region,
@@ -283,10 +283,12 @@ class ProcessFadeoutNoStar(Process):
         if as64core.fade_status == self._is_reset(reset_region, self._reset_template):
             as64core.enable_predictions(True)
             self._split_occurred = False
+            self._reset()
             return self.signals["RESET"]
         elif self._is_reset(reset_region, self._reset_template_2):
             as64core.enable_predictions(True)
             self._split_occurred = False
+            self._reset()
             return self.signals["RESET"]
 
         # If both star count, and life count are still black, reprocess fadeout, otherwise fadeout completed
@@ -296,6 +298,20 @@ class ProcessFadeoutNoStar(Process):
             as64core.enable_predictions(True)
             self._split_occurred = False
             return self.signals["COMPLETE"]
+
+    def _reset(self):
+        if not config.get("general", "srl_mode"):
+            if as64core.current_time - as64core.last_split < self._undo_threshold:
+                as64core.undo()
+
+            as64core.reset()
+            if as64core.start_on_reset:
+                as64core.split()
+
+        as64core.enable_fade_count(False)
+        as64core.enable_xcam_count(False)
+        as64core.set_in_game(False)
+        as64core.star_count = as64core.route.initial_star
 
     def _is_reset(self, region, template):
         match = cv2.minMaxLoc(cv2.matchTemplate(region,
@@ -364,7 +380,7 @@ class ProcessFadeoutResetOnly(Process):
         as64core.enable_xcam_count(False)
         as64core.set_in_game(False)
         as64core.star_count = as64core.route.initial_star
-        as64core.force_update()
+        #as64core.force_update()
 
     def _is_reset(self, region, template):
         match = cv2.minMaxLoc(cv2.matchTemplate(region,
