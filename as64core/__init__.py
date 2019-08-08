@@ -84,6 +84,7 @@ fadein_count: int = 0
 fade_status: str = NO_FADE
 prediction_info = None
 execution_time: float = 0.0
+start_on_reset: bool = True
 
 
 def init() -> None:

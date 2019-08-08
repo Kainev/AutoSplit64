@@ -1,5 +1,4 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from threading import Thread
 import time
 
 from ..constants import (
@@ -242,5 +241,3 @@ class OutputReader(QtCore.QThread):
                 time.sleep(1 / self.update_rate)
             except ValueError:
                 pass
-
-

@@ -187,6 +187,7 @@ class ProcessFadeout(Process):
         self._fps = config.get("advanced", "fadeout_process_frame_rate")
         self._reset_threshold = config.get("thresholds", "reset_threshold")
         self._black_threshold = config.get("thresholds", "black_threshold")
+        self._undo_threshold = config.get("thresholds", "undo_threshold")
 
         _, _, reset_width, reset_height = as64core.get_region_rect(as64core.RESET_REGION)
         self._reset_template = cv2.resize(cv2.imread(resource_path(config.get("advanced", "reset_frame_one"))), (reset_width, reset_height), interpolation=cv2.INTER_AREA)
@@ -204,10 +205,12 @@ class ProcessFadeout(Process):
         if as64core.fade_status == self._is_reset(reset_region, self._reset_template):
             as64core.enable_predictions(True)
             self._split_occurred = False
+            self._reset()
             return self.signals["RESET"]
         elif self._is_reset(reset_region, self._reset_template_2):
             as64core.enable_predictions(True)
             self._split_occurred = False
+            self._reset()
             return self.signals["RESET"]
 
         # If both star count, and life count are still black, reprocess fadeout, otherwise fadeout completed
@@ -217,6 +220,22 @@ class ProcessFadeout(Process):
             as64core.enable_predictions(True)
             self._split_occurred = False
             return self.signals["COMPLETE"]
+
+    def _reset(self):
+        if not config.get("general", "srl_mode"):
+            if as64core.current_time - as64core.last_split < self._undo_threshold:
+                as64core.undo()
+
+            as64core.reset()
+            # time.sleep(self._restart_split_delay)
+            if as64core.start_on_reset:
+                as64core.split()
+
+        as64core.enable_fade_count(False)
+        as64core.enable_xcam_count(False)
+        as64core.set_in_game(False)
+        as64core.star_count = as64core.route.initial_star
+        as64core.force_update()
 
     def _is_reset(self, region, template):
         match = cv2.minMaxLoc(cv2.matchTemplate(region,
@@ -246,6 +265,7 @@ class ProcessFadeoutNoStar(Process):
         self._fps = config.get("advanced", "fadeout_process_frame_rate")
         self._reset_threshold = config.get("thresholds", "reset_threshold")
         self._black_threshold = config.get("thresholds", "black_threshold")
+        self._undo_threshold = config.get("thresholds", "undo_threshold")
 
         _, _, reset_width, reset_height = as64core.get_region_rect(as64core.RESET_REGION)
         self._reset_template = cv2.resize(cv2.imread(resource_path(config.get("advanced", "reset_frame_one"))), (reset_width, reset_height), interpolation=cv2.INTER_AREA)
@@ -293,67 +313,6 @@ class ProcessFadeoutNoStar(Process):
         as64core.enable_xcam_count(False)
         super().on_transition()
 
-class ProcessFadeoutNoStar(Process):
-    def __init__(self):
-        super().__init__()
-        self.register_signal("RESET")
-        self.register_signal("COMPLETE")
-
-        self._split_occurred = False
-
-        self._fps = config.get("advanced", "fadeout_process_frame_rate")
-        self._reset_threshold = config.get("thresholds", "reset_threshold")
-        self._black_threshold = config.get("thresholds", "black_threshold")
-
-        _, _, reset_width, reset_height = as64core.get_region_rect(as64core.RESET_REGION)
-        self._reset_template = cv2.resize(cv2.imread(resource_path(config.get("advanced", "reset_frame_one"))), (reset_width, reset_height), interpolation=cv2.INTER_AREA)
-        self._reset_template_2 = cv2.resize(cv2.imread(resource_path(config.get("advanced", "reset_frame_two"))), (reset_width, reset_height), interpolation=cv2.INTER_AREA)
-
-    def execute(self):
-        reset_region = as64core.get_region(as64core.RESET_REGION)
-
-        # TODO: SWITCH TO USING FADE_STATUS
-        # If centre of screen is black, and the current split conditions are met, trigger split
-        if is_black(reset_region, self._black_threshold) and as64core.current_split().on_fadeout == as64core.fadeout_count:
-            as64core.split()
-            self._split_occurred = True
-
-        # Check for a match against the reset_template (SM64 logo)
-        if self._is_reset(reset_region, self._reset_template):
-            if self._split_occurred:
-                as64core.undo()
-            as64core.enable_predictions(True)
-            return self.signals["RESET"]
-        elif self._is_reset(reset_region, self._reset_template_2):
-            if self._split_occurred:
-                as64core.undo()
-            as64core.enable_predictions(True)
-            return self.signals["RESET"]
-
-        # If both star count, and life count are still black, reprocess fadeout, otherwise fadeout completed
-        if as64core.fade_status in (as64core.FADEOUT_COMPLETE, as64core.FADEOUT_PARTIAL):
-            return self.signals["LOOP"]
-        else:
-            as64core.enable_predictions(True)
-            return self.signals["COMPLETE"]
-
-    def _is_reset(self, region, template):
-        match = cv2.minMaxLoc(cv2.matchTemplate(region,
-                                                template,
-                                                cv2.TM_SQDIFF_NORMED))[0]
-
-        if match < config.get("thresholds", "reset_threshold"):
-            return True
-        else:
-            return False
-
-    def on_transition(self):
-        as64core.fps = self._fps
-        self._split_occurred = False
-        as64core.enable_predictions(False)
-        as64core.enable_xcam_count(False)
-        super().on_transition()
-
 
 class ProcessFadeoutResetOnly(Process):
     def __init__(self):
@@ -364,6 +323,7 @@ class ProcessFadeoutResetOnly(Process):
         self._fps = config.get("advanced", "fadeout_process_frame_rate")
         self._reset_threshold = config.get("thresholds", "reset_threshold")
         self._black_threshold = config.get("thresholds", "black_threshold")
+        self._undo_threshold = config.get("thresholds", "undo_threshold")
 
         _, _, reset_width, reset_height = as64core.get_region_rect(as64core.RESET_REGION)
         self._reset_template = cv2.resize(cv2.imread(resource_path(config.get("advanced", "reset_frame_one"))),
@@ -377,9 +337,11 @@ class ProcessFadeoutResetOnly(Process):
         # Check for a match against the reset_template (SM64 logo)
         if self._is_reset(reset_region, self._reset_template):
             as64core.enable_predictions(True)
+            self._reset()
             return self.signals["RESET"]
         elif self._is_reset(reset_region, self._reset_template_2):
             as64core.enable_predictions(True)
+            self._reset()
             return self.signals["RESET"]
 
         # If both star count, and life count are still black, reprocess fadeout, otherwise fadeout completed
@@ -388,6 +350,21 @@ class ProcessFadeoutResetOnly(Process):
         else:
             as64core.enable_predictions(True)
             return self.signals["COMPLETE"]
+
+    def _reset(self):
+        if not config.get("general", "srl_mode"):
+            if as64core.current_time - as64core.last_split < self._undo_threshold:
+                as64core.undo()
+
+            as64core.reset()
+            if as64core.start_on_reset:
+                as64core.split()
+
+        as64core.enable_fade_count(False)
+        as64core.enable_xcam_count(False)
+        as64core.set_in_game(False)
+        as64core.star_count = as64core.route.initial_star
+        as64core.force_update()
 
     def _is_reset(self, region, template):
         match = cv2.minMaxLoc(cv2.matchTemplate(region,
@@ -535,24 +512,8 @@ class ProcessReset(Process):
     def __init__(self,):
         super().__init__()
         self.register_signal("RESET")
-        self._restart_split_delay = config.get("advanced", "restart_split_delay") + (config.get("advanced", "restart_frame_offset") / 29.97)
-        self._undo_threshold = config.get("thresholds", "undo_threshold")
 
     def execute(self):
-        if not config.get("general", "srl_mode"):
-            if as64core.current_time - as64core.last_split < self._undo_threshold:
-                as64core.undo()
-
-            as64core.reset()
-            time.sleep(self._restart_split_delay)
-            as64core.split()
-
-        as64core.enable_fade_count(False)
-        as64core.enable_xcam_count(False)
-        as64core.set_in_game(False)
-        as64core.star_count = as64core.route.initial_star
-        as64core.force_update()
-
         return self.signals["RESET"]
 
     def on_transition(self):
@@ -566,17 +527,17 @@ class ProcessResetNoStart(Process):
         self._restart_split_delay = config.get("advanced", "restart_split_delay")
 
     def execute(self):
-        if not config.get("general", "srl_mode"):
-            if as64core.current_time - as64core.last_split < 4:
-                as64core.undo()
-
-            as64core.reset()
-
-        as64core.enable_fade_count(False)
-        as64core.enable_xcam_count(False)
-        as64core.set_in_game(False)
-        as64core.star_count = as64core.route.initial_star
-        as64core.force_update()
+        # if not config.get("general", "srl_mode"):
+        #     if as64core.current_time - as64core.last_split < 4:
+        #         as64core.undo()
+        #
+        #     as64core.reset()
+        #
+        # as64core.enable_fade_count(False)
+        # as64core.enable_xcam_count(False)
+        # as64core.set_in_game(False)
+        # as64core.star_count = as64core.route.initial_star
+        # as64core.force_update()
 
         return self.signals["RESET"]
 
@@ -651,7 +612,10 @@ class ProcessFileSelectSplit(Process):
             region[mask] = [0, 0, 0]
 
             if np.any(region == [0, 0, 0]):
-                time.sleep(self._restart_split_delay)
+                try:
+                    time.sleep(self._restart_split_delay)
+                except ValueError:
+                    pass
                 as64core.fadein_count = 0
                 as64core.fadeout_count = 0
                 as64core.split()

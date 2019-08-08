@@ -300,7 +300,10 @@ class App(QtWidgets.QMainWindow):
             self.open_route_browser()
         elif action == cords_action:
             self.dialogs["capture_editor"].show()
-            self.dialogs["output_dialog"].close()
+            try:
+                self.dialogs["output_dialog"].close()
+            except AttributeError:
+                pass
         elif action == advanced_action:
             self.dialogs["settings_dialog"].show()
         elif action == reset_gen_action:
@@ -406,6 +409,5 @@ class App(QtWidgets.QMainWindow):
         self.set_started(False)
 
     def close(self):
-        self.dialogs["output_dialog"].close()
         self.stop.emit()
         super().close()

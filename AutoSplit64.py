@@ -86,9 +86,11 @@ class AutoSplit64(QtCore.QObject):
 
         if timing == as64core.TIMING_UP_RTA:
             insert_global_hook("RESET", ProcessResetNoStart())
+            as64core.start_on_reset = False
             initial_processor = ProcessorGenerator.generate("logic/up_rta/initial_up_rta.processor")
         elif timing == as64core.TIMING_FILE_SELECT:
             insert_global_hook("RESET", ProcessResetNoStart())
+            as64core.start_on_reset = False
             initial_processor = ProcessorGenerator.generate("logic/file_select/initial_file_select_start.processor")
         else:
             initial_processor = ProcessorGenerator.generate("logic/standard/initial.processor")
@@ -157,7 +159,7 @@ if __name__ == "__main__":
     qt_app.setPalette(palette)
 
     # Add font to database
-    QtGui.QFontDatabase.addApplicationFont(resource_path("resources/font/TCM_____.ttf"))
+    QtGui.QFontDatabase.addApplicationFont(resource_path("resources/gui/font/TCM_____.ttf"))
 
     logging.basicConfig(
         level=logging.WARNING,

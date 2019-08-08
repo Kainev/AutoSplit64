@@ -878,8 +878,8 @@ class AdvancedMenu(BaseMenu):
         # Add Widgets
         self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
 
-        self.menu_layout.addWidget(self.restart_delay_lb, 5, 0)
-        self.menu_layout.addWidget(self.restart_delay_sb, 5, 1, 1, 2)
+        # self.menu_layout.addWidget(self.restart_delay_lb, 5, 0)
+        # self.menu_layout.addWidget(self.restart_delay_sb, 5, 1, 1, 2)
 
         self.menu_layout.addWidget(self.file_select_offset_lb, 6, 0)
         self.menu_layout.addWidget(self.file_select_offset_sb, 6, 1, 1, 2)
