@@ -28,13 +28,15 @@ For details on proper emulator configuration see Giboss's [Setup Guide](https://
 If attempting to use an emulator, you may also need to capture the game feed from OBS instead of Project64.
 
 ## Release
-[Version 0.1.2.1](https://github.com/synozure/AutoSplit64/releases)
+[Version 0.2.2](https://github.com/synozure/AutoSplit64/releases)
 
 ## Features
 * Automatically start/reset timer on console reset
 * Split on fadeout/fadein at specified star count
 * Split on DDD enter
 * Split on final star grab
+* Split on X-Cam
+* Death Detection
 * Create custom routes with graphical interface
 * Automatically convert LiveSplit .lss files to AutoSplit 64 routes
 * SRL Mode - Prevents AutoSplit64 from detecting console resets to pass control to SRL
@@ -43,7 +45,7 @@ If attempting to use an emulator, you may also need to capture the game feed fro
 ## Quick Setup
 Download the latest release. Extract contents and run `AutoSplit64.exe`.
 
-LiveSplit timer should start at 3 seconds.
+LiveSplit timer should start at 1.36 seconds.
 
 ### Interface
 All windows and options are accessed via the right-click menu:
