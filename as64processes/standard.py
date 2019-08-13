@@ -202,7 +202,7 @@ class ProcessFadeout(Process):
             self._split_occurred = True
 
         # Check for a match against the reset_template (SM64 logo)
-        if as64core.fade_status == self._is_reset(reset_region, self._reset_template):
+        if self._is_reset(reset_region, self._reset_template):
             as64core.enable_predictions(True)
             self._split_occurred = False
             self._reset()

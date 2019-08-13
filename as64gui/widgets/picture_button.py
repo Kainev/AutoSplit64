@@ -49,7 +49,7 @@ class PictureButton(QtWidgets.QAbstractButton):
 
 
 class StateButton(QtWidgets.QAbstractButton):
-    def __init__(self, pixmap, pixmap_pressed, pixmap_hover=None, parent=None):
+    def __init__(self, pixmap=None, pixmap_pressed=None, pixmap_hover=None, parent=None):
         super().__init__(parent=parent)
         self.pixmap = pixmap
         self.pixmap_pressed = pixmap_pressed
@@ -71,7 +71,8 @@ class StateButton(QtWidgets.QAbstractButton):
 
     def paintEvent(self, event):
         pix = self.pixmap_hover if self.underMouse() and self.pixmap_hover else self.pixmap
-        if self.isDown():
+
+        if self.isDown() and self.pixmap_pressed:
             pix = self.pixmap_pressed
 
         painter = QtGui.QPainter()

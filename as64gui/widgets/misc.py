@@ -1,4 +1,7 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
+
+from as64gui.widgets import PictureButton
+from as64gui import constants
 
 
 class HLine(QtWidgets.QFrame):
@@ -6,7 +9,10 @@ class HLine(QtWidgets.QFrame):
         super().__init__(parent)
 
         self.setFrameShape(QtWidgets.QFrame.HLine)
-        self.setFrameShadow(QtWidgets.QFrame.Sunken)
+        #self.setFrameShadow(QtWidgets.QFrame.Plain)
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(43, 45, 47))
+        self.setPalette(palette)
 
 
 class StarCountDisplay(QtWidgets.QWidget):

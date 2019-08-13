@@ -36,7 +36,7 @@ class SplitListWidget(QtWidgets.QWidget):
 
                 painter.drawText(x_pos, y_pos, text_width, split_height, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, self.splits[split_index].text)
             except IndexError:
-                break
+                pass
 
         painter.end()
 

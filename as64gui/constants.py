@@ -1,4 +1,4 @@
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 TITLE = "AutoSplit 64"
 AUTHOR = "Synozure"
 
@@ -10,6 +10,7 @@ START_PATH = "resources/gui/buttons/start_button_default.png"
 STOP_PATH = "resources/gui/buttons/stop_button_default.png"
 INIT_PATH = "resources/gui/buttons/init_button_default.png"
 CLOSE_PATH = "resources/gui/buttons/close_default.png"
+CONTRACT_PATH = "resources/gui/buttons/contract_default.png"
 STAR_PATH = "resources/gui/buttons/star_default.png"
 STAR_HOVER_PATH = "resources/gui/buttons/star_hover.png"
 MINIMIZE_PATH = "resources/gui/buttons/minimize_default.png"
