@@ -28,7 +28,7 @@ For details on proper emulator configuration see Giboss's [Setup Guide](https://
 If attempting to use an emulator, you may also need to capture the game feed from OBS instead of Project64.
 
 ## Release
-[Version 0.2.2](https://github.com/synozure/AutoSplit64/releases)
+[Version 0.2.3](https://github.com/synozure/AutoSplit64/releases)
 
 ## Features
 * Automatically start/reset timer on console reset
@@ -71,7 +71,7 @@ Make sure you have your capture software open (i.e., AmaRecTV), then open the Ca
   </a>
 </p>
 
-Select the correct process from the `Process` drop-down and position the `Game Region` selector as shown. Ensure you are as accurate as possible for best results.
+Select the desired process from the `Process` drop-down and position the `Game Region` selector as shown. Ensure you are as accurate as possible for best results.
 
 When finished, press `Apply` to save changes.
 
