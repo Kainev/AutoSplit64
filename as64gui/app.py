@@ -89,7 +89,12 @@ class App(QtWidgets.QMainWindow):
     def initialize(self):
         # Configure window
         self.setWindowTitle(self.title)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+
+        if config.get("general", "on_top"):
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+        else:
+            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+
         self.setFixedSize(self.width, self.height)
 
         # Configure Central Widget
