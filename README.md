@@ -23,9 +23,9 @@
 ## Introduction
 Inspired by Gerardo Cervantes's [Star Classifier](https://github.com/gerardocervantes8/Star-Classifier-For-Mario-64), AutoSplit 64 analyzes your game capture to automate splitting.
 
-AutoSplit64 is primarily designed for console use, however may still function for Emulator.
+AutoSplit64 is primarily designed for console use, and is the only officialy supported platform, however may still function for Emulator.
 For details on proper emulator configuration see Giboss's [Setup Guide](https://goo.gl/PKGDn6).
-If attempting to use an emulator, you may also need to capture the game feed from OBS instead of Project64.
+Virtual Console is not supported.
 
 ## Release
 [Version 0.2.3](https://github.com/synozure/AutoSplit64/releases)
