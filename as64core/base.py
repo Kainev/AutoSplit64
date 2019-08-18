@@ -221,7 +221,6 @@ class Base(Thread):
 
                 try:
                     self._game_capture.capture()
-                    cv2.imwrite("capture.png", self._game_capture.get_region(as64.NO_HUD_REGION))
                 except:
                     self._error_occurred("Unable to capture " + config.get("game", "process_name"))
 
