@@ -43,6 +43,9 @@ class Base(Thread):
         self._ls_socket = livesplit.init_socket()
         livesplit.connect(self._ls_socket)
 
+        # Load Route
+        self._route = load_route(config.get("route", "path"))
+
         # Initialize Game Capture
         if config.get("game", "override_version"):
             version = config.get("game", "version")
@@ -93,9 +96,6 @@ class Base(Thread):
 
         #
         self._in_game = False
-
-        # Load Route
-        self._route = load_route(config.get("route", "path"))
 
         try:
             self._route_length = len(self._route.splits)
@@ -221,6 +221,7 @@ class Base(Thread):
 
                 try:
                     self._game_capture.capture()
+                    cv2.imwrite("capture.png", self._game_capture.get_region(as64.NO_HUD_REGION))
                 except:
                     self._error_occurred("Unable to capture " + config.get("game", "process_name"))
 

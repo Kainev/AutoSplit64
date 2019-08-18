@@ -4,7 +4,6 @@ import cv2
 
 
 def is_black(image, threshold=0.1, percent_threshold=0.9):
-    #gray_1d = np_convert_to_gray(img_np).flatten()
     img_1d = convert_to_np([image]).flatten()
     return np.sum(img_1d < threshold) > len(img_1d) * percent_threshold
 
