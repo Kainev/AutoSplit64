@@ -141,12 +141,11 @@ def validate_route(route):
         if type(split.star_count) != int:
             return "Split Star is not a valid integer"
 
-        if split.star_count < 0 or split.star_count > 120:
-            if split.split_type != SPLIT_FADE_ONLY:
+        if split.split_type != SPLIT_FADE_ONLY:
+            if split.star_count < 0 or split.star_count > 120:
                 return "Split: {} - Invalid Split Star.".format(split.title)
-
-        if split.star_count < prev_star_count:
-            return "Split: {} - Split star must be greater than previous split.".format(split.title)
+            if split.star_count < prev_star_count:
+                return "Split: {} - Split star must be greater than previous split.".format(split.title)
 
         prev_star_count = split.star_count
 
