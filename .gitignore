@@ -31,9 +31,13 @@ MANIFEST
 
 # Custom
 config.ini
+config
 .master_version
 misc/
 resources/game_preview.png
+.vscode/
+planning.txt
+venv_old/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
