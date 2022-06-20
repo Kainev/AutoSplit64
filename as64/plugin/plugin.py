@@ -20,6 +20,9 @@ class BasePlugin(object):
     
     def initialize(self):
         pass
+    
+    def is_valid(self):
+        return True
         
 
 class CapturePlugin(BasePlugin):

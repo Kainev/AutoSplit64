@@ -57,6 +57,7 @@ class GameController(object):
         self.count_x_cams: bool = False
        
         self.undo = split_plugin.undo
+        self.skip = split_plugin.skip
         self.split = split_plugin.split
         self.reset = split_plugin.reset
 
@@ -80,13 +81,15 @@ class AS64(object):
                 
         self._user_plugins: list = user_plugins
         
-        self._initialize_plugins()
+        self._initialize_system_plugins()
         self._export_functions()
         
     def run(self) -> None:
         self._running = True
         
         self._start_plugins()
+        
+        self._split_plugin.split()
 
         while self._running:
             self._game_status.current_time = time.time()
@@ -94,8 +97,10 @@ class AS64(object):
             # Capture the game window
             self._game_capture.capture()
             
+            # Update current split
+            self._set_split(self._split_plugin.index())
+            
             # Execute system plugins
-            self._split_plugin.execute(None)
             self._fade_plugin.execute(None)
             self._xcam_plugin.execute(None)
             self._star_plugin.execute(None)
@@ -115,10 +120,13 @@ class AS64(object):
     def stop(self) -> None:
         self._running = False
         
+    def _set_split(self, index) -> None:
+        self._game_status.current_split = self._game_status.route.splits[index]
+        
     def _export_functions(self):
         pass
         
-    def _initialize_plugins(self):
+    def _initialize_system_plugins(self):
         self._split_plugin.initialize()
         self._fade_plugin.initialize()
         self._star_plugin.initialize()
