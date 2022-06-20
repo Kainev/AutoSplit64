@@ -11,7 +11,7 @@ height = 40
 user = []
 
 [plugins.system]
-capture = 'capture'
+capture = 'bitblt'
 star = 'star'
 fade = 'fade'
 xcam = 'xcam'
