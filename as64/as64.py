@@ -10,10 +10,10 @@ from as64.capture import GameCapture, get_handle
 
 import cv2
 
-from as64.plugin.plugin import Plugin
+from as64.plugin.plugin import Plugin, SplitPlugin
 
 class GameStatus(object):
-    def __init__(self) -> None:
+    def __init__(self, game_capture) -> None:
         # Timing
         self.current_time = 0
         self.last_split_time = 0
@@ -51,21 +51,21 @@ class GameStatus(object):
 
 
 class GameController(object):
-    def __init__(self) -> None:
+    def __init__(self, split_plugin) -> None:
         self.predict_star_count: bool = True
         self.count_fades: bool = False
         self.count_x_cams: bool = False
        
-        self.undo = None
-        self.split = None
-        self.reset = None
+        self.undo = split_plugin.undo
+        self.split = split_plugin.split
+        self.reset = split_plugin.reset
 
 
 class AS64(object):
     def __init__(self, system_plugins: dict, user_plugins: list=[]) -> None:
         self._running: bool = False
-        self._game_status = GameStatus()
-        self._game_controller = GameController()
+        self._game_status = GameStatus(None)
+        self._game_controller = GameController(SplitPlugin())
         
         self._hwnd = get_handle(config.get('capture', 'process'))
         
@@ -77,14 +77,11 @@ class AS64(object):
         self._star_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'star')]()
         self._xcam_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'xcam')]()
         self._logic_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'logic')]()
-        
-        self._split_plugin.initialize()
-        self._fade_plugin.initialize()
-        self._star_plugin.initialize()
-        self._xcam_plugin.initialize()
-        self._logic_plugin.initialize()
-        
+                
         self._user_plugins: list = user_plugins
+        
+        self._initialize_plugins()
+        self._export_functions()
         
     def run(self) -> None:
         self._running = True
@@ -117,6 +114,16 @@ class AS64(object):
 
     def stop(self) -> None:
         self._running = False
+        
+    def _export_functions(self):
+        pass
+        
+    def _initialize_plugins(self):
+        self._split_plugin.initialize()
+        self._fade_plugin.initialize()
+        self._star_plugin.initialize()
+        self._xcam_plugin.initialize()
+        self._logic_plugin.initialize()
         
     def _start_plugins(self):
         self._fade_plugin.start()

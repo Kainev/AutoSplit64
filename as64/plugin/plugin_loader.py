@@ -3,24 +3,24 @@ import sys
 import inspect
 from importlib import import_module
 
-from as64.plugin.plugin import Plugin
+from as64.plugin.plugin import BasePlugin
 from as64 import utils
 
 
 def is_plugin_subclass(cls) -> bool:
-    """Determines if class is a Plugin subclass, but NOT the Plugin class itself
+    """Determines if class is a BasePlugin subclass, but NOT the BasePlugin class itself
 
     Returns:
-        bool: Does given class subclass Plugin
+        bool: Does given class subclass BasePlugin
     """
     try:
-        return issubclass(cls, Plugin) and cls != Plugin
+        return issubclass(cls, BasePlugin) and cls != BasePlugin
     except Exception:
         return False
 
 
 def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
-    """Import all modules from a given directory and return a list of found `Plugin` subclasses.
+    """Import all modules from a given directory and return a list of found `BasePlugin` subclasses.
 
     Args:
         directory (str): Import directory
@@ -28,7 +28,7 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
         exclude (list, optional): List of modules to ignore. Defaults to [].
 
     Returns:
-        list: Plugin subclasses
+        list: BasePlugin subclasses
     """
     # Find all modules in a given directory, sort by given order
     files = [file_name.split(".")[0] for file_name in os.listdir(directory) if file_name.endswith(".py")]
@@ -37,7 +37,7 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
     package_path = directory.replace("/", ".")
     print(package_path)
 
-    # Plugin Classes
+    # BasePlugin Classes
     _plugins = []
 
     # Import plugins
@@ -48,7 +48,7 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
 
         _module = import_module("{}.{}".format(package_path, file))
 
-        # Find Plugin subclasses in modules
+        # Find BasePlugin subclasses in modules
         for name, cls in inspect.getmembers(sys.modules[_module.__name__], is_plugin_subclass):
             _plugins.append(cls)
 
@@ -59,10 +59,10 @@ def initialize_plugins(classes: list) -> list:
     """Initialize plugin instances and call plugin initialize method.
 
     Args:
-        classes (list): Plugin classes to intialize.
+        classes (list): BasePlugin classes to intialize.
 
     Returns:
-        list: Plugin instances
+        list: BasePlugin instances
     """
     # Initialized plugin instances
     instances = []

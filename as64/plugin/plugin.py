@@ -10,22 +10,39 @@ class Definition(object):
     SCHEDULE = Schedule.FRAME
 
     SETTINGS = {}
+    
 
-
-class Plugin(object):
-    # class Schedule(Enum):
-    #     FRAME = auto()
-    #     ONCE = auto()
-    #     TIMER =  auto()
-
-    # SCHEDULE = Schedule.FRAME
-
-    # SETTINGS = {}
-
+class BasePlugin(object):
+    DEFINITION = None
+    
     def __init__(self):
         pass
-
+    
     def initialize(self):
+        pass
+        
+
+class CapturePlugin(BasePlugin):
+    def capture(self, hwnd):    
+        pass
+    
+    
+class SplitPlugin(BasePlugin):
+    def split(self):
+        pass
+    
+    def skip(self):
+        pass
+    
+    def undo(self):
+        pass
+    
+    def reset(self):
+        pass
+    
+
+class Plugin(BasePlugin):
+    def __init__(self):
         pass
 
     def start(self):

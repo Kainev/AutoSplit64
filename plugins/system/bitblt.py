@@ -1,5 +1,5 @@
 # Plugin
-from as64.plugin import Plugin, Definition
+from as64.plugin import CapturePlugin, Definition
 
 # Python
 import os
@@ -19,10 +19,10 @@ class BitBltDefinition(Definition):
     VERSION = "1.0.0"
 
 
-class BitBlt(Plugin):
+class BitBlt(CapturePlugin):
     DEFINITION = BitBltDefinition
         
-    def execute(self, hwnd):
+    def capture(self, hwnd):
         return _bit_blt(hwnd)
       
         

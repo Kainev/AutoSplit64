@@ -60,7 +60,7 @@ class GameCapture(object):
         self._region_images = {}
         
     def capture(self):
-        self._game_image = self._capture_plugin.execute(self._hwnd)
+        self._game_image = self._capture_plugin.capture(self._hwnd)
         self._region_images.clear()
         
 
