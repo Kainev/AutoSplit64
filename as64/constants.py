@@ -7,13 +7,21 @@ class Version(Enum):
     US = "US"
 
 
+class SplitType(Enum):
+    STAR = "Star"
+    BOWSER = "Bowser"
+    LBLJ = "LBLJ"
+    MIPS = "Mips"
+    CUSTOM = "Custom"
+    
+
 class FadeStatus(Enum):
     NO_FADE = auto()
     FADE_OUT_PARTIAL = auto()
     FADE_OUT_COMPLETE = auto()
     FADE_IN_PARTIAL = auto()
     FADE_IN_COMPLETE = auto()
-    
+        
     
 class Region(Enum):
     GAME = auto()

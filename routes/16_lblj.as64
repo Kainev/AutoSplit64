@@ -1,0 +1,30 @@
+__route__ = true
+title = "16 LBLJ"
+category = "16 Star"
+initial_star = 0
+version = "JP"
+logic_plugin = "_system"
+
+
+[SPLIT.LBLJ]
+star_count = 0
+fade_out = 2
+fade_in = -1
+x_cam = -1
+split_type = "STAR"
+
+
+[SPLIT.DW]
+star_count = 1
+fade_out = 2
+fade_in = -1
+x_cam = -1
+split_type = "STAR"
+
+
+[SPLIT.WF]
+star_count = 4
+fade_out = 1
+fade_in = -1
+x_cam = -1
+split_type = "STAR"

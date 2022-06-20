@@ -11,21 +11,23 @@ from as64.capture import GameCapture, get_handle
 import cv2
 
 from as64.plugin.plugin import Plugin, SplitPlugin
+from as64 import route
+from as64.route import Route, Split
 
 class GameStatus(object):
-    def __init__(self, game_capture) -> None:
+    def __init__(self, route: Route, current_split: Split, game_capture: GameCapture) -> None:
         # Timing
-        self.current_time = 0
-        self.last_split_time = 0
-        self.last_fade_out_time = 0
-        self.last_fade_in_time = 0
-        self.last_reset_time = 0
-        self.x_cam_begin_time: int = 0
+        self.current_time: float = 0
+        self.last_split_time: float = 0
+        self.last_fade_out_time: float = 0
+        self.last_fade_in_time: float = 0
+        self.last_reset_time: float = 0
+        self.x_cam_begin_time: float = 0
         self.delta: float = 0
         self.fps: float = 6
 
         # Game Status
-        self.star_count: int = 0
+        self.star_count: int = route.initial_star
         self.fade_out_count: int = 0
         self.fade_in_count: int = 0
         self.x_cam_count: int = 0
@@ -38,13 +40,13 @@ class GameStatus(object):
         self.probability: float = 0
 
         # Route
-        self.route = None
-        self.current_split = None
+        self.route: Route = route
+        self.current_split: Split = current_split
 
         # Regions
-        self.get_region = None
-        self.get_region_rect = None
-        self.export_region_image = None
+        self.get_region = game_capture.get_region
+        # self.get_region_rect = None
+        # self.export_region_image = None
 
         # Helper functions
         self.check_prediction = None
@@ -65,32 +67,34 @@ class GameController(object):
 class AS64(object):
     def __init__(self, system_plugins: dict, user_plugins: list=[]) -> None:
         self._running: bool = False
-        self._game_status = GameStatus(None)
-        self._game_controller = GameController(SplitPlugin())
         
         self._hwnd = get_handle(config.get('capture', 'process'))
-        
         self._game_capture: GameCapture = GameCapture(self._hwnd, None, config.get('capture', 'region'), system_plugins[config.get('plugins', 'system', 'capture')])
         
-        # Instantiate and initialize plugins
+        # Instantiate system plugins
         self._split_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'split')]()
         self._fade_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'fade')]()
         self._star_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'star')]()
         self._xcam_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'xcam')]()
         self._logic_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'logic')]()
                 
+        # Store user plugins (User plugins are initialized on AS64 launch)
         self._user_plugins: list = user_plugins
         
+        # Game Status/Controller
+        _route = route.load(config.get('route', 'path'))
+        _split = _route.splits[0]
+        self._game_status = GameStatus(_route, _split, self._game_capture)
+        self._game_controller = GameController(self._split_plugin)
+        
+        # Initialize Plugins
         self._initialize_system_plugins()
-        self._export_functions()
         
     def run(self) -> None:
         self._running = True
         
         self._start_plugins()
         
-        self._split_plugin.split()
-
         while self._running:
             self._game_status.current_time = time.time()
             
@@ -121,11 +125,9 @@ class AS64(object):
         self._running = False
         
     def _set_split(self, index) -> None:
+        # TODO: max(index, 0) (?)
         self._game_status.current_split = self._game_status.route.splits[index]
-        
-    def _export_functions(self):
-        pass
-        
+               
     def _initialize_system_plugins(self):
         self._split_plugin.initialize()
         self._fade_plugin.initialize()

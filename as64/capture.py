@@ -1,3 +1,4 @@
+from cmath import e
 import os
 
 # Win32
@@ -62,6 +63,20 @@ class GameCapture(object):
     def capture(self):
         self._game_image = self._capture_plugin.capture(self._hwnd)
         self._region_images.clear()
+        
+    def get_region(self, region: Region):
+        if region in self._region_images:
+            return self._region_images[region]
+        
+        try:
+            self._region_images[region] = self._get_crop(*self._regions[region])
+            return self._region_images[region]
+        except KeyError:
+            return None
+        
+    def _get_crop(self, x, y, width, height):
+        # TODO: Add a crop function util class for plugins developers?
+        return self._game_image[y:y + height, x:x + width]
         
 
 def _get_window_handles():
