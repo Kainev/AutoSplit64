@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QApplication
 )
 
-from as64 import AS64, config
+from as64 import AS64, config, constants
 from as64.plugin import import_plugins, initialize_plugins
 
 
@@ -19,9 +19,10 @@ class AutoSplit64(QObject):
 
         self._as64: AS64 = None
         self._user_plugins: list = []
-        self._system_plugins: dict = {}
+        self._system_plugin_classes: dict = {}
 
         self.load_plugins()
+        
 
         self.temporary_command_input()
 
@@ -47,14 +48,23 @@ class AutoSplit64(QObject):
 
 
     def load_plugins(self) -> None:
-        user_plugin_dir = config.get('advanced', 'user_plugin_dir')
+        # Initialize user plugins
+        user_plugin_classes = import_plugins(constants.USER_PLUGIN_DIR)
+        self._user_plugins = initialize_plugins(user_plugin_classes)
 
-        plugin_classes = import_plugins(user_plugin_dir)
-        self._user_plugins = initialize_plugins(plugin_classes)
+        # Update config for user plugins
+        config.set('plugins', 'user', [cls.__module__.split('.')[-1] for cls in user_plugin_classes])
+        config.save()
+
+        system_plugin_classes = import_plugins(constants.SYSTEM_PLUGIN_DIR)
+        self._system_plugin_classes = {cls.__module__.split('.')[-1]: cls for cls in system_plugin_classes}
+
+        # TODO: Check if all system plugins are present, give user an warning if not (?)
+
         
 
     def start(self):
-        self._as64 = AS64()
+        self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins)
         self._as64.run()
 
 

@@ -25,7 +25,7 @@ class Plugin(object):
     def __init__(self):
         pass
 
-    def intialize(self):
+    def initialize(self):
         pass
 
     def start(self):

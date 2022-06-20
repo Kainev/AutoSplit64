@@ -1,3 +1,4 @@
+from typing import Any
 import toml
 import copy
 
@@ -11,14 +12,39 @@ _defaults = {}
 _rollbacks = {}
 
 
-def get(*args):
+def get(*args) -> Any:
+    """Get value from the currently loaded config file.
+
+    Returns:
+        Any: Value from config file
+    """
+    global _config
     value = _config
 
+
     for section in args:
+        # TODO: Catch KeyError 
         value = value[section]
 
     return value
 
+
+def set(*args) -> None:
+    global _config
+
+    path = list(args)
+    value = path.pop()
+    key = path.pop()
+
+    current_section = _config
+
+    for section in path:
+        # TODO: Catch KeyError
+        current_section = current_section[section]
+    
+    current_section[key] = value
+
+    
 
 def load():
     global _config

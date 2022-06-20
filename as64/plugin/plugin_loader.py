@@ -34,7 +34,8 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
     files = [file_name.split(".")[0] for file_name in os.listdir(directory) if file_name.endswith(".py")]
     files.sort(key=lambda element: utils.sublist_comparator(element, order))
 
-    print('Plugin files', files)
+    package_path = directory.replace("/", ".")
+    print(package_path)
 
     # Plugin Classes
     _plugins = []
@@ -45,7 +46,7 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
         if file in exclude:
             continue
 
-        _module = import_module("plugins.{}".format(file))
+        _module = import_module("{}.{}".format(package_path, file))
 
         # Find Plugin subclasses in modules
         for name, cls in inspect.getmembers(sys.modules[_module.__name__], is_plugin_subclass):

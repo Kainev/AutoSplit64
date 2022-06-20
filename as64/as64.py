@@ -5,6 +5,12 @@ from as64.constants import (
     FadeStatus
 )
 
+from as64 import config
+from as64.capture import GameCapture, get_handle
+
+import cv2
+
+from as64.plugin.plugin import Plugin
 
 class GameStatus(object):
     def __init__(self) -> None:
@@ -56,19 +62,53 @@ class GameController(object):
 
 
 class AS64(object):
-    def __init__(self) -> None:
+    def __init__(self, system_plugins: dict, user_plugins: list=[]) -> None:
         self._running: bool = False
         self._game_status = GameStatus()
         self._game_controller = GameController()
         
+        self._hwnd = get_handle(config.get('capture', 'process'))
+        
+        self._game_capture: GameCapture = GameCapture(self._hwnd, None, config.get('capture', 'region'), system_plugins[config.get('plugins', 'system', 'capture')])
+        
+        # Instantiate and initialize plugins
+        self._split_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'split')]()
+        self._fade_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'fade')]()
+        self._star_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'star')]()
+        self._xcam_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'xcam')]()
+        self._logic_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'logic')]()
+        
+        self._split_plugin.initialize()
+        self._fade_plugin.initialize()
+        self._star_plugin.initialize()
+        self._xcam_plugin.initialize()
+        self._logic_plugin.initialize()
+        
+        self._user_plugins: list = user_plugins
+        
     def run(self) -> None:
         self._running = True
+        
+        self._start_plugins()
 
         while self._running:
             self._game_status.current_time = time.time()
             
+            # Capture the game window
+            self._game_capture.capture()
             
-            # Attempt to run main loop at given FPS
+            # Execute system plugins
+            self._split_plugin.execute(None)
+            self._fade_plugin.execute(None)
+            self._xcam_plugin.execute(None)
+            self._star_plugin.execute(None)
+            self._logic_plugin.execute(None)
+            
+            # Execute user plugins
+            for plugin in self._user_plugins:
+                plugin.execute(None)
+                        
+            # Limit FPS 
             try:
                 self._game_status.delta = time.time() - self._game_status.current_time
                 time.sleep(1 / self._game_status.fps - self._game_status.delta)
@@ -77,3 +117,12 @@ class AS64(object):
 
     def stop(self) -> None:
         self._running = False
+        
+    def _start_plugins(self):
+        self._fade_plugin.start()
+        self._star_plugin.start()
+        self._xcam_plugin.start()
+        self._logic_plugin.start()
+        
+        for plugin in self._user_plugins:
+            plugin.start()
