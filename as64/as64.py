@@ -24,7 +24,7 @@ class GameStatus(object):
         self.last_reset_time: float = 0
         self.x_cam_begin_time: float = 0
         self.delta: float = 0
-        self.fps: float = 6
+        
 
         # Game Status
         self.star_count: int = route.initial_star
@@ -54,6 +54,7 @@ class GameStatus(object):
 
 class GameController(object):
     def __init__(self, split_plugin) -> None:
+        self.fps: float = 6
         self.predict_star_count: bool = True
         self.count_fades: bool = False
         self.count_x_cams: bool = False
@@ -117,7 +118,7 @@ class AS64(object):
             # Limit FPS 
             try:
                 self._game_status.delta = time.time() - self._game_status.current_time
-                time.sleep(1 / self._game_status.fps - self._game_status.delta)
+                time.sleep(1 / self._game_controller.fps - self._game_status.delta)
             except ValueError:
                 pass
 
