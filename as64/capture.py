@@ -51,7 +51,8 @@ class GameCapture(object):
         self._hwnd = hwnd
         self._version = version
         self._game_region = game_region
-
+ 
+        print("REGION", version)
         self._regions = _generate_regions(game_region, version)
 
         self._capture_plugin = capture_plugin_class()

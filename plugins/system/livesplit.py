@@ -31,7 +31,7 @@ class LiveSplit(SplitPlugin):
         self._host = None
         self._port = None
         
-    def initialize(self):
+    def initialize(self, ev):
         self._host = config.get("connection", "host")
         self._port = config.get("connection", "port")
         

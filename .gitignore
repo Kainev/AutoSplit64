@@ -37,7 +37,7 @@ misc/
 resources/game_preview.png
 .vscode/
 planning.txt
-venv_old/
+untracked/
 spikes/
 
 # PyInstaller

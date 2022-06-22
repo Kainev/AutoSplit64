@@ -5,4 +5,4 @@ def calculate_ratio(window_size, region):
             region[3] / window_size[1]]
     
     
-print(calculate_ratio([617, 454], [0, 0, 617, 454]))
+print(calculate_ratio([618, 452], [516, 7, 92, 49]))

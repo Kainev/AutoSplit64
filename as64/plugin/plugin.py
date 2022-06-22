@@ -18,7 +18,7 @@ class BasePlugin(object):
     def __init__(self):
         pass
     
-    def initialize(self):
+    def initialize(self, ev=None):
         pass
     
     def is_valid(self):
@@ -48,14 +48,14 @@ class Plugin(BasePlugin):
     def __init__(self):
         pass
 
-    def start(self):
+    def start(self, ev=None):
         pass
 
-    def execute(self):
+    def execute(self, ev=None):
         pass
 
-    def stop(self):
+    def stop(self, ev=None):
         pass
 
-    def exit(self):
+    def exit(self, ev=None):
         pass

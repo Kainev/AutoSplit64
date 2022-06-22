@@ -6,11 +6,13 @@ from PyQt5.QtCore import (
 )
 
 from PyQt5.QtWidgets import (
-    QApplication
+    QApplication,
+    QWidget
 )
 
 from as64 import AS64, config, constants
 from as64.plugin import import_plugins, initialize_plugins
+from as64.state import StateMachine
 
 
 class AutoSplit64(QObject):
@@ -61,17 +63,11 @@ class AutoSplit64(QObject):
 
         # TODO: Check if all system plugins are present, give user an warning if not (?)
 
-        
-
     def start(self):
         self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins)
         self._as64.run()
 
-
-
-
-
-
+    
 if __name__ == "__main__":
     # 
     sys._excepthook = sys.excepthook
@@ -92,7 +88,7 @@ if __name__ == "__main__":
     qt_app.setApplicationName('AutoSplit 64')
     qt_app.setOrganizationName('AutoSplit 64')
     qt_app.setOrganizationDomain('https://autosplit64.com')
-
+    
     # AutoSplit64 Application
     _main = AutoSplit64(qt_app)
 
