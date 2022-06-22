@@ -2,7 +2,8 @@ import time
 from threading import Thread
 
 from as64.constants import (
-    FadeStatus
+    FadeStatus,
+    Version
 )
 
 from as64 import config
@@ -25,7 +26,6 @@ class GameStatus(object):
         self.x_cam_begin_time: float = 0
         self.delta: float = 0
         
-
         # Game Status
         self.star_count: int = route.initial_star
         self.fade_out_count: int = 0
@@ -63,6 +63,12 @@ class GameController(object):
         self.skip = split_plugin.skip
         self.split = split_plugin.split
         self.reset = split_plugin.reset
+        
+
+class GameEvent(object):
+    def __init__(self, status: GameStatus,  controller: GameController):
+        self.status: GameStatus = status
+        self.controller: GameController = controller
 
 
 class AS64(object):
@@ -70,7 +76,7 @@ class AS64(object):
         self._running: bool = False
         
         self._hwnd = get_handle(config.get('capture', 'process'))
-        self._game_capture: GameCapture = GameCapture(self._hwnd, None, config.get('capture', 'region'), system_plugins[config.get('plugins', 'system', 'capture')])
+        self._game_capture: GameCapture = GameCapture(self._hwnd, Version.JP, config.get('capture', 'region'), system_plugins[config.get('plugins', 'system', 'capture')])
         
         # Instantiate system plugins
         self._split_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'split')]()
@@ -87,13 +93,13 @@ class AS64(object):
         _split = _route.splits[0]
         self._game_status = GameStatus(_route, _split, self._game_capture)
         self._game_controller = GameController(self._split_plugin)
+        self._game_event = GameEvent(self._game_status, self._game_controller)
         
         # Initialize Plugins
         self._initialize_system_plugins()
         
     def run(self) -> None:
         self._running = True
-        
         self._start_plugins()
         
         while self._running:
@@ -106,14 +112,14 @@ class AS64(object):
             self._set_split(self._split_plugin.index())
             
             # Execute system plugins
-            self._fade_plugin.execute(None)
-            self._xcam_plugin.execute(None)
-            self._star_plugin.execute(None)
-            self._logic_plugin.execute(None)
+            self._fade_plugin.execute(self._game_event)
+            self._xcam_plugin.execute(self._game_event)
+            self._star_plugin.execute(self._game_event)
+            self._logic_plugin.execute(self._game_event)
             
             # Execute user plugins
             for plugin in self._user_plugins:
-                plugin.execute(None)
+                plugin.execute(self._game_event)
                         
             # Limit FPS 
             try:
@@ -130,11 +136,11 @@ class AS64(object):
         self._game_status.current_split = self._game_status.route.splits[index]
                
     def _initialize_system_plugins(self):
-        self._split_plugin.initialize()
-        self._fade_plugin.initialize()
-        self._star_plugin.initialize()
-        self._xcam_plugin.initialize()
-        self._logic_plugin.initialize()
+        self._split_plugin.initialize(self._game_event)
+        self._fade_plugin.initialize(self._game_event)
+        self._star_plugin.initialize(self._game_event)
+        self._xcam_plugin.initialize(self._game_event)
+        self._logic_plugin.initialize(self._game_event)
         
     def _start_plugins(self):
         self._fade_plugin.start()
