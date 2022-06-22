@@ -27,13 +27,14 @@ class GameStatus(object):
         self.delta: float = 0
         
         # Game Status
-        self.star_count: int = route.initial_star
+        self.star_count: int = None
         self.fade_out_count: int = 0
         self.fade_in_count: int = 0
         self.x_cam_count: int = 0
         self.in_x_cam: bool = False
         self.in_bowser_fight: bool = False
         self.fade_status = FadeStatus.NO_FADE
+        self.in_intro = True
 
         # Prediction
         self.prediction: int = -1
@@ -47,9 +48,6 @@ class GameStatus(object):
         self.get_region = game_capture.get_region
         # self.get_region_rect = None
         # self.export_region_image = None
-
-        # Helper functions
-        self.check_prediction = None
 
 
 class GameController(object):

@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 class State(object):
     def __init__(self):
         self._transitions: Dict[Any : State] = {}
+        self._parent: StateMachine = None
 
     def on_enter(self, sm, ev):
         pass
@@ -18,8 +19,10 @@ class State(object):
         self._transitions[signal] = destination
 
 
-class StateMachine(object):
+class StateMachine(State):
     def __init__(self, event):
+        super().__init__()
+        
         self._initial_state: State = None
         self._current_state: State = None
         self._states: list[State] = []
@@ -48,6 +51,7 @@ class StateMachine(object):
           
     def _add_state(self, state: State):
         self._states.append(state)
+        state._parent = self
         
         for transition in self._global_transitions:
             state._add_transition(self._global_transitions[transition], transition)
@@ -65,10 +69,16 @@ class StateMachine(object):
             self._current_state = self._initial_state
             
     def trigger(self, signal: Any):
+        # Propagate signal up if not caught
+        if signal not in self._current_state._transitions:
+                self._parent.trigger(signal)
+                return
+ 
         # Ignore internal transitions
-        print("TRIGGER", self._current_state._transitions)
         if self._current_state._transitions[signal] == self._current_state:
             return
+    
+        print("Transition - Source: {} Destination: {}".format(self._current_state.__class__.__name__, self._current_state._transitions[signal].__class__.__name__))
         
         # Transition to new state
         self._current_state.on_exit(self, self._event)
@@ -77,8 +87,17 @@ class StateMachine(object):
         
     def update(self):
         self._current_state.on_update(self, self._event)
-
-
+        
+        
+    def on_exit(self, sm, ev):
+        self._current_state.on_exit(self, self._event)
+        self._current_state = self._initial_state
+        
+    def on_update(self, sm, ev):
+        self.update()
+        
+        
+    
 
 
 """

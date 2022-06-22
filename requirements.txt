@@ -1,10 +1,11 @@
 absl-py==1.1.0
+aenum==3.1.11
 astor==0.8.1
 cached-property==1.5.2
 dataclasses==0.8
 gast==0.5.3
 grpcio==1.46.3
-h5py==3.1.0
+h5py==2.10.0
 importlib-metadata==4.8.3
 Keras==2.2.4
 Keras-Applications==1.0.8

@@ -49,12 +49,11 @@ class XCamSignal(Enum):
 def _in_x_cam(image):
     threshold = 25
 
-    colour_1 = [42, 47, 168]
-    colour_2 = [40, 52, 153]
+    colour_1 = [3, 10, 118]
+    colour_2 = [40, 52, 151]
     
     point_1 = [18, 8]
-    point_2 = [18, 18]
-    
+    point_2 = [18, 18]  
 
     point_1_result = (colour_1[0] - threshold < image[point_1[0], point_1[1], 0] < colour_1[0] + threshold and
                       colour_1[1] - threshold < image[point_1[0], point_1[1], 1] < colour_1[1] + threshold and
@@ -75,7 +74,7 @@ class AnalyzeXCamState(State):
         controller: GameController = ev.controller
         
         # Get region
-        x_cam_region = status.get_region(Region.XCAM)
+        x_cam_region = status.get_region(Region.XCAM)        
         
         # Analyze region
         in_x_cam = _in_x_cam(x_cam_region)
@@ -119,6 +118,7 @@ class XCamPostFadeoutState(State):
                 print("DEATH")
                 if status.current_time - status.last_split_time < 6:
                     controller.undo()
+                sm.trigger(XCamSignal.Analyze)
             # x-cam duration between 4 and 5 seconds indicates in save menu
             elif 4 < duration < 5:
                 self._in_faded_x_cam = True

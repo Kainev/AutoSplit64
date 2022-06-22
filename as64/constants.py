@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, Flag, auto
 
 
 class Version(Enum):
@@ -15,7 +15,7 @@ class SplitType(Enum):
     CUSTOM = "Custom"
     
 
-class FadeStatus(Enum):
+class FadeStatus(Flag):
     NO_FADE = auto()
     FADE_OUT_PARTIAL = auto()
     FADE_OUT_COMPLETE = auto()

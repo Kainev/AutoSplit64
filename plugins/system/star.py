@@ -91,7 +91,7 @@ class Star(Plugin):
         status.probability = self._model.probability
         
         #
-        next_star = status.star_count + 1
+        next_star = status.star_count + 1 if status.star_count is not None else status.route.initial_star
         
         # Last 2 predictions must meet the threshold for a star to be confirmed
         star_confirmed = (previous_prediction in self._star_links[str(next_star)] and
@@ -100,10 +100,11 @@ class Star(Plugin):
                           status.probability >= self._probability_threshold)
         
         if star_confirmed:
-            print("Star Found:", next_star)
+            # print("Star Found:", next_star)
             self._set_star_count(status, next_star)
             
     def _set_star_count(self, status: GameStatus, star_count):
+        print("Set Star:", star_count)
         status.star_count = star_count
         
         status.fade_out_count = 0

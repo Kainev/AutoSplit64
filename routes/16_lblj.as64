@@ -5,18 +5,24 @@ initial_star = 0
 version = "JP"
 logic_plugin = "_system"
 
+[SPLIT.ONE]
+star_count = 1
+fade_out = 1
+fade_in = -1
+x_cam = -1
+split_type = "STAR"
 
 [SPLIT.LBLJ]
-star_count = 0
-fade_out = 2
+star_count = 2
+fade_out = 1
 fade_in = -1
 x_cam = -1
 split_type = "STAR"
 
 
 [SPLIT.DW]
-star_count = 1
-fade_out = 2
+star_count = 3
+fade_out = 1
 fade_in = -1
 x_cam = -1
 split_type = "STAR"
