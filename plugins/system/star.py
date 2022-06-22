@@ -8,9 +8,22 @@ from as64.plugin import Plugin, Definition
 # Keras
 from keras import backend as K
 from keras.models import load_model
+from keras.preprocessing.image import img_to_array
 
 # Numpy
 import numpy as np
+
+
+def _convert_to_np(img):
+    np_images = [(img_to_array(image) / 255) for image in img]
+
+    return np.array(np_images)
+
+
+def _convert_to_cv2(img):
+    open_cv_image = np.array(img)
+    # Convert RGB to BGR
+    return open_cv_image[:, :, ::-1].copy()
 
 
 class Model(object):
@@ -51,6 +64,8 @@ class Star(Plugin):
         super().__init__()
         
         self._model = None
+        self._star_links = config.get("starlinks")
+        self._probability_threshold = config.get("thresholds", "probability")
         
     def initialize(self, ev=None):
         print(config.get("model", "path"))
@@ -60,28 +75,38 @@ class Star(Plugin):
         status: GameStatus = ev.status
         controller: GameController = ev.controller
         
-        star_region = cv2.resize(convert_to_cv2(status.get_region(Region.STAR)), (self._model.width, self._model.height))
-        cv2.imwrite("star.png", cv2.resize(status.get_region(Region.STAR), (self._model.width, self._model.height)))
+        if not controller.predict_star_count:
+            return
         
-        self._model.predict(convert_to_np([star_region]))
+        star_region = cv2.resize(_convert_to_cv2(status.get_region(Region.STAR)), (self._model.width, self._model.height))
+        # cv2.imwrite("star.png", cv2.resize(status.get_region(Region.STAR), (self._model.width, self._model.height)))
+        
+        # Store the last prediction
+        previous_prediction = status.prediction
+        previous_probability = status.probability
+        
+        # Predict the current frame
+        self._model.predict(_convert_to_np([star_region]))
         status.prediction = self._model.prediction
         status.probability = self._model.probability
         
-        print("Prediction:", status.prediction)
-        print("Probability:", status.probability)
+        #
+        next_star = status.star_count + 1
+        
+        # Last 2 predictions must meet the threshold for a star to be confirmed
+        star_confirmed = (previous_prediction in self._star_links[str(next_star)] and
+                          previous_probability >= self._probability_threshold and
+                          status.prediction in self._star_links[str(next_star)] and
+                          status.probability >= self._probability_threshold)
+        
+        if star_confirmed:
+            print("Star Found:", next_star)
+            self._set_star_count(status, next_star)
+            
+    def _set_star_count(self, status: GameStatus, star_count):
+        status.star_count = star_count
+        
+        status.fade_out_count = 0
+        status.fade_in_count = 0
+        status.x_cam_count = 0
 
-
-
-from keras.preprocessing.image import img_to_array
-
-
-def convert_to_np(img):
-    np_images = [(img_to_array(image) / 255) for image in img]
-
-    return np.array(np_images)
-
-
-def convert_to_cv2(img):
-    open_cv_image = np.array(img)
-    # Convert RGB to BGR
-    return open_cv_image[:, :, ::-1].copy()
