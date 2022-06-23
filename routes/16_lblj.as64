@@ -10,7 +10,7 @@ star_count = 1
 fade_out = 1
 fade_in = -1
 x_cam = -1
-split_type = "STAR"
+split_type = "BOWSER"
 
 [SPLIT.LBLJ]
 star_count = 2
