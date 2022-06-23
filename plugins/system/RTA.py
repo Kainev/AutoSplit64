@@ -386,15 +386,12 @@ class KeyFadeoutState(BaseFadeoutState):
         super().__init__()
         
     def should_split(self, game: GameStatus):
-        print("Fade Complete:", game.fade_status != FadeStatus.FADE_OUT_COMPLETE)
         if game.fade_status != FadeStatus.FADE_OUT_COMPLETE:
             return False
         
-        print("Delta:", game.current_time - game.x_cam_begin_time)
         if game.current_time - game.x_cam_begin_time > 4:
             return False
         
-        print("Current Split Type:", game.current_split.split_type)
         return game.current_split.split_type == SplitType.BOWSER
     
     def handle_split(self, sm, game: GameStatus, controller: GameController):
@@ -429,8 +426,3 @@ class PostKeyState(State):
         # TODO: Catch index exception?
         sm.trigger(game.route.splits[game.current_split_index + 1].split_type)
             
-        
-            
-            
-        
-        

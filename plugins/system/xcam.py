@@ -119,8 +119,8 @@ class XCamPostFadeoutState(State):
                 if status.current_time - status.last_split_time < 6:
                     controller.undo()
                 sm.trigger(XCamSignal.Analyze)
-            # x-cam duration between 4 and 5 seconds indicates in save menu
-            elif 4 < duration < 5:
+            # x-cam duration between 4 and 5.5 seconds indicates in save menu
+            elif 4 < duration < 5.5:
                 self._in_faded_x_cam = True
                 print("IN SAVE MENU")
             # x-cam duration greater than 7 seconds indicates a bowser fight
