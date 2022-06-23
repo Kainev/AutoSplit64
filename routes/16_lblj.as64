@@ -10,27 +10,25 @@ star_count = 1
 fade_out = 1
 fade_in = -1
 x_cam = -1
-split_type = "BOWSER"
+split_type = "STAR"
 
-[SPLIT.LBLJ]
+[SPLIT.TWO]
 star_count = 2
 fade_out = 1
 fade_in = -1
 x_cam = -1
 split_type = "STAR"
 
-
-[SPLIT.DW]
+[SPLIT.THREE]
 star_count = 3
 fade_out = 1
 fade_in = -1
 x_cam = -1
 split_type = "STAR"
 
-
-[SPLIT.WF]
-star_count = 4
+[SPLIT.FOUR]
+star_count = 16
 fade_out = 1
 fade_in = -1
 x_cam = -1
-split_type = "STAR"
+split_type = "BOWSER"

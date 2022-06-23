@@ -2,7 +2,7 @@
 import cv2
 from as64 import config
 from as64.as64 import GameController, GameStatus
-from as64.constants import Region
+from as64.constants import Event, Region
 from as64.plugin import Plugin, Definition
 
 # Keras
@@ -66,10 +66,11 @@ class Star(Plugin):
         self._model = None
         self._star_links = config.get("starlinks")
         self._probability_threshold = config.get("thresholds", "probability")
+        self._emitter = None
         
     def initialize(self, ev=None):
-        print(config.get("model", "path"))
         self._model = Model(config.get("model", "path"), config.get("model", "width"), config.get("model", "height"))
+        self._emitter = ev.emitter
         
     def execute(self, ev):
         status: GameStatus = ev.status
@@ -100,14 +101,15 @@ class Star(Plugin):
                           status.probability >= self._probability_threshold)
         
         if star_confirmed:
-            # print("Star Found:", next_star)
             self._set_star_count(status, next_star)
             
-    def _set_star_count(self, status: GameStatus, star_count):
+    def _set_star_count(self, status: GameStatus, star_count: int):
         print("Set Star:", star_count)
         status.star_count = star_count
         
         status.fade_out_count = 0
         status.fade_in_count = 0
         status.x_cam_count = 0
+        
+        self._emitter.emit(Event.STAR_COLLECTED, star_count)
 

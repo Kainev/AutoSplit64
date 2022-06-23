@@ -43,6 +43,9 @@ class SplitPlugin(BasePlugin):
     def reset(self):
         pass
     
+    def execute(self, ev=None):
+        pass
+    
 
 class Plugin(BasePlugin):
     def __init__(self):

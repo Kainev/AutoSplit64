@@ -5,4 +5,8 @@ def calculate_ratio(window_size, region):
             region[3] / window_size[1]]
     
     
-print(calculate_ratio([618, 452], [516, 7, 92, 49]))
+    
+print(calculate_ratio([618, 452], [140, 59, 336, 326]))
+
+# JP Star coordinates
+# print(calculate_ratio([618, 452], [516, 7, 92, 49]))

@@ -1,5 +1,6 @@
 import time
-from threading import Thread
+
+from pymitter import EventEmitter
 
 from as64.constants import (
     FadeStatus,
@@ -9,7 +10,6 @@ from as64.constants import (
 from as64 import config
 from as64.capture import GameCapture, get_handle
 
-import cv2
 
 from as64.plugin.plugin import Plugin, SplitPlugin
 from as64 import route
@@ -44,6 +44,7 @@ class GameStatus(object):
         self.route: Route = route
         self.current_split: Split = route.splits[0]
         self.current_split_index: int = 0
+        self.external_split_update: bool = False
 
         # Regions
         self.get_region = game_capture.get_region
@@ -65,9 +66,10 @@ class GameController(object):
         
 
 class GameEvent(object):
-    def __init__(self, status: GameStatus,  controller: GameController):
+    def __init__(self, status: GameStatus,  controller: GameController, emitter: EventEmitter):
         self.status: GameStatus = status
         self.controller: GameController = controller
+        self.emitter: EventEmitter = emitter
 
 
 class AS64(object):
@@ -78,7 +80,7 @@ class AS64(object):
         self._game_capture: GameCapture = GameCapture(self._hwnd, Version.JP, config.get('capture', 'region'), system_plugins[config.get('plugins', 'system', 'capture')])
         
         # Instantiate system plugins
-        self._split_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'split')]()
+        self._split_plugin: SplitPlugin = system_plugins[config.get('plugins', 'system', 'split')]()
         self._fade_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'fade')]()
         self._star_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'star')]()
         self._xcam_plugin: Plugin = system_plugins[config.get('plugins', 'system', 'xcam')]()
@@ -87,17 +89,20 @@ class AS64(object):
         # Store user plugins (User plugins are initialized on AS64 launch)
         self._user_plugins: list = user_plugins
         
+        # Event System
+        self._event_emitter = EventEmitter()
+        
         # Game Status/Controller
         self._game_status = GameStatus(route.load(config.get('route', 'path')), self._game_capture)
         self._game_controller = GameController(self._split_plugin)
-        self._game_event = GameEvent(self._game_status, self._game_controller)
+        self._game_event = GameEvent(self._game_status, self._game_controller, self._event_emitter)
         
         # Initialize Plugins
         self._initialize_system_plugins()
         
     def run(self) -> None:
         self._running = True
-        self._start_plugins()
+        self._start_plugins(self._game_event)
         
         while self._running:
             self._game_status.current_time = time.time()
@@ -105,10 +110,8 @@ class AS64(object):
             # Capture the game window
             self._game_capture.capture()
             
-            # Update current split
-            self._set_split(self._split_plugin.index())
-            
             # Execute system plugins
+            self._split_plugin.execute(self._game_event)
             self._fade_plugin.execute(self._game_event)
             self._xcam_plugin.execute(self._game_event)
             self._star_plugin.execute(self._game_event)
@@ -127,11 +130,7 @@ class AS64(object):
 
     def stop(self) -> None:
         self._running = False
-        
-    def _set_split(self, index) -> None:
-        # TODO: max(index, 0) (?)
-        self._game_status.current_split = self._game_status.route.splits[index]
-               
+                       
     def _initialize_system_plugins(self):
         self._split_plugin.initialize(self._game_event)
         self._fade_plugin.initialize(self._game_event)
@@ -139,11 +138,11 @@ class AS64(object):
         self._xcam_plugin.initialize(self._game_event)
         self._logic_plugin.initialize(self._game_event)
         
-    def _start_plugins(self):
-        self._fade_plugin.start()
-        self._star_plugin.start()
-        self._xcam_plugin.start()
-        self._logic_plugin.start()
+    def _start_plugins(self, ev):
+        self._fade_plugin.start(ev)
+        self._star_plugin.start(ev)
+        self._xcam_plugin.start(ev)
+        self._logic_plugin.start(ev)
         
         for plugin in self._user_plugins:
-            plugin.start()
+            plugin.start(ev)

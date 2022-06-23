@@ -14,6 +14,10 @@ class SplitType(Enum):
     MIPS = "Mips"
     CUSTOM = "Custom"
     
+    
+class Event(object):
+    EXTERNAL_SPLIT_UPDATE = 'EXTERNAL_SPLIT_UPDATE'
+    STAR_COLLECTED = 'STAR_COLLECTED'
 
 class FadeStatus(Flag):
     NO_FADE = auto()
@@ -32,6 +36,7 @@ class Region(Enum):
     RESET = auto()
     NO_HUD = auto()
     XCAM = auto()
+    FINAL_STAR = auto()
 
 
 USER_PLUGIN_DIR = 'plugins'

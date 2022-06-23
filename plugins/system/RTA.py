@@ -1,12 +1,10 @@
 # Plugin
-from asyncio import wait_for
-from cmath import e
-from time import time
-
 import cv2
+import numpy as np
 from as64 import config
 from as64.as64 import AS64, GameController, GameStatus
-from as64.constants import FadeStatus, Region, SplitType
+from as64.constants import FadeStatus, Region, SplitType, Event
+from as64.image import in_colour_range
 from as64.plugin import Plugin, Definition
 
 # Python
@@ -29,8 +27,10 @@ class RTA(Plugin):
         super().__init__()
         
         self._state_machine: StateMachine = None
+        self._game_status: GameStatus = None
     
     def initialize(self, ev):
+        self._game_status: GameStatus = ev.status
         state_machine = StateMachine(event=ev)
         
         # States
@@ -54,12 +54,15 @@ class RTA(Plugin):
         #
         self._state_machine = state_machine
         
-    def execute(self, ev):
-        game: GameStatus = ev.status
+        # Register event callbacks
+        ev.emitter.on(Event.EXTERNAL_SPLIT_UPDATE, self.on_external_split_update)
         
-        # if not game.in_intro:
-        #     self._state_machine.trigger(game.current_split.split_type)
-
+    
+    def on_external_split_update(self):
+        print("External Split Update!")
+        self._state_machine.trigger(self._game_status.current_split.split_type)
+        
+    def execute(self, ev):
         self._state_machine.update()
         
         
@@ -71,6 +74,7 @@ class AS64State(Enum):
     WaitForBowser = auto()
     Key = auto()
     PostKey = auto()
+    Final = auto()
     
     
 class IntroStateMachine(StateMachine):
@@ -322,16 +326,32 @@ class BowserSplitStateMachine(StateMachine):
         key_fade_out = KeyFadeoutState()
         post_key = PostKeyState()
         
+        final_bowser = FinalBowserState()
+        final_star = FinalStarState()
+        wait_for_reset = WaitForReset()
+        wait_for_reset_fadeout = BaseFadeoutState()
+        
         # Transitions 
         self.add_transition(base_fadeout, wait_for_bowser, AS64State.InGame)
         self.add_transition(wait_for_bowser, base_fadeout, AS64State.Fadeout)
         self.add_transition(wait_for_bowser, key_split, AS64State.Key)
+        self.add_transition(wait_for_bowser, final_bowser, AS64State.Final)
         
         self.add_transition(key_split, key_fade_out, AS64State.Fadeout)
         self.add_transition(key_fade_out, post_key, AS64State.InGame)
         
         self.add_transition(post_key, wait_for_bowser, AS64State.WaitForBowser)
         self.add_transition(post_key, base_fadeout, AS64State.Fadeout)
+        
+        self.add_transition(final_bowser, final_star, AS64State.Final)
+        self.add_transition(final_bowser, base_fadeout, AS64State.Fadeout)
+        
+        self.add_transition(final_star, base_fadeout, AS64State.Fadeout)
+        self.add_transition(final_star, wait_for_reset, AS64State.Final)
+        
+        self.add_transition(wait_for_reset, wait_for_reset_fadeout, AS64State.Fadeout)
+        self.add_transition(wait_for_reset_fadeout, wait_for_reset, AS64State.InGame)
+        
         
         # Set initial state
         self.set_initial_state(wait_for_bowser)
@@ -359,6 +379,8 @@ class WaitForBowserState(State):
         if game.in_bowser_fight:
             if game.current_split_index != len(game.route.splits) - 1:
                 sm.trigger(AS64State.Key)
+            else:
+                sm.trigger(AS64State.Final)
                 
                 
 class KeySplitState(State):
@@ -426,3 +448,80 @@ class PostKeyState(State):
         # TODO: Catch index exception?
         sm.trigger(game.route.splits[game.current_split_index + 1].split_type)
             
+
+class FinalBowserState(State):
+    def __init__(self):
+        super().__init__()
+        
+    def on_enter(self, sm, ev):
+        controller: GameController = ev.controller
+        
+        controller.fps = 6
+        controller.predict_star_count = False
+        controller.count_x_cams = True
+        controller.count_fades = True
+                
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+        
+        if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
+            sm.trigger(AS64State.Fadeout)
+            return
+        
+        if game.in_x_cam:
+            sm.trigger(AS64State.Final)
+            
+
+class FinalStarState(State):
+    def __init__(self):
+        super().__init__()
+
+        self._white_lower_bound = np.array(config.get('colour_bounds', 'white_lower_bound'), dtype='uint8')
+        self._white_upper_bound = np.array(config.get('colour_bounds', 'white_upper_bound'), dtype='uint8')
+        self._final_star_threshold = config.get('thresholds', 'final_star')
+        
+        self.index = 0
+        
+    def on_enter(self, sm, ev):
+        controller: GameController = ev.controller
+        
+        controller.fps = 29.97
+        controller.predict_star_count = False
+        controller.count_x_cams = True
+        controller.count_fades = True
+                
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+        controller: GameController = ev.controller
+        
+        if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
+            sm.trigger(AS64State.Fadeout)
+            return
+        
+        if not game.in_x_cam:
+            final_region = game.get_region(Region.FINAL_STAR)
+            
+            if in_colour_range(final_region, self._white_lower_bound, self._white_upper_bound, self._final_star_threshold):
+                controller.split()            
+                sm.trigger(AS64State.Final)
+            
+            
+class WaitForReset(State):
+    def __init__(self):
+        super().__init__()
+        
+    def on_enter(self, sm, ev):
+        controller: GameController = ev.controller
+        
+        controller.fps = 6
+        controller.predict_star_count = False
+        controller.count_x_cams = False
+        controller.count_fades = False
+                
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+        
+        if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
+            sm.trigger(AS64State.Fadeout)
+            
+         
