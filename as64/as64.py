@@ -16,7 +16,7 @@ from as64 import route
 from as64.route import Route, Split
 
 class GameStatus(object):
-    def __init__(self, route: Route, current_split: Split, game_capture: GameCapture) -> None:
+    def __init__(self, route: Route, game_capture: GameCapture) -> None:
         # Timing
         self.current_time: float = 0
         self.last_split_time: float = 0
@@ -42,7 +42,8 @@ class GameStatus(object):
 
         # Route
         self.route: Route = route
-        self.current_split: Split = current_split
+        self.current_split: Split = route.splits[0]
+        self.current_split_index: int = 0
 
         # Regions
         self.get_region = game_capture.get_region
@@ -87,9 +88,7 @@ class AS64(object):
         self._user_plugins: list = user_plugins
         
         # Game Status/Controller
-        _route = route.load(config.get('route', 'path'))
-        _split = _route.splits[0]
-        self._game_status = GameStatus(_route, _split, self._game_capture)
+        self._game_status = GameStatus(route.load(config.get('route', 'path')), self._game_capture)
         self._game_controller = GameController(self._split_plugin)
         self._game_event = GameEvent(self._game_status, self._game_controller)
         
