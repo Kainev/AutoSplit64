@@ -31,7 +31,7 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
         list: BasePlugin subclasses
     """
     # Find all modules in a given directory, sort by given order
-    files = [file_name.split(".")[0] for file_name in os.listdir(directory) if file_name.endswith(".py")]
+    files = [file_name.split(".")[0] for file_name in os.listdir(directory) if file_name.endswith(".py") or file_name.endswith(".pyd")]
     files.sort(key=lambda element: utils.sublist_comparator(element, order))
 
     package_path = directory.replace("/", ".")
@@ -39,7 +39,6 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
 
     # BasePlugin Classes
     _plugins = []
-
     # Import plugins
     for file in files:
         # Don't import excluded plugins
