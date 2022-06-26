@@ -164,7 +164,8 @@ class IntroState(State):
         if game.star_count == game.route.initial_star:
             game.in_intro = False
             emitter.emit(Event.GAME_START, ev)
-            sm.trigger(game.current_split.split_type)          
+            sm.trigger(game.current_split.split_type)
+        elif game.
 
     
 class InGameState(State):
@@ -290,7 +291,7 @@ class FadeoutLBLJState(BaseFadeoutState):
         if game.fade_status != FadeStatus.FADE_OUT_COMPLETE:
             return False
         
-        if game.current_time - game.x_cam_begin_time < 3:
+        if game.current_time - game.last_x_cam_time < 3:
             return False
         
         if game.current_time - game.last_fade_out_time < self._minimum_split_delay:
@@ -419,7 +420,7 @@ class KeyFadeoutState(BaseFadeoutState):
         if game.fade_status != FadeStatus.FADE_OUT_COMPLETE:
             return False
         
-        if game.current_time - game.x_cam_begin_time > 4:
+        if game.current_time - game.last_x_cam_time > 4:
             return False
         
         return game.current_split.split_type == SplitType.BOWSER

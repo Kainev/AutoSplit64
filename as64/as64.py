@@ -19,13 +19,13 @@ from as64.route import Route, Split
 class GameStatus(object):
     def __init__(self, route: Route, game_capture: GameCapture) -> None:
         # Timing
-        self.current_time: float = 0
-        self.last_split_time: float = 0
-        self.last_fade_out_time: float = 0
-        self.last_fade_in_time: float = 0
-        self.last_reset_time: float = 0
-        self.x_cam_begin_time: float = 0
-        self.delta: float = 0
+        self.current_time: float = 0        # Time the most recent analyzed frame occured
+        self.last_split_time: float = 0     # Time the last split occured
+        self.last_fade_out_time: float = 0  # Time the last fade-out began
+        self.last_fade_in_time: float = 0   # Time the last fade-in began
+        self.last_reset_time: float = 0     # Time the last reset occured
+        self.last_x_cam_time: float = 0     # Time the last x-cam began
+        self.delta: float = 0               # Amount of time the last frame took to execute
         
         # Game Status
         self.star_count: int = None

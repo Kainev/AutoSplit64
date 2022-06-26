@@ -10,6 +10,7 @@ from as64.utils import calculate_point_from_ratio
 
 from as64 import api
 
+
 from numpy import ndarray
 
 import cv2
@@ -32,7 +33,7 @@ class XCam(Plugin):
         emitter: EventEmitter = ev.emitter
         game: GameStatus = ev.status
         
-        # Add event type
+        # Add an 'XCAM_CALIBRATED' event
         api.add_event_type('XCAM_CALIBRATED')
         
         # Calculate x-cam points
@@ -104,6 +105,7 @@ class AnalyzeXCamState(State):
         self._colour_1 = config.get('xcam', 'point_1_colour')
         self._colour_2 = config.get('xcam', 'point_2_colour')
         self._threshold = config.get('xcam', 'threshold')
+        self._automatic_calibration = config.get('xcam', 'automatic_calibration')
         
     def calibrate(self, ev: GameEvent):
         """Automatically calibrates the x-cam settings given the current frame includes an x-cam.
@@ -111,6 +113,9 @@ class AnalyzeXCamState(State):
         Args:
             ev (GameEvent): The current GameEvent
         """
+        if not self._automatic_calibration:
+            return
+        
         emitter: EventEmitter = ev.emitter
         
         image = ev.status.get_region(Region.XCAM)
@@ -139,7 +144,7 @@ class AnalyzeXCamState(State):
         if in_x_cam and not status.in_x_cam:
             print("X-Cam detected")
             status.x_cam_count += 1 if controller.count_x_cams else 0
-            status.x_cam_begin_time = status.current_time
+            status.last_x_cam_time = status.current_time
             emitter.emit(Event.ENTER_XCAM)
             
         if not in_x_cam and status.in_x_cam:
@@ -181,7 +186,7 @@ class XCamPostFadeoutState(State):
         in_x_cam = _in_x_cam(x_cam_region, self._point_1, self._point_2, self._colour_1, self._colour_2, self._threshold)
 
         if not in_x_cam and status.in_x_cam and not self._in_faded_x_cam:
-            duration = status.current_time - status.x_cam_begin_time
+            duration = status.current_time - status.last_x_cam_time
             print("X-Cam Finished!", duration)
 
             # x-cam duration between 3 and 4 seconds indicates death
