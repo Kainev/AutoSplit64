@@ -165,7 +165,8 @@ class IntroState(State):
             game.in_intro = False
             emitter.emit(Event.GAME_START, ev)
             sm.trigger(game.current_split.split_type)
-        elif game.
+        # TODO: If current star prediction contained within split, jump to star
+        # elif game.
 
     
 class InGameState(State):
