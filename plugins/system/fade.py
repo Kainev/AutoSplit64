@@ -5,7 +5,7 @@ from as64 import GameController, GameStatus, config
 from as64.image import in_colour_range
 from as64.plugin import Plugin, Definition
 from as64.state import State, StateMachine
-from as64.constants import FadeStatus, Region
+from as64.constants import Event, FadeStatus, Region
 
 
 class FadeDefinition(Definition):
@@ -121,6 +121,9 @@ class PartialFadeOutState(FadeStateBase):
     def __init__(self):
         super().__init__()
         
+    def on_enter(self, sm, ev):
+        ev.emitter.emit(Event.FADEOUT_BEGIN)
+        
     def on_update(self, sm, ev):
         status: GameStatus = ev.status
         
@@ -135,6 +138,9 @@ class PartialFadeInState(FadeStateBase):
     def __init__(self):
         super().__init__()
         
+    def on_enter(self, sm, ev):
+        ev.emitter.emit(Event.FADEIN_BEGIN)
+        
     def on_update(self, sm, ev):
         status: GameStatus = ev.status
         
@@ -148,6 +154,9 @@ class PartialFadeInState(FadeStateBase):
 class FadeOutCompleteState(FadeStateBase):
     def __init__(self):
         super().__init__()
+        
+    def on_enter(self, sm, ev):
+        ev.emitter.emit(Event.FADEOUT_COMPLETE)
                 
     def on_update(self, sm, ev):
         status: GameStatus = ev.status
@@ -158,10 +167,16 @@ class FadeOutCompleteState(FadeStateBase):
             status.fade_status = FadeStatus.NO_FADE
             sm.trigger(FadeSignal.WaitForFade)
             
+    def on_exit(self, sm, ev):
+        ev.emitter.emit(Event.FADEOUT_END)
+            
             
 class FadeInCompleteState(FadeStateBase):
     def __init__(self):
         super().__init__()
+        
+    def on_enter(self, sm, ev):
+        ev.emitter.emit(Event.FADEIN_COMPLETE)
                 
     def on_update(self, sm, ev):
         status: GameStatus = ev.status
@@ -171,3 +186,6 @@ class FadeInCompleteState(FadeStateBase):
         if not in_colour_range(life_region, self._white_lower_bound, self._white_upper_bound, self._white_threshold):
             status.fade_status = FadeStatus.NO_FADE
             sm.trigger(FadeSignal.WaitForFade)
+            
+    def on_exit(self, sm, ev):
+        ev.emitter.emit(Event.FADEIN_END)

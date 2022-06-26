@@ -4,12 +4,15 @@ import copy
 
 
 # File Paths
-_CONFIG_FILE_NAME = "config"
-_DEFAULTS_FILE_NAME  = "defaults"
+_CONFIG_FILE_NAME = "config.ini"
+_DEFAULTS_FILE_NAME  = "defaults.ini"
 
 _config = {}
 _defaults = {}
 _rollbacks = {}
+
+# Event
+_event_emitter = None
 
 
 def get(*args) -> Any:
@@ -33,6 +36,7 @@ def set(*args) -> None:
     global _config
 
     path = list(args)
+    print(path)
     value = path.pop()
     key = path.pop()
 
@@ -74,8 +78,8 @@ def save():
         pass  # TODO: Handle error
     except PermissionError:
         pass  # TODO: Handle error
-
-
+    
+    
 def _generate():
     global _config
 

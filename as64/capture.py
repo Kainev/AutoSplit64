@@ -66,13 +66,19 @@ class GameCapture(object):
         self._game_image = self._capture_plugin.capture(self._hwnd)
         self._region_images.clear()
         
-    def get_region(self, region: Region):
+    def region_image(self, region: Region):
         if region in self._region_images:
             return self._region_images[region]
         
         try:
             self._region_images[region] = self._get_crop(*self._regions[region])
             return self._region_images[region]
+        except KeyError:
+            return None
+        
+    def region_rect(self, region: Region):
+        try:
+            return self._regions[region]
         except KeyError:
             return None
         

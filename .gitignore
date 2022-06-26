@@ -39,6 +39,10 @@ resources/game_preview.png
 planning.txt
 untracked/
 spikes/
+*.dist/
+*.build/
+*.cmd
+*.exe
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

@@ -18,3 +18,10 @@ def resource_path(relative_path):
         path = os.path.abspath(".")
         
     return os.path.join(path, relative_path).replace('\\', '/')
+
+
+def calculate_point_from_ratio(region_size: list, point_ratio: list) -> list:
+    return [
+        int(round(region_size[0] * point_ratio[0])),
+        int(round(region_size[1] * point_ratio[1]))
+    ]

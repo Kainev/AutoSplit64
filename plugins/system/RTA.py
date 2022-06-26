@@ -1,18 +1,15 @@
-# Plugin
-import cv2
-import numpy as np
-from as64 import config
-from as64.as64 import AS64, GameController, GameStatus
-from as64.constants import FadeStatus, Region, SplitType, Event
-from as64.image import in_colour_range
 from as64.plugin import Plugin, Definition
 
-# Python
 from enum import Enum, auto
-from as64.route import Split
 
+import cv2
+import numpy as np
+
+from as64 import GameController, GameStatus, EventEmitter, config
+from as64.constants import FadeStatus, Region, SplitType, Event
 from as64.state import StateMachine, State
 from as64.utils import resource_path
+from as64.image import in_colour_range
 
 
 class RTADefinition(Definition):
@@ -140,13 +137,10 @@ class LBLJSplitStateMachine(StateMachine):
         self.add_transition(in_game, in_game, AS64State.Fadein)
         
         self.set_initial_state(in_game)
-        
 
-
-        
-   
+ 
 # ------------------------------------- STATES ------------------------------------------- #       
-        
+
 class IntroState(State):
     def __init__(self):
         super().__init__()
@@ -161,13 +155,15 @@ class IntroState(State):
         
     def on_update(self, sm, ev):
         game: GameStatus = ev.status
+        emitter: EventEmitter = ev.emitter
                 
         if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
             sm.trigger(AS64State.Fadeout)
             return
         
         if game.star_count == game.route.initial_star:
-            game.in_intro = False  
+            game.in_intro = False
+            emitter.emit(Event.GAME_START, ev)
             sm.trigger(game.current_split.split_type)          
 
     
@@ -265,8 +261,14 @@ class FadeoutState(BaseFadeoutState):
     def __init__(self):
         super().__init__()
         
+        # TODO: Add to config
+        self._minimum_split_delay = 0.6
+        
     def should_split(self, game: GameStatus):
         if game.fade_status != FadeStatus.FADE_OUT_COMPLETE:
+            return False
+        
+        if game.current_time - game.last_fade_out_time < self._minimum_split_delay:
             return False    
         
         result = ((game.current_split.fadeout == game.fade_out_count or game.current_split.fadeout == -1) and
@@ -281,12 +283,18 @@ class FadeoutLBLJState(BaseFadeoutState):
     def __init__(self):
         super().__init__()
         
+        # TODO: Add to config
+        self._minimum_split_delay = 0.53
+        
     def should_split(self, game: GameStatus):
         if game.fade_status != FadeStatus.FADE_OUT_COMPLETE:
             return False
         
         if game.current_time - game.x_cam_begin_time < 3:
             return False
+        
+        if game.current_time - game.last_fade_out_time < self._minimum_split_delay:
+            return False 
         
         return game.current_split.star_count == game.star_count or game.current_split.star_count == -1
         

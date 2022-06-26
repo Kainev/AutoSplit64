@@ -34,3 +34,10 @@ class SpeechNotes(Plugin):
         if star_count in self._notes:
             self._engine.say(self._notes[star_count])
             self._engine.runAndWait()
+
+
+# import pyttsx3
+
+# engine = pyttsx3.init()
+# engine.say("Nuitka")
+# engine.runAndWait()

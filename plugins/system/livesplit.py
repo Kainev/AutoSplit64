@@ -6,8 +6,7 @@ import socket
 import select
 
 # AS64
-from as64 import config
-from as64.as64 import GameStatus
+from as64 import GameStatus, EventEmitter, config 
 from as64.constants import Event
 
 class LiveSplitDefinition(Definition):
@@ -34,7 +33,8 @@ class LiveSplit(SplitPlugin):
         self._port = None
 
         self._game_status = None
-        self._emitter = None
+        self._emitter: EventEmitter = None
+        
         
     def initialize(self, ev):
         self._host = config.get("connection", "host")
@@ -43,25 +43,27 @@ class LiveSplit(SplitPlugin):
         self._connect()
         
         self._game_status: GameStatus = ev.status
-        self._emitter = ev.emitter
-        
-        
-    
+        self._emitter: EventEmitter = ev.emitter
+
     def split(self):
         self._send(LiveSplit.Command.SPLIT)
         self._set_split_index(self._game_status.current_split_index + 1)
+        self._emitter.emit(Event.SPLIT)
     
     def skip(self):
         self._send(LiveSplit.Command.SKIP)
         self._set_split_index(self._game_status.current_split_index + 1)
+        self._emitter.emit(Event.SKIP)
     
     def undo(self):
         self._send(LiveSplit.Command.UNDO)
         self._set_split_index(self._game_status.current_split_index - 1)
+        self._emitter.emit(Event.UNDO)
     
     def reset(self):
         self._send(LiveSplit.Command.RESET)
         self._set_split_index(0)
+        self._emitter.emit(Event.RESET)
         
     def index(self):
         try:

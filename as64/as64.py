@@ -15,6 +15,7 @@ from as64.plugin.plugin import Plugin, SplitPlugin
 from as64 import route
 from as64.route import Route, Split
 
+
 class GameStatus(object):
     def __init__(self, route: Route, game_capture: GameCapture) -> None:
         # Timing
@@ -47,8 +48,8 @@ class GameStatus(object):
         self.external_split_update: bool = False
 
         # Regions
-        self.get_region = game_capture.get_region
-        # self.get_region_rect = None
+        self.get_region = game_capture.region_image
+        self.region_rect = game_capture.region_rect
         # self.export_region_image = None
 
 

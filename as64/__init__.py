@@ -1,1 +1,1 @@
-from as64.as64 import AS64, GameStatus, GameController
+from as64.as64 import AS64, GameStatus, GameController, EventEmitter
