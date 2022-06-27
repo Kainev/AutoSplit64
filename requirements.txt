@@ -2,6 +2,7 @@ absl-py==1.1.0
 aenum==3.1.11
 astor==0.8.1
 cached-property==1.5.2
+comtypes==1.1.11
 dataclasses==0.8
 gast==0.5.3
 grpcio==1.46.3
@@ -11,12 +12,17 @@ Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.2
 Markdown==3.3.7
+Nuitka==0.9
 numpy==1.19.5
 opencv-python==4.6.0.66
+ordered-set==4.0.2
 protobuf==3.19.4
+pymitter==0.3.2
+pypiwin32==223
 PyQt5==5.15.6
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.9.1
+pyttsx3==2.71
 pywin32==304
 PyYAML==6.0
 scipy==1.5.4
@@ -28,3 +34,4 @@ toml==0.10.2
 typing_extensions==4.1.1
 Werkzeug==2.0.3
 zipp==3.6.0
+zstandard==0.18.0
