@@ -1,7 +1,9 @@
 import sys
 from threading import Thread
+from time import time
 
 from PyQt5.QtCore import (
+    Qt,
     QObject
 )
 
@@ -12,7 +14,7 @@ from PyQt5.QtWidgets import (
 
 from as64 import AS64, config, constants
 from as64.plugin import import_plugins, initialize_plugins
-from as64.state import StateMachine
+from as64ui.application import Application
 
 
 class AutoSplit64(QObject):
@@ -22,8 +24,15 @@ class AutoSplit64(QObject):
         self._as64: AS64 = None
         self._user_plugins: list = []
         self._system_plugin_classes: dict = {}
+        
+        self._app: Application = Application(self)
 
-        self.load_plugins()
+        t = time()
+        # self.load_plugins()
+        f = time()
+        
+        print("F:", f - t)
+        
         
 
         self.temporary_command_input()
@@ -68,7 +77,7 @@ class AutoSplit64(QObject):
         self._as64.run()
 
     
-if __name__ == "__main__":
+if __name__ == "__main__":    
     # 
     sys._excepthook = sys.excepthook
 
@@ -82,8 +91,12 @@ if __name__ == "__main__":
     config.load()
 
     # Qt Application
+    import os
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    
     qt_app = QApplication(sys.argv)
     qt_app.setStyle('Fusion')
+    qt_app.setAttribute(Qt.AA_EnableHighDpiScaling)
 
     qt_app.setApplicationName('AutoSplit 64')
     qt_app.setOrganizationName('AutoSplit 64')

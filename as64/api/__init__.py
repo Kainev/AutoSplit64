@@ -1,3 +1,6 @@
+#
+from as64 import config
+
 # Constants
 from as64.constants import Version, SplitType, Event, FadeStatus, Region
 

@@ -1,18 +1,18 @@
 __route__ = true
-title = "16 LBLJ"
-category = "16 Star"
+title = "70 Star (CCM18)"
+category = "70 Star"
 initial_star = 0
 version = "JP"
 logic_plugin = "_system"
 
-[SPLIT.ONE]
-star_count = 1
+[SPLIT.WF]
+star_count = 9
 fade_out = 1
 fade_in = -1
 x_cam = -1
 split_type = "STAR"
 
-[SPLIT.TWO]
+[SPLIT.DW]
 star_count = 2
 fade_out = 1
 fade_in = -1
@@ -20,7 +20,7 @@ x_cam = -1
 split_type = "STAR"
 
 [SPLIT.THREE]
-star_count = 3
+star_count = 
 fade_out = 1
 fade_in = -1
 x_cam = -1

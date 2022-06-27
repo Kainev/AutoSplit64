@@ -1,0 +1,27 @@
+title = "Dark"
+
+[app]
+primary = [39, 44, 49]
+secondary = [39, 44, 49]
+
+[base]
+window = [60, 63, 65]
+base = [23, 25, 27]
+base_disabled = [40, 42, 44]
+alternate_base = [53, 55, 57]
+highlight = [75, 110, 175]
+light = [105, 108, 122]
+dark = [12, 12, 12]
+tooltip = [255, 255, 255]
+
+[button]
+active = [53, 55, 57]
+disabled = [43, 45, 47]
+
+[text]
+window = [200, 203, 207]
+link = [88, 157, 246]
+button = [200, 203, 207]
+bright = [255, 0, 0]
+highlight = [0, 0, 0]
+tooltip = [255, 255, 255]
