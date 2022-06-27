@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QLabel,
+    QLineEdit,
     QAbstractButton,
     QSpacerItem,
     QSizePolicy,
@@ -36,6 +37,9 @@ class BaseWindow(QDialog):
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
         
+        self._bottom_layout = QHBoxLayout(self)
+        self._bottom_layout.setContentsMargins(0, 0, 0, 0)
+        
         self._left_layout = QVBoxLayout(self)
         self._left_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -45,6 +49,7 @@ class BaseWindow(QDialog):
         
         # Widgets
         self._side_menu = SideMenu(self)
+        self._route_title = QLineEdit(self)
         
         # Populate Layouts
         self._left_layout.addWidget(self._side_menu, alignment=Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
