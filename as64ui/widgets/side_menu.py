@@ -2,7 +2,9 @@ from functools import partial
 
 from PyQt5.QtCore import (
     Qt,
-    pyqtSignal
+    pyqtSignal,
+    QRectF,
+    QRect
 )
 
 from PyQt5.QtWidgets import (
@@ -13,11 +15,15 @@ from PyQt5.QtWidgets import (
     QAbstractButton,
     QSpacerItem,
     QSizePolicy,
+    QApplication
 )
 
 from PyQt5.QtGui import (
     QPainter,
+    QPainterPath,
     QColor,
+    QPalette,
+    QRegion
 )
 
 
@@ -30,11 +36,11 @@ class SideMenu(QFrame):
 
         # Properties
         self.setFixedSize(100, 480)
-        self.setStyleSheet("QFrame { background: #202225; border-top-right-radius: 20px }" )
+        self.setStyleSheet("QFrame { background: #202225; border-top-right-radius: 10px }" )
 
         # Layout
         self._layout = QVBoxLayout(self)
-        self._layout.setContentsMargins(0, 20, 0, 0)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(0)
 
         self._menu_layout = QVBoxLayout(self)
@@ -59,6 +65,10 @@ class SideMenu(QFrame):
 
     def add_option(self, pixmap, text):
         menu_button = MenuButton(self, pixmap, text)
+        
+        if not self._menu_options:
+            menu_button.is_first_item = True
+        
         menu_button.clicked.connect(partial(self.menu_click.emit, text))
 
         menu_button.setMinimumHeight(90)
@@ -66,12 +76,16 @@ class SideMenu(QFrame):
         self._menu_layout.addWidget(menu_button)
         self._menu_options[text] = menu_button
         
+        
 class MenuButton(QAbstractButton):
-    def __init__(self, parent, pixmap, text):
+    def __init__(self, parent, pixmap, text, is_first_item=False):
         super().__init__(parent=parent)
+        
+        self.is_first_item = is_first_item
 
         self._layout = QVBoxLayout(self)
         self._layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self._layout.setSpacing(10)
 
         self._icon = QLabel()
         self._icon.setPixmap(pixmap)
@@ -89,13 +103,34 @@ class MenuButton(QAbstractButton):
         self.update()
 
     def paintEvent(self, event):
+        should_paint = False
+        
         if self.isDown():
-            painter = QPainter()
-            painter.begin(self)
-            color = QColor(0, 0, 0, 25)
-            painter.fillRect(event.rect(), color)
+            should_paint = True
+            colour = QColor(0, 0, 0, 25)
         elif self.underMouse():
+            should_paint = True
+            colour = QColor(QApplication.palette().color(QPalette.Highlight))
+            colour.setAlpha(100)
+            
+            
+        if should_paint:
             painter = QPainter()
+
             painter.begin(self)
-            color = QColor(255, 255, 255, 8)
-            painter.fillRect(event.rect(), color)
+            painter.setRenderHint(QPainter.Antialiasing)
+            
+            event_rect: QRect = event.rect()
+                        
+            if not self.is_first_item:
+                painter.fillRect(event_rect, colour)
+            else:
+                # Paint straight-edged corners
+                painter.fillRect(QRectF(event_rect.x(), event_rect.y(), 10, event_rect.height()), colour)
+                painter.fillRect(QRectF(event_rect.x() + 10, event_rect.height() - 10, event_rect.width() - 10, 10), colour)
+                
+                # Paint rounded top-right corner
+                path = QPainterPath()
+                path.addRoundedRect(QRectF(event_rect), 10, 10)
+                painter.setClipRegion(QRegion(event_rect.x() + 10, event_rect.y(), event_rect.width() - 10, event_rect.height() - 10))
+                painter.fillPath(path, colour)

@@ -27,15 +27,9 @@ class AutoSplit64(QObject):
         
         self._app: Application = Application(self)
 
-        t = time()
         # self.load_plugins()
-        f = time()
-        
-        print("F:", f - t)
-        
-        
 
-        self.temporary_command_input()
+        # self.temporary_command_input()
 
         
     def temporary_command_input(self):

@@ -22,6 +22,8 @@ from as64ui.utils import apply_gradient
 class Application(QObject):
     def __init__(self, parent):
         super().__init__(parent)
+        # Load Theme/Colours
+        self.load_theme(config.get("appearance", "theme"))
         
         self._window = MainWindow()
         
@@ -29,8 +31,7 @@ class Application(QObject):
             
         }
         
-        # Load Theme/Colours
-        self.load_theme(config.get("appearance", "theme"))
+        
         
         
     def load_theme(self, theme):
@@ -66,6 +67,6 @@ class Application(QObject):
 
         QApplication.instance().setPalette(palette)
 
-        apply_gradient(self._window, Colours.app_primary, Colours.app_secondary)
+        # apply_gradient(self._window, Colours.app_primary, Colours.app_secondary)
 
         return True
