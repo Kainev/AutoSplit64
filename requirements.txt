@@ -1,0 +1,10 @@
+# Tested with python 3.11.2
+PyQt5
+requests
+opencv-python
+psutil
+pywin32
+tensorflow
+Keras-Preprocessing
+Keras-Applications
+pyinstaller

@@ -1,13 +1,14 @@
 import json
 import copy
-
+import os
+import shutil
 
 _config = {}
 _defaults = None
 _rollback = None
 
-_CONFIG_FILE_NAME = "config.ini"
-_DEFAULTS_FILE_NAME = "defaults.ini"
+_CONFIG_FILE_NAME = "config.json"
+_DEFAULTS_FILE_NAME = "defaults.json"
 
 
 def add_section(section):
@@ -113,6 +114,10 @@ def flush_rollback():
 
 def load_config():
     global _config
+
+    if os.path.exists('config.ini'):
+        shutil.move('config.ini', _CONFIG_FILE_NAME)
+
     try:
         with open(_CONFIG_FILE_NAME) as file:
             data = json.load(file)
@@ -123,6 +128,9 @@ def load_config():
 
 def load_defaults():
     global _defaults
+
+    # NOTE: this file is also named .ini but is actually a JSON file by its contents.
+
     with open(_DEFAULTS_FILE_NAME) as file:
         data = json.load(file)
         _defaults = data

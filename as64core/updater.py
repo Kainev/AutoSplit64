@@ -26,7 +26,8 @@ class Updater(object):
 
     def check_for_update(self, override_ignore=False):
         # Load data from local installs .version
-        if self._updater.get_local()["ignore_updates"] and not override_ignore:
+        local = self._updater.get_local()
+        if local is None or (local.get("ignore_updates") and not override_ignore):
             return False
 
         return self._updater.update_available()

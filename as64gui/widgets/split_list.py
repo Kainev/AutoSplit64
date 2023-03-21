@@ -14,12 +14,12 @@ class SplitListWidget(QtWidgets.QWidget):
     def paintEvent(self, event):
         painter = QtGui.QPainter()
 
-        split_height = event.rect().height() / self._display_count
+        split_height = int(event.rect().height() / self._display_count)
         split_width = event.rect().width()
         text_width = split_width - split_height
         x_pos = split_height
-        pixmap_dimension = split_height * 0.8
-        pixmap_spacing = (split_height - pixmap_dimension) / 2
+        pixmap_dimension = int(split_height * 0.8)
+        pixmap_spacing = int((split_height - pixmap_dimension) / 2)
 
         painter.begin(self)
 

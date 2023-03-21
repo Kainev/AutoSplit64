@@ -16,7 +16,7 @@ class Model(object):
         K.clear_session()
         try:
             self.model = load_model(model_path)
-            self.model._make_predict_function()
+            self.model.make_predict_function()
         except OSError:
             self.model = None
 

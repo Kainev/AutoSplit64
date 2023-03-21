@@ -66,6 +66,7 @@ def get_hwnd_from_list(process_name, process_list):
 def capture(hwnd):
     """
     https://stackoverflow.com/a/24352388
+    https://stackoverflow.com/a/40042587
     """
     left, top, right, bot = win32gui.GetWindowRect(hwnd)
     w = right - left
@@ -81,7 +82,7 @@ def capture(hwnd):
 
     save_dc.SelectObject(save_bitmap)
 
-    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 0)
+    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 2)
 
     bmp_info = save_bitmap.GetInfo()
     bmp_str = save_bitmap.GetBitmapBits(True)
