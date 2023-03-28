@@ -26,34 +26,34 @@ def get_visible_processes():
     """ Returns a list of processes with a valid hwnd """
     processes = []
     for proc in psutil.process_iter():
-        hwnd = 0
         try:
+            hwnds = []
+
             # Get process name & pid from process object.
             process_name = proc.name()
             process_id = proc.pid
 
             if process_id is not None:
-                def callback(h, additional):
-                    if win32gui.IsWindowVisible(h) and win32gui.IsWindowEnabled(h):
+                def callback(h, hwnds):
+                    if win32gui.IsWindowVisible(h):
                         _, p = win32process.GetWindowThreadProcessId(h)
                         if p == process_id:
-                            additional.append(h)
+                            hwnds.append(h)
                         return True
                     return True
 
-                additional = []
-                win32gui.EnumWindows(callback, additional)
+                win32gui.EnumWindows(callback, hwnds)
 
-                if additional:
-                    hwnd = additional[0]
-
-            if hwnd and process_name not in EXCLUSION_LIST:
-                processes.append((proc, hwnd))
+            if hwnds and process_name not in EXCLUSION_LIST:
+                for hwnd in hwnds:
+                    window_name = win32gui.GetWindowText(hwnd)
+                    window_id = '{} - {}'.format(process_name, window_name) if window_name else process_name
+                    processes.append((window_id, proc, hwnd))
 
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
 
-    return processes
+    return list(sorted(processes))
 
 
 def get_hwnd_from_list(process_name, process_list):
