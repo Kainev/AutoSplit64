@@ -81,7 +81,7 @@ def capture(hwnd):
 
     save_dc.SelectObject(save_bitmap)
 
-    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 0)
+    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 2)
 
     bmp_info = save_bitmap.GetInfo()
     bmp_str = save_bitmap.GetBitmapBits(True)

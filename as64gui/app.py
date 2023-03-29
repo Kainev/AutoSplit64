@@ -288,7 +288,7 @@ class App(QtWidgets.QMainWindow):
         on_top_action.setChecked(config.get("general", "on_top"))
         context_menu.addSeparator()
         about_action = context_menu.addAction("About")
-        update_action = context_menu.addAction("Check for Updates..")
+        # update_action = context_menu.addAction("Check for Updates..")
         context_menu.addSeparator()
         exit_action = context_menu.addAction("Exit")
 
@@ -322,8 +322,8 @@ class App(QtWidgets.QMainWindow):
             self.set_always_on_top(config.get("general", "on_top"))
         elif action == about_action:
             self.dialogs["about_dialog"].show()
-        elif action == update_action:
-            self.check_update.emit()
+        # elif action == update_action:
+        #     self.check_update.emit()
         elif action == exit_action:
             self.close()
         else:

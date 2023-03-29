@@ -28,27 +28,27 @@ class AutoSplit64(QtCore.QObject):
         self.app = App()
 
         # Initialize updater
-        self._updater = Updater()
-        self._updater.set_exit_listener(self)
+        # self._updater = Updater()
+        # self._updater.set_exit_listener(self)
 
         # Connections
         self.app.start.connect(lambda: Thread(target=self.start).start())
         self.app.stop.connect(self.stop)
         self.app.destroyed.connect(self.stop)
-        self.app.check_update.connect(lambda: Thread(target=self.check_for_update, args=(True,)).start())
-        self.app.ignore_update.connect(lambda: self._updater.set_ignore_update(True))
-        self.app.install_update.connect(self._updater.install_update)
+        # self.app.check_update.connect(lambda: Thread(target=self.check_for_update, args=(True,)).start())
+        # self.app.ignore_update.connect(lambda: self._updater.set_ignore_update(True))
+        # self.app.install_update.connect(self._updater.install_update)
         self.error.connect(self.app.display_error_message)
-        self.update_found.connect(self.app.update_found)
+        # self.update_found.connect(self.app.update_found)
 
-        # Check for updates
-        Thread(target=self.check_for_update).start()
-
-    def check_for_update(self, override_ignore=False):
-        if self._updater.check_for_update(override_ignore):
-            self.update_found.emit({"found": True, "current": self._updater.current_version_info(), "latest": self._updater.latest_version_info(), "override_ignore": override_ignore})
-        else:
-            self.update_found.emit({"found": False, "current": None, "latest": None, "override_ignore": override_ignore})
+    #     # Check for updates
+    #     Thread(target=self.check_for_update).start()
+    #
+    # def check_for_update(self, override_ignore=False):
+    #     if self._updater.check_for_update(override_ignore):
+    #         self.update_found.emit({"found": True, "current": self._updater.current_version_info(), "latest": self._updater.latest_version_info(), "override_ignore": override_ignore})
+    #     else:
+    #         self.update_found.emit({"found": False, "current": None, "latest": None, "override_ignore": override_ignore})
 
     def start(self):
         as64core.init()
