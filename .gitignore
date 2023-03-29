@@ -30,7 +30,7 @@ share/python-wheels/
 MANIFEST
 
 # Custom
-config.*
+config.ini
 .master_version
 misc/
 resources/game_preview.png

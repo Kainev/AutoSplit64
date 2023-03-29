@@ -119,7 +119,7 @@ class CaptureEditor(QtWidgets.QDialog):
     def _refresh_process_list(self):
         self.process_combo.clear()
         self._process_list = capture_window.get_visible_processes()
-        self.process_combo.addItems(window_id for window_id, _, _ in self._process_list)
+        self.process_combo.addItems([proc[0].name() for proc in self._process_list])
 
     def show(self):
         # Load game_region from preferences
@@ -134,7 +134,7 @@ class CaptureEditor(QtWidgets.QDialog):
         p_name = config.get("game", "process_name")
 
         for i in range(len(self._process_list)):
-            if self._process_list[i][0] == p_name:
+            if self._process_list[i][0].name() == p_name:
                 self.process_combo.setCurrentIndex(i)
 
         self.refresh_graphics_scene()
@@ -156,7 +156,7 @@ class CaptureEditor(QtWidgets.QDialog):
         config.set_key("game", "process_name", self.process_combo.currentText())
 
         try:
-            config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][2]))
+            config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
         except:
             pass
 
@@ -193,7 +193,7 @@ class CaptureEditor(QtWidgets.QDialog):
         selected_hwnd = 0
 
         try:
-            selected_hwnd = self._process_list[self.process_combo.currentIndex()][2]
+            selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
         except IndexError:
             pass
 
