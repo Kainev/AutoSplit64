@@ -1,5 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
+DEBUG = bool(os.environ.get('DEBUG'))
+
 block_cipher = None
 
 a = Analysis(
@@ -8,7 +12,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('routes/README.txt', 'routes'),
-        ('defaults.json', '.'),
+        ('defaults.ini', '.'),
         ('templates/default*', 'templates'),
         ('.version', '.'),
     ],
@@ -40,7 +44,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,
+    console=DEBUG,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
