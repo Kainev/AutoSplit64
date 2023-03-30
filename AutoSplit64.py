@@ -1,6 +1,8 @@
-import sys
-from threading import Thread
 import logging
+import sys
+import os
+
+from threading import Thread
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -132,7 +134,7 @@ class AutoSplit64(QtCore.QObject):
         self.app.close()
 
 
-if __name__ == "__main__":
+def main():
     # Create QT Application
     qt_app = QtWidgets.QApplication(sys.argv)
 
@@ -171,5 +173,13 @@ if __name__ == "__main__":
     # Create main application
     autosplit64 = AutoSplit64(qt_app)
 
-    # Exit
-    sys.exit(qt_app.exec_())
+    if sys.stdout is None:
+        with open(os.devnull, 'w') as out:
+            sys.stdout = sys.stderr = out
+            return qt_app.exec_()
+    else:
+        return qt_app.exec_()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
