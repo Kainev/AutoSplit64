@@ -43,6 +43,10 @@ spikes/
 *.build/
 *.cmd
 *.exe
+templates/generated_reset_one.jpg
+templates/generated_reset_two.jpg
+routes/*
+!routes/16_lblj.as64
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

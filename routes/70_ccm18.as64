@@ -13,14 +13,14 @@ x_cam = -1
 split_type = "STAR"
 
 [SPLIT.DW]
-star_count = 2
+star_count = 12
 fade_out = 1
 fade_in = -1
 x_cam = -1
-split_type = "STAR"
+split_type = "BOWSER"
 
-[SPLIT.THREE]
-star_count = 
+[SPLIT.CCM]
+star_count = 18
 fade_out = 1
 fade_in = -1
 x_cam = -1

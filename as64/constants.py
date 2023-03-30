@@ -2,7 +2,7 @@ from enum import Enum, Flag, auto
 
 
 class Version(Enum):
-    AUTO = "Auto"
+    AUTO = "Automatic"
     JP = "JP"
     US = "US"
 

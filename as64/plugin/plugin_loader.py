@@ -35,7 +35,6 @@ def import_plugins(directory: str, order: list=[], exclude: list=[]) -> list:
     files.sort(key=lambda element: utils.sublist_comparator(element, order))
 
     package_path = directory.replace("/", ".")
-    print(package_path)
 
     # BasePlugin Classes
     _plugins = []
@@ -68,7 +67,7 @@ def initialize_plugins(classes: list) -> list:
 
     for cls in classes:
         plugin = cls()
-        plugin.initialize()
+        plugin.initialize(None)
 
         instances.append(plugin)
 

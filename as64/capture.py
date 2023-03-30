@@ -11,6 +11,7 @@ import win32process
 from as64 import config
 from as64.constants import Region, Version
 
+
 def _calculate_region(game_region, region_ratio) -> list:
     return [
         int(round(game_region[0] + (game_region[2] * region_ratio[0]))),
@@ -18,6 +19,7 @@ def _calculate_region(game_region, region_ratio) -> list:
         int(round(game_region[2] * region_ratio[2])),
         int(round(game_region[3] * region_ratio[3]))
     ]
+
 
 def _generate_regions(game_region, version):
     # Calculated regions
@@ -111,4 +113,3 @@ def get_handle(name: str):
             return handle
         
     return None
-        

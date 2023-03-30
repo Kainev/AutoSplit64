@@ -3,32 +3,44 @@ title = "16 LBLJ"
 category = "16 Star"
 initial_star = 0
 version = "JP"
-logic_plugin = "_system"
+logic_plugin = "RTA"
 
-[SPLIT.ONE]
-star_count = 1
-fade_out = 1
-fade_in = -1
-x_cam = -1
+[SPLIT.LBLJ]
+split_type = "LBLJ"
+
+[SPLIT.DW]
+split_type = "BOWSER"
+
+[SPLIT.WF]
+star_count = 4
 split_type = "STAR"
 
-[SPLIT.TWO]
-star_count = 2
-fade_out = 1
-fade_in = -1
-x_cam = -1
+[SPLIT.SSL]
+star_count = 7
 split_type = "STAR"
 
-[SPLIT.THREE]
-star_count = 3
-fade_out = 1
-fade_in = -1
-x_cam = -1
+[SPLIT.LLL]
+star_count = 11
 split_type = "STAR"
 
-[SPLIT.FOUR]
+[SPLIT.HMC]
+star_count = 15
+split_type = "STAR"
+
+[SPLIT.Mips]
+split_type = "MIPS"
+
+[SPLIT.DDD]
 star_count = 16
-fade_out = 1
-fade_in = -1
-x_cam = -1
+split_type = "STAR"
+
+[SPLIT.FS]
+split_type = "BOWSER"
+
+[SPLIT.BLJs]
+star_count = 16
+fade_out = 4
+split_type = "CUSTOM"
+
+[SPLIT.BiTS]
 split_type = "BOWSER"

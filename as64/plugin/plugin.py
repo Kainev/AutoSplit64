@@ -5,7 +5,7 @@ class Definition(object):
     class Schedule(Enum):
         FRAME = auto()
         ONCE = auto()
-        TIMER =  auto()
+        TIMER = auto()
 
     SCHEDULE = Schedule.FRAME
 
@@ -19,6 +19,9 @@ class BasePlugin(object):
         pass
     
     def initialize(self, ev=None):
+        pass
+
+    def start(self, ev=None):
         pass
     
     def is_valid(self):

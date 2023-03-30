@@ -1,3 +1,4 @@
+from as64.api.split_type import SplitTypeDefinition
 from as64.plugin import Plugin, Definition
 
 from enum import Enum, auto
@@ -5,11 +6,29 @@ from enum import Enum, auto
 import cv2
 import numpy as np
 
-from as64 import GameController, GameStatus, EventEmitter, config
-from as64.constants import FadeStatus, Region, SplitType, Event
+from as64.api import (
+    GameEvent,
+    GameController,
+    GameStatus,
+    EventEmitter,
+    FadeStatus,
+    Region,
+    SplitType,
+    Event,
+    config
+)
+
+# from as64 import GameController, GameStatus, EventEmitter, config
+# from as64.constants import FadeStatus, Region, SplitType, Event
 from as64.state import StateMachine, State
 from as64.utils import resource_path
 from as64.image import in_colour_range
+
+# class BowserSplitType(SplitTypeDefinition):
+#     name = 'BOWSER'
+#     display_name = 'Bowser'
+#     editor_widget = None
+#     plugin = None
 
 
 class RTADefinition(Definition):
@@ -38,7 +57,7 @@ class RTA(Plugin):
         bowser_split = BowserSplitStateMachine(ev)
         
         # Transitions
-        # Addd intro state to main state machine (remove from normal), in execute have add if not in_intro to if check
+        # Add intro state to main state machine (remove from normal), in execute have add if not in_intro to if check
         state_machine.add_transition(None, intro, AS64State.Intro)
         state_machine.add_transition(None, lblj_split, SplitType.LBLJ)
         state_machine.add_transition(None, normal_split, SplitType.STAR)
@@ -54,13 +73,19 @@ class RTA(Plugin):
         # Register event callbacks
         ev.emitter.on(Event.EXTERNAL_SPLIT_UPDATE, self.on_external_split_update)
         
-    
+    def stop(self, ev):
+        self._state_machine = None
+        self._game_status = None
+        
+        ev.emitter.off(Event.EXTERNAL_SPLIT_UPDATE, self.on_external_split_update)
+        
     def on_external_split_update(self):
         print("External Split Update!")
         self._state_machine.trigger(self._game_status.current_split.split_type)
         
     def execute(self, ev):
         self._state_machine.update()
+        print("STATE:", self._state_machine._current_state, self._state_machine._current_state._current_state)
         
         
 class AS64State(Enum):
@@ -83,10 +108,9 @@ class IntroStateMachine(StateMachine):
     def _initialize(self):
         # States
         intro = IntroState()
-        fade_out = FadeoutState()
+        fade_out = BaseFadeoutState()
         
         # Transitions
-        
         self.add_transition(intro, fade_out, AS64State.Fadeout)
         self.add_transition(fade_out, intro, AS64State.InGame)
         self.add_transition(fade_out, intro, AS64State.Intro)
@@ -160,7 +184,9 @@ class IntroState(State):
         if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
             sm.trigger(AS64State.Fadeout)
             return
-        
+
+        # print("CURRENT STAR:", game.star_count, "INITIAL STAR:", game.route.initial_star)
+
         if game.star_count == game.route.initial_star:
             game.in_intro = False
             emitter.emit(Event.GAME_START, ev)
@@ -175,7 +201,8 @@ class InGameState(State):
         
     def on_enter(self, sm, ev):
         controller: GameController = ev.controller
-        
+        controller: GameController = ev.controller
+
         controller.fps = 6
         controller.predict_star_count = True
         controller.count_x_cams = True
@@ -256,7 +283,7 @@ class BaseFadeoutState(State):
     def handle_split(self, sm, game: GameStatus, controller: GameController):
         controller.split()
         # TODO: Catch index exception?
-        sm.trigger(game.route.splits[game.current_split_index + 1].split_type)
+        sm.trigger(game.route.splits[game.current_split_index].split_type)
         
   
 class FadeoutState(BaseFadeoutState):
@@ -273,10 +300,10 @@ class FadeoutState(BaseFadeoutState):
         if game.current_time - game.last_fade_out_time < self._minimum_split_delay:
             return False    
         
-        result = ((game.current_split.fadeout == game.fade_out_count or game.current_split.fadeout == -1) and
-                  (game.current_split.fadein == game.fade_in_count or game.current_split.fadein == -1) and
-                  (game.current_split.xcam == game.x_cam_count or game.current_split.xcam == -1) and
-                  (game.current_split.star_count == game.star_count or game.current_split.star_count == -1))
+        result = ((game.current_split.fadeout == game.fade_out_count or game.current_split.fadeout == None) and
+                  (game.current_split.fadein == game.fade_in_count or game.current_split.fadein == None) and
+                  (game.current_split.xcam == game.x_cam_count or game.current_split.xcam == None) and
+                  (game.current_split.star_count == game.star_count or game.current_split.star_count == None))
 
         return result
  
@@ -298,7 +325,7 @@ class FadeoutLBLJState(BaseFadeoutState):
         if game.current_time - game.last_fade_out_time < self._minimum_split_delay:
             return False 
         
-        return game.current_split.star_count == game.star_count or game.current_split.star_count == -1
+        return game.current_split.star_count == game.star_count or game.current_split.star_count == None
         
 
 class FadeinState(State):
@@ -319,7 +346,6 @@ class FadeinState(State):
             sm.trigger(AS64State.InGame)
         elif game.fade_status == FadeStatus.FADE_OUT_PARTIAL | FadeStatus.FADE_OUT_COMPLETE:
             sm.trigger(AS64State.Fadeout)
-
 
 
 class BowserSplitStateMachine(StateMachine):
@@ -361,8 +387,7 @@ class BowserSplitStateMachine(StateMachine):
         
         self.add_transition(wait_for_reset, wait_for_reset_fadeout, AS64State.Fadeout)
         self.add_transition(wait_for_reset_fadeout, wait_for_reset, AS64State.InGame)
-        
-        
+
         # Set initial state
         self.set_initial_state(wait_for_bowser)
 

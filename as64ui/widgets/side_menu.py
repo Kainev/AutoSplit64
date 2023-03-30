@@ -27,23 +27,25 @@ from PyQt5.QtGui import (
 )
 
 
-
 class SideMenu(QFrame):
     menu_click = pyqtSignal(str)
+    action_click = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
         # Properties
-        self.setFixedSize(100, 480)
-        self.setStyleSheet("QFrame { background: #202225; border-top-right-radius: 10px }" )
+        self.setMinimumHeight(480)
+        self.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self.setFixedWidth(100)
+        self.setStyleSheet("QFrame { background: #202225; border-top-right-radius: 10px }")
 
         # Layout
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(0)
 
-        self._menu_layout = QVBoxLayout(self)
+        self._menu_layout = QVBoxLayout()
 
         self._menu_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self._menu_layout.setContentsMargins(0, 0, 0, 0)
@@ -52,16 +54,40 @@ class SideMenu(QFrame):
         # Widgets
         self._button = QPushButton(self)
         self._button.setStyleSheet("background: #26752e; border-top-right-radius: 0px")
-        self._button.setFixedSize(100, 30)
+        self._button.setFixedSize(100, 35)
 
         # Populate layout
-        self.setLayout(self._layout)
-
         self._layout.addLayout(self._menu_layout)
+        spacer = QSpacerItem(0, 0, QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+        self._layout.addSpacerItem(spacer)
         self._layout.addWidget(self._button, alignment=Qt.AlignmentFlag.AlignBottom)
+        
+        #
+        self._button.clicked.connect(self.action_click.emit)
 
         #
         self._menu_options = {}
+        
+        #
+        self._action_states = {}
+                
+    def add_action_state(self, text: str, background_colour: QColor, hover_colour: QColor=None, pressed_colour: QColor=None):
+        if not hover_colour:
+            hover_colour = background_colour.lighter(115)
+            
+        if not pressed_colour:
+            pressed_colour = background_colour.darker(109)
+        
+        self._action_states[text] = {'background': 'rgb({}, {}, {})'.format(*background_colour.getRgb()),
+                                     'hover': 'rgb({}, {}, {})'.format(*hover_colour.getRgb()),
+                                     'pressed': 'rgb({}, {}, {})'.format(*pressed_colour.getRgb())}
+                
+    def set_action_state(self, state: str):
+        self._button.setStyleSheet("QPushButton {{ background: {}; border-top-right-radius: 0px; }} QPushButton::hover {{ background: {};}} QPushButton::pressed {{ background: {};}}".format(self._action_states[state]['background'], self._action_states[state]['hover'], self._action_states[state]['pressed']))
+        self._button.setText(state)
+        
+    def current_state(self) -> str:
+        return self._button.text()
 
     def add_option(self, pixmap, text):
         menu_button = MenuButton(self, pixmap, text)
@@ -73,7 +99,7 @@ class SideMenu(QFrame):
 
         menu_button.setMinimumHeight(90)
 
-        self._menu_layout.addWidget(menu_button)
+        self._menu_layout.insertWidget(len(self._menu_options), menu_button)
         self._menu_options[text] = menu_button
         
         
@@ -112,8 +138,7 @@ class MenuButton(QAbstractButton):
             should_paint = True
             colour = QColor(QApplication.palette().color(QPalette.Highlight))
             colour.setAlpha(100)
-            
-            
+
         if should_paint:
             painter = QPainter()
 

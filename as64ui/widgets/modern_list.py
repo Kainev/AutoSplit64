@@ -45,8 +45,6 @@ class ModernListWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         # painter.fillRect(0, 0, event.rect().width(), event.rect().height(), QApplication.palette().color(QPalette.Base))
-        
-        
 
         for i in range(self._display_count):
             try:
@@ -62,9 +60,9 @@ class ModernListWidget(QWidget):
                     
                     colour = QApplication.palette().color(QPalette.Highlight)
                     # painter.fillRect(0, y_pos, item_width, height,
-                    #                  QApplication.palette().color(QPalette.Highlight))
+                    #                  QApplication.palette().color(QPalette.H ighlight))
                 elif index % 2 == 0:
-                    colour = QApplication.palette().color(QPalette.Base).darker(113)
+                    colour = QApplication.palette().color(QPalette.Base).darker(95)
                     # painter.fillRect(0, y_pos, item_width, height,
                     #                  QApplication.palette().color(QPalette.Base).darker(113))
                 else:
@@ -89,13 +87,11 @@ class ModernListWidget(QWidget):
                 else:
                     painter.fillRect(0, y_pos, item_width, height,
                                      colour)
-                
-                
+
                 painter.drawText(x_pos, y_pos, text_width, self._item_height, Qt.AlignLeft | Qt.AlignVCenter, self.menu_items[index])
             except IndexError:
                 pass
 
-        
         painter.end()
         
     def add_item(self, text):

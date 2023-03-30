@@ -1,3 +1,4 @@
+from mimetypes import init
 from PyQt5.QtCore import (
     Qt,
     QObject,
@@ -14,26 +15,51 @@ from PyQt5.QtGui import (
 )
 
 from as64.api import config
+from as64ui.dialog.route_editor import RouteEditor
+from as64ui.dialog.splash_screen import SplashScreen
 from as64ui.main_window import MainWindow
 from as64ui.colours import Colours
 from as64ui.utils import apply_gradient
 
 
 class Application(QObject):
+    start = pyqtSignal()
+    exit = pyqtSignal()
+
     def __init__(self, parent):
         super().__init__(parent)
         # Load Theme/Colours
         self.load_theme(config.get("appearance", "theme"))
         
+        # Splash screen
+        self._splash_screen = SplashScreen()     
+         
+        # Main window and dialogs
         self._window = MainWindow()
         
         self._dialogs = {
-            
+            "Route": RouteEditor()
         }
         
+        # Connect signals
+        self._window.openDialog.connect(self.open_dialog)
+        self._window.start.connect(self.start.emit)
+        self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
         
+    def open_dialog(self, dialog):
+        self._dialogs[dialog].show()
         
+    def show_window(self) -> None:
+        self._splash_screen.hide()
+        self._window.show()
         
+    def show_splash_screen(self) -> None:
+        self._window.hide()
+        self._splash_screen.show()
+        
+    def set_started(self, started: bool) -> None:
+        self._window.set_started(started)
+                
     def load_theme(self, theme):
         """
         Apply colours defined in theme to applications palette

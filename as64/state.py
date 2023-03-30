@@ -87,8 +87,8 @@ class StateMachine(State):
         
     def update(self):
         self._current_state.on_update(self, self._event)
-        
-        
+        # print(self._current_state)
+
     def on_exit(self, sm, ev):
         self._current_state.on_exit(self, self._event)
         self._current_state = self._initial_state

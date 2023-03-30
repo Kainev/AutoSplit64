@@ -35,7 +35,7 @@ class GameStatus(object):
         self.in_x_cam: bool = False
         self.in_bowser_fight: bool = False
         self.fade_status = FadeStatus.NO_FADE
-        self.in_intro = True
+        self.in_intro: bool = True
 
         # Prediction
         self.prediction: int = -1
@@ -44,7 +44,7 @@ class GameStatus(object):
         # Route
         self.route: Route = route
         self.current_split: Split = route.splits[0]
-        self.current_split_index: int = 0
+        self.current_split_index: int = -1
         self.external_split_update: bool = False
 
         # Regions
@@ -121,7 +121,7 @@ class AS64(object):
             # Execute user plugins
             for plugin in self._user_plugins:
                 plugin.execute(self._game_event)
-                        
+
             # Limit FPS 
             try:
                 self._game_status.delta = time.time() - self._game_status.current_time
@@ -131,7 +131,16 @@ class AS64(object):
 
     def stop(self) -> None:
         self._running = False
-                       
+        
+        self._split_plugin.stop(self._game_event)
+        self._fade_plugin.stop(self._game_event)
+        self._star_plugin.stop(self._game_event)
+        self._xcam_plugin.stop(self._game_event)
+        self._logic_plugin.stop(self._game_event)
+        
+        for plugin in self._user_plugins:
+            plugin.stop(self._game_event)
+
     def _initialize_system_plugins(self):
         self._split_plugin.initialize(self._game_event)
         self._fade_plugin.initialize(self._game_event)
@@ -140,6 +149,7 @@ class AS64(object):
         self._logic_plugin.initialize(self._game_event)
         
     def _start_plugins(self, ev):
+        self._split_plugin.start(self._game_event)
         self._fade_plugin.start(ev)
         self._star_plugin.start(ev)
         self._xcam_plugin.start(ev)
@@ -147,3 +157,6 @@ class AS64(object):
         
         for plugin in self._user_plugins:
             plugin.start(ev)
+            
+    def _validity_check(self):
+        return True

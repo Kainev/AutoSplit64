@@ -23,7 +23,7 @@ class BitBlt(CapturePlugin):
     DEFINITION = BitBltDefinition
         
     def capture(self, hwnd):
-        return _bit_blt(hwnd)
+        return print_window(hwnd)
       
         
 def _bit_blt(hwnd) -> np.array:
@@ -58,6 +58,7 @@ def _bit_blt(hwnd) -> np.array:
 
     return img
 
+
 def print_window(hwnd):
     """
     Capture the window of a given handle using the windows PrintWindow method.
@@ -77,7 +78,7 @@ def print_window(hwnd):
 
     mem_dc.SelectObject(bitmap)
 
-    windll.user32.PrintWindow(hwnd, mem_dc.GetSafeHdc(), 0)
+    windll.user32.PrintWindow(hwnd, mem_dc.GetSafeHdc(), 2)
 
     bmp_info = bitmap.GetInfo()
     bmp_str = bitmap.GetBitmapBits(True)

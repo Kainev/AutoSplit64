@@ -4,8 +4,8 @@ import copy
 
 
 # File Paths
-_CONFIG_FILE_NAME = "config.ini"
-_DEFAULTS_FILE_NAME  = "defaults.ini"
+_CONFIG_FILE_NAME = "config.toml"
+_DEFAULTS_FILE_NAME = "defaults.toml"
 
 _config = {}
 _defaults = {}
@@ -24,7 +24,6 @@ def get(*args) -> Any:
     global _config
     value = _config
 
-
     for section in args:
         # TODO: Catch KeyError 
         value = value[section]
@@ -36,7 +35,6 @@ def set(*args) -> None:
     global _config
 
     path = list(args)
-    print(path)
     value = path.pop()
     key = path.pop()
 
@@ -48,7 +46,6 @@ def set(*args) -> None:
     
     current_section[key] = value
 
-    
 
 def load():
     global _config
@@ -58,7 +55,7 @@ def load():
         with open(_DEFAULTS_FILE_NAME) as file:
             _defaults = toml.load(file)
     except FileNotFoundError:
-        pass # TODO: Can't generate defaults.. Raise an error?
+        pass  # TODO: Can't generate defaults.. Raise an error?
 
     try:
         with open(_CONFIG_FILE_NAME) as file:

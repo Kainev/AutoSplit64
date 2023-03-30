@@ -64,14 +64,16 @@ class Star(Plugin):
         super().__init__()
         
         self._model = None
-        self._star_links = config.get("starlinks")
-        self._probability_threshold = config.get("thresholds", "probability")
+        self._star_links = None
+        self._probability_threshold = None
         self._emitter = None
         
     def initialize(self, ev=None):
         self._model = Model(config.get("model", "path"), config.get("model", "width"), config.get("model", "height"))
+        self._star_links = config.get("starlinks")
+        self._probability_threshold = config.get("thresholds", "probability")
         self._emitter = ev.emitter
-        
+               
     def execute(self, ev):
         status: GameStatus = ev.status
         controller: GameController = ev.controller
@@ -80,7 +82,6 @@ class Star(Plugin):
             return
         
         star_region = cv2.resize(_convert_to_cv2(status.get_region(Region.STAR)), (self._model.width, self._model.height))
-        # cv2.imwrite("star.png", cv2.resize(status.get_region(Region.STAR), (self._model.width, self._model.height)))
         
         # Store the last prediction
         previous_prediction = status.prediction

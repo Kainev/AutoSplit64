@@ -62,8 +62,7 @@ class XCam(Plugin):
         # Events
         emitter.on(Event.GAME_START, analyze_x_cam.calibrate) # Automatically calibrate x-cams when the intro ends
         emitter.on(Event.XCAM_CALIBRATED, post_fade_out.on_calibrate) # Update the post_fade_out x-cam values after a calibration has occured
-        
-        
+
     def execute(self, ev):
        self._state_machine.update()
        

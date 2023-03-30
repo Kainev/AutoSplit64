@@ -23,8 +23,7 @@ class LiveSplit(SplitPlugin):
         UNDO = "unsplit\r\n"
         RESET = "reset\r\n"
         INDEX = "getsplitindex\r\n"
-        
-        
+
     ENCODING = "utf-8"
        
     def __init__(self):
@@ -34,8 +33,7 @@ class LiveSplit(SplitPlugin):
 
         self._game_status = None
         self._emitter: EventEmitter = None
-        
-        
+
     def initialize(self, ev):
         self._host = config.get("connection", "host")
         self._port = config.get("connection", "port")
@@ -45,7 +43,11 @@ class LiveSplit(SplitPlugin):
         self._game_status: GameStatus = ev.status
         self._emitter: EventEmitter = ev.emitter
 
+    def stop(self, ev):
+        self._socket.close()
+
     def split(self):
+        print("SPLIT")
         self._send(LiveSplit.Command.SPLIT)
         self._set_split_index(self._game_status.current_split_index + 1)
         self._emitter.emit(Event.SPLIT)
@@ -61,8 +63,9 @@ class LiveSplit(SplitPlugin):
         self._emitter.emit(Event.UNDO)
     
     def reset(self):
+        print("RESET")
         self._send(LiveSplit.Command.RESET)
-        self._set_split_index(0)
+        self._set_split_index(-1)
         self._emitter.emit(Event.RESET)
         
     def index(self):

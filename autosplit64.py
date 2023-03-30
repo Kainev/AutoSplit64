@@ -1,36 +1,93 @@
+# Disable Future Warnings (TensorFlow has many)
+import warnings
+warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
+
+# Import version number
+from _version import __version__
+
+# Python
 import sys
 from threading import Thread
-from time import time
+from time import sleep, time
 
+# PyQt5
 from PyQt5.QtCore import (
     Qt,
-    QObject
+    QObject,
+    pyqtSignal
 )
 
 from PyQt5.QtWidgets import (
     QApplication,
-    QWidget
+    QWidget,
+    qApp
 )
 
+from PyQt5.QtGui import (
+    QFontDatabase,
+    QFont
+)
+
+# AS64
 from as64 import AS64, config, constants
 from as64.plugin import import_plugins, initialize_plugins
 from as64ui.application import Application
 
 
-class AutoSplit64(QObject):
-    def __init__(self, parent=None):
+class AutoSplit64(QObject):  
+    MINIMUM_SPLASH_SCREEN_TIME = 2
+    
+    def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
-
+        
+        # Core components
         self._as64: AS64 = None
         self._user_plugins: list = []
         self._system_plugin_classes: dict = {}
         
+        # UI
         self._app: Application = Application(self)
-
-        # self.load_plugins()
-
-        # self.temporary_command_input()
-
+        
+        # Signals
+        self._app.start.connect(self.toggle_start)
+        
+        # Initialize
+        self.initialize()    
+        
+    def initialize(self) -> None:
+        # Show splash screen
+        self._app.show_splash_screen()
+        
+        # Process Qt events to allow splash screen to display without being blocked by plugin loading
+        qApp.processEvents()
+        
+        # Load plugins
+        load_start_time = time()
+        self.load_plugins()
+        load_end_time = time()
+        
+        # Ensure minimum display time for splash screen
+        sleep_time = self.MINIMUM_SPLASH_SCREEN_TIME - (load_end_time - load_start_time)
+        sleep(sleep_time if sleep_time > 0 else 0)
+        
+        # Display main window
+        self._app.show_window()
+        
+        self.temporary_command_input()
+        
+    def toggle_start(self) -> None:
+        print("Toggle start")
+        if self._as64:
+            # Stop the AS64 instance
+            self._as64.stop()
+            self._as64 = None
+            
+            # Tell the UI it has stopped
+            self._app.set_started(False)
+            return
+        
+        # If no instance, running, call the start function in a new thread
+        Thread(target=self.start).start()
         
     def temporary_command_input(self):
         while True:
@@ -61,13 +118,17 @@ class AutoSplit64(QObject):
         config.set('plugins', 'user', [cls.__module__.split('.')[-1] for cls in user_plugin_classes])
         config.save()
 
+        # Import system plugins
         system_plugin_classes = import_plugins(constants.SYSTEM_PLUGIN_DIR)
+        # self._system_plugins = initialize_plugins(system_plugin_classes)
         self._system_plugin_classes = {cls.__module__.split('.')[-1]: cls for cls in system_plugin_classes}
-
+        
         # TODO: Check if all system plugins are present, give user an warning if not (?)
+
 
     def start(self):
         self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins)
+        self._app.set_started(True)
         self._as64.run()
 
     
@@ -90,7 +151,17 @@ if __name__ == "__main__":
     
     qt_app = QApplication(sys.argv)
     qt_app.setStyle('Fusion')
-    qt_app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    # qt_app.setAttribute(Qt.AA_EnableHighDpiScaling)
+    
+    # Load font
+    id = QFontDatabase.addApplicationFont('resources\\fonts\\MyriadProRegular.ttf')
+    font_string = QFontDatabase.applicationFontFamilies(id)[0]
+    font = QFont(font_string, 11)
+    font.setHintingPreference(QFont.HintingPreference.PreferNoHinting);
+    font.setLetterSpacing(QFont.PercentageSpacing, 110)
+    qt_app.setFont(font)
+    
+
 
     qt_app.setApplicationName('AutoSplit 64')
     qt_app.setOrganizationName('AutoSplit 64')
