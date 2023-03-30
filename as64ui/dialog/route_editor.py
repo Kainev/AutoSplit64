@@ -230,7 +230,7 @@ class RoutePropertiesWidget(QFrame):
         
         # Properties
         self.setMinimumHeight(150)
-        self.setStyleSheet("QFrame { background: palette(Alternate-Base); border-radius: 10px; }")
+        self.setStyleSheet("QFrame { background: palette(Alternate-Base); border-radius: 5px; }")
         
         # Layout
         self._layout = QGridLayout(self)
@@ -263,11 +263,12 @@ class RoutePropertiesWidget(QFrame):
         self._star_lb.setFixedHeight(27)
         
         self._title_le.setFixedHeight(27)
-        self._title_le.setStyleSheet("QLineEdit { background-color: palette(Window); border-radius: 10px; padding-left: 10px}")
+        self._title_le.setStyleSheet("QLineEdit { background-color: palette(Window); border-radius: 5px; padding-left: 10px}")
         
         self._star_sb.setStyleSheet(global_style_sheet)
         self._star_sb.setObjectName('NoArrowSpinBox')
         self._star_sb.setFixedSize(50, 30)
+        self._star_sb.setRange(0, 120)
         self._star_sb.setRange(0, 120)
         
         self._category_combo.setView(QListView())
@@ -383,7 +384,7 @@ class SplitWidget(QWidget):
         
         self._title_le.setMinimumWidth(175)
         self._title_le.setFixedHeight(30)
-        self._title_le.setStyleSheet("QLineEdit { background-color: palette(Window); border-radius: 10px; padding-left: 10px}")
+        self._title_le.setStyleSheet("QLineEdit { background-color: palette(Window); border-radius: 5px; padding-left: 10px}")
         self._type_lb.setObjectName("BaseColourLabel")
         
         self._type_combo.setObjectName("WindowColourCombo")
@@ -486,7 +487,37 @@ class RouteSplitsWidget(QFrame):
         super().__init__(parent)
         
         self.setMinimumHeight(400)
-        self.setStyleSheet("QFrame { background: palette(Alternate-Base); border-radius: 10px; }")
+        self.setStyleSheet("""
+                            QFrame
+                            {
+                                background: palette(Alternate-Base);
+                                border-radius: 5px;
+                            }
+                            
+                            QScrollBar::vertical
+                            {
+                                width: 12px;
+                                background: rgba(0, 0, 0, 0);
+                            }
+                            
+                            QScrollBar::handle:vertical
+                            {
+                                background: palette(Window);
+                                border-radius: 3px;
+                                margin-left: 5px;
+                                margin-left: 5px;
+                            }
+                            
+                            QScrollBar::sub-line:vertical
+                            {
+                                background: none;
+                            }
+                            
+                            QScrollBar::add-line:vertical
+                            {
+                                background: none;
+                            } 
+                            """)
         
         # Layout
         self._layout = QVBoxLayout(self)
@@ -505,7 +536,7 @@ class RouteSplitsWidget(QFrame):
                                  QListView::item
                                  {
                                     background: palette(Base);
-                                    border-radius: 10px;
+                                    border-radius: 5px;
                                  }
                                  QListView::item::selected
                                  {
@@ -513,6 +544,16 @@ class RouteSplitsWidget(QFrame):
                                     border-width: 3px;
                                     border-color: palette(Highlight);
                                     
+                                 }
+                                 
+                                 QScrollBar::vertical
+                                 {
+                                    width: 45px;
+                                 }
+                                 
+                                 QScrollBar::handle:vertical
+                                 {
+                                    min-height:50px;
                                  }
                                  """)
         self._list.setSpacing(4)
@@ -620,14 +661,15 @@ class RouteButtonBar(QFrame):
         self.setStyleSheet("""
                             QFrame
                             {
-                                border-radius: 10px;
+                                border-radius: 5px;
                             }
                             
                             QPushButton
                             {
                                 height: 30px;
+                                height: 30px;
                                 min-width: 90px;
-                                border-radius: 10px;
+                                border-radius: 5px;
                                 background-color: palette(Alternate-Base);
                             }
                             

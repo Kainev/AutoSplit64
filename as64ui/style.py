@@ -2,7 +2,7 @@ global_style_sheet = """
 
 QSpinBox {
     background-color: palette(Window);
-    border-radius: 10px;
+    border-radius: 5px;
     padding-left: 10px;
     padding-right: 0px;
     margin: 0px;
@@ -51,7 +51,7 @@ QSpinBox#NoArrowSpinBox::up-arrow {
 }
 
 QLineEdit {
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 QLabel#BaseColourLabel {
@@ -68,7 +68,7 @@ QComboBox#WindowColourCombo {
 }
 
 QComboBox {
-    border-radius: 10px;
+    border-radius: 5px;
     padding-left: 10px;
     padding-right: 32px;
 }
@@ -105,8 +105,8 @@ QListView::item::selected
 
 QComboBox::drop-down
 {
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 QComboBox::down-arrow
@@ -125,6 +125,16 @@ QCheckBox::indicator:unchecked
 QCheckBox::indicator:checked
 {
     image: url(resources/icons/checkbox_checked_42_14.png)
+}
+
+QScrollBar:vertical
+{
+    width:50px;
+}
+
+QScrollBar::handle:vertical
+{
+    min-height: 30px;
 }
 
 """
