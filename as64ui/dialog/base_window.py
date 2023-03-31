@@ -1,25 +1,17 @@
-from PyQt5.QtCore import (
+from PySide6.QtCore import (
     Qt,
-    pyqtSignal
+    Signal
 )
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog,
-    QFrame,
     QVBoxLayout,
     QHBoxLayout,
-    QWidget,
-    QLabel,
     QLineEdit,
-    QAbstractButton,
-    QSpacerItem,
     QSizePolicy,
-    QGraphicsDropShadowEffect
 )
 
-from PyQt5.QtGui import (
-    QPainter,
-    QColor,
+from PySide6.QtGui import (
     QPixmap
 )
 from as64ui.widgets.modern_list import ModernListWidget
@@ -31,7 +23,7 @@ from as64 import route, config
 
 
 class BaseWindow(QDialog):
-    start = pyqtSignal()
+    start = Signal()
     
     def __init__(self, parent=None):
         super().__init__(parent)

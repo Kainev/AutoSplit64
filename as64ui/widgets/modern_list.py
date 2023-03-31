@@ -1,18 +1,15 @@
-from PyQt5.QtCore import(
+from PySide6.QtCore import(
     Qt,
-    QEvent,
-    pyqtSignal,
+    Signal,
     QRectF
 )
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication,
     QWidget,
-    QLineEdit,
-    QVBoxLayout
 )
 
-from PyQt5.QtGui import (
+from PySide6.QtGui import (
     QPalette,
     QPainter,
     QPainterPath
@@ -20,8 +17,8 @@ from PyQt5.QtGui import (
 
 
 class ModernListWidget(QWidget):
-    index_changed = pyqtSignal(int)
-    double_clicked = pyqtSignal(int)
+    index_changed = Signal(int)
+    double_clicked = Signal(int)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

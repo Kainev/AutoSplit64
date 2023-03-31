@@ -1,8 +1,9 @@
-from PyQt5.QtGui import QColor
+from PySide6.QtGui import QColor
 
 import toml
 
 from as64ui.constants import Directory
+
 
 class Colours(object):
     app_primary = QColor(30, 37, 42)

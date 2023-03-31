@@ -1,18 +1,18 @@
 from as64ui.colours import Colours
 from as64ui.dialog.base_window import BaseWindow
 
-from PyQt5.QtCore import (
-    pyqtSignal
+from PySide6.QtCore import (
+    Signal
 )
 
-from PyQt5.QtGui import (
+from PySide6.QtGui import (
     QPixmap,
     QColor
 )
 
 
 class MainWindow(BaseWindow):
-    openDialog = pyqtSignal(str)
+    openDialog = Signal(str)
     
     class State(object):
         START = 'Start'

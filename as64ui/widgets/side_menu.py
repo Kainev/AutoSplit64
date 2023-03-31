@@ -1,13 +1,13 @@
 from functools import partial
 
-from PyQt5.QtCore import (
+from PySide6.QtCore import (
     Qt,
-    pyqtSignal,
+    Signal,
     QRectF,
     QRect
 )
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QFrame,
     QVBoxLayout,
     QPushButton,
@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
     QApplication
 )
 
-from PyQt5.QtGui import (
+from PySide6.QtGui import (
     QPainter,
     QPainterPath,
     QColor,
@@ -28,8 +28,8 @@ from PyQt5.QtGui import (
 
 
 class SideMenu(QFrame):
-    menu_click = pyqtSignal(str)
-    action_click = pyqtSignal()
+    menu_click = Signal(str)
+    action_click = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)

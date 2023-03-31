@@ -10,36 +10,26 @@ import sys
 from threading import Thread
 from time import sleep, time
 
-# PyQt5
-# from PyQt5.QtCore import (
-#     Qt,
-#     QObject,
-#     pyqtSignal
-# )
-#
-# from PyQt5.QtWidgets import (
-#     QApplication,
-#     QWidget,
-#     qApp
-# )
-#
-# from PyQt5.QtGui import (
-#     QFontDatabase,
-#     QFont
-# )
+# PySide6
+from PySide6.QtCore import (
+    QObject,
+    Signal
+)
 
-from PySide6.QtCore import QObject
+from PySide6.QtWidgets import (
+    QApplication,
+)
 
 # AS64
 from as64 import AS64, config, constants, GameStatus
 from as64.plugin import import_plugins, initialize_plugins
-# from as64ui.application import Application
+from as64ui.application import Application
 
 
 class AutoSplit64(QObject):  
     MINIMUM_SPLASH_SCREEN_TIME = 2
 
-    # splitter_update = pyqtSignal(GameStatus)
+    splitter_update = Signal(GameStatus)
     
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -48,40 +38,38 @@ class AutoSplit64(QObject):
         self._as64: AS64 = None
         self._user_plugins: list = []
         self._system_plugin_classes: dict = {}
-        
+
         # UI
-        # self._app: Application = Application(self)
+        self._app: Application = Application(self)
         
         # Signals
-        # self._app.start.connect(self.toggle_start)
-        # self.splitter_update.connect(self._app.on_splitter_update)
+        self._app.start.connect(self.toggle_start)
+        self.splitter_update.connect(self._app.on_splitter_update)
         
         # Initialize
-        # self.initialize()
+        self.initialize()
         
     def initialize(self) -> None:
         # Show splash screen
         self._app.show_splash_screen()
         
         # Process Qt events to allow splash screen to display without being blocked by plugin loading
-        qApp.processEvents()
+        # qApp.processEvents()
+        QApplication.processEvents()
         
         # Load plugins
         load_start_time = time()
         self.load_plugins()
         load_end_time = time()
-        
+
         # Ensure minimum display time for splash screen
         sleep_time = self.MINIMUM_SPLASH_SCREEN_TIME - (load_end_time - load_start_time)
         sleep(sleep_time if sleep_time > 0 else 0)
-        
+
         # Display main window
         self._app.show_window()
-        
-        self.temporary_command_input()
-        
+
     def toggle_start(self) -> None:
-        print("Toggle start")
         if self._as64:
             # Stop the AS64 instance
             self._as64.stop()
@@ -93,25 +81,6 @@ class AutoSplit64(QObject):
         
         # If no instance, running, call the start function in a new thread
         Thread(target=self.start).start()
-        
-    def temporary_command_input(self):
-        while True:
-            user_input = input()
-
-            if user_input.lower() == 'start':
-                try:
-                    self._as64.stop()
-                except:
-                    pass
-
-                Thread(target=self.start).start()
-            elif user_input.lower() == 'quit':
-                try:
-                    self._as64.stop()
-                except:
-                    pass
-
-                sys.exit(1)
 
     def load_plugins(self) -> None:
         # Initialize user plugins
@@ -136,6 +105,21 @@ class AutoSplit64(QObject):
 
     def on_update_callback(self, status):
         self.splitter_update.emit(status)
+
+
+if __name__ == "__main__":
+    # Load AS64 config file
+    config.load()
+
+    app = QApplication(sys.argv)
+    app.setApplicationName('AutoSplit64')
+    app.setOrganizationName('Kainev')
+
+    _main = AutoSplit64(app)
+
+    app.exec()
+
+
 
     
 # if __name__ == "__main__":

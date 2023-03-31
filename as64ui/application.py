@@ -1,21 +1,23 @@
 from mimetypes import init
-from PyQt5.QtCore import (
+
+from PySide6.QtCore import (
     Qt,
     QObject,
-    pyqtSignal,
-    QUrl
+    QUrl,
+    Signal
 )
 
-from PyQt5.QtWidgets import (
+
+from PySide6.QtWidgets import (
     QApplication
 )
 
-from PyQt5.QtGui import (
+from PySide6.QtGui import (
     QPalette
 )
 
 from as64.api import config
-from as64ui.dialog.route_editor import RouteEditor
+# from as64ui.dialog.route_editor import RouteEditor
 from as64ui.dialog.splash_screen import SplashScreen
 from as64ui.main_window import MainWindow
 from as64ui.colours import Colours
@@ -23,8 +25,8 @@ from as64ui.utils import apply_gradient
 
 
 class Application(QObject):
-    start = pyqtSignal()
-    exit = pyqtSignal()
+    start = Signal()
+    exit = Signal()
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -38,13 +40,13 @@ class Application(QObject):
         self._window = MainWindow()
         
         self._dialogs = {
-            "Route": RouteEditor()
+            # "Route": RouteEditor()
         }
         
         # Connect signals
         self._window.openDialog.connect(self.open_dialog)
         self._window.start.connect(self.start.emit)
-        self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
+        # self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
 
     def on_splitter_update(self, status):
         self._window.set_selected_split(status.current_split_index)

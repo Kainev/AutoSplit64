@@ -1,5 +1,6 @@
 # Plugin
 import cv2
+import time
 from as64 import config
 from as64.as64 import GameController, GameStatus
 from as64.constants import Event, Region
@@ -8,7 +9,10 @@ from as64.plugin import Plugin, Definition
 # Keras
 from keras import backend as K
 from keras.models import load_model
-from keras.preprocessing.image import img_to_array
+from keras.utils.image_utils import img_to_array
+import tensorflow as tf
+#
+# tf.compat.v1.disable_v2_behavior()
 
 # Numpy
 import numpy as np
@@ -31,7 +35,7 @@ class Model(object):
         K.clear_session()
         
         self.model = load_model(model_path)
-        self.model._make_predict_function()
+        self.model.call = tf.function(self.model.call)
         
         self.width = width
         self.height = height
@@ -44,10 +48,10 @@ class Model(object):
             return True
 
         return False
-    
+
     def predict(self, image):
-        model_output = self.model.predict(image)
-        
+        model_output = self.model(image, training=False)
+
         self.prediction = np.argmax(model_output)
         self.probability = np.max(model_output)
 

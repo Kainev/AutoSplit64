@@ -1,26 +1,14 @@
-from PyQt5.QtCore import QSize, Qt
+from PySide6.QtCore import Qt
 
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog,
     QFrame,
-    QVBoxLayout,
     QHBoxLayout,
-    QListWidget,
-    QListWidgetItem,
-    QWidget,
-    QAbstractItemView,
     QLabel,
-    QLineEdit,
-    QComboBox,
-    QSpacerItem,
-    QSizePolicy,
-    QListView,
-    QPushButton,
-    QGridLayout
+
 )
 
-from PyQt5.QtGui import (
-    QPalette,
+from PySide6.QtGui import (
     QPixmap,
     QFont
 )

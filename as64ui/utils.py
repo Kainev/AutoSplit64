@@ -1,14 +1,14 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QMessageBox,
     QErrorMessage
 )
 
-from PyQt5.QtGui import (
+from PySide6.QtGui import (
     QPalette,
     QLinearGradient,
     QBrush,
-    QIcon
 )
+
 
 def apply_gradient(widget, colour_1, colour_2):
     p = QPalette()
