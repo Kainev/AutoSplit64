@@ -1,6 +1,6 @@
 # Disable Future Warnings (TensorFlow has many)
-import warnings
-warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
+# import warnings
+# warnings.filterwarnings("ignore", message=r"Passing", category=FutureWarning)
 
 # Import version number
 from _version import __version__
@@ -11,33 +11,35 @@ from threading import Thread
 from time import sleep, time
 
 # PyQt5
-from PyQt5.QtCore import (
-    Qt,
-    QObject,
-    pyqtSignal
-)
+# from PyQt5.QtCore import (
+#     Qt,
+#     QObject,
+#     pyqtSignal
+# )
+#
+# from PyQt5.QtWidgets import (
+#     QApplication,
+#     QWidget,
+#     qApp
+# )
+#
+# from PyQt5.QtGui import (
+#     QFontDatabase,
+#     QFont
+# )
 
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    qApp
-)
-
-from PyQt5.QtGui import (
-    QFontDatabase,
-    QFont
-)
+from PySide6.QtCore import QObject
 
 # AS64
 from as64 import AS64, config, constants, GameStatus
 from as64.plugin import import_plugins, initialize_plugins
-from as64ui.application import Application
+# from as64ui.application import Application
 
 
 class AutoSplit64(QObject):  
     MINIMUM_SPLASH_SCREEN_TIME = 2
 
-    splitter_update = pyqtSignal(GameStatus)
+    # splitter_update = pyqtSignal(GameStatus)
     
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -48,14 +50,14 @@ class AutoSplit64(QObject):
         self._system_plugin_classes: dict = {}
         
         # UI
-        self._app: Application = Application(self)
+        # self._app: Application = Application(self)
         
         # Signals
-        self._app.start.connect(self.toggle_start)
-        self.splitter_update.connect(self._app.on_splitter_update)
+        # self._app.start.connect(self.toggle_start)
+        # self.splitter_update.connect(self._app.on_splitter_update)
         
         # Initialize
-        self.initialize()    
+        # self.initialize()
         
     def initialize(self) -> None:
         # Show splash screen
@@ -136,43 +138,43 @@ class AutoSplit64(QObject):
         self.splitter_update.emit(status)
 
     
-if __name__ == "__main__":    
-    # 
-    sys._excepthook = sys.excepthook
-
-    def exception_hook(exctype, value, tracebook):
-        sys._excepthook(exctype, value, tracebook)
-        sys.exit(1)
-
-    sys.excepthook = exception_hook
-
-    # Load AS64 config file
-    config.load()
-
-    # Qt Application
-    import os
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-    
-    qt_app = QApplication(sys.argv)
-    qt_app.setStyle('Fusion')
-    # qt_app.setAttribute(Qt.AA_EnableHighDpiScaling)
-    
-    # Load font
-    id = QFontDatabase.addApplicationFont('resources\\fonts\\MyriadProRegular.ttf')
-    font_string = QFontDatabase.applicationFontFamilies(id)[0]
-    font = QFont(font_string, 11)
-    font.setHintingPreference(QFont.HintingPreference.PreferNoHinting);
-    font.setLetterSpacing(QFont.PercentageSpacing, 110)
-    qt_app.setFont(font)
-    
-
-
-    qt_app.setApplicationName('AutoSplit 64')
-    qt_app.setOrganizationName('AutoSplit 64')
-    qt_app.setOrganizationDomain('https://autosplit64.com')
-    
-    # AutoSplit64 Application
-    _main = AutoSplit64(qt_app)
-
-    # Exit
-    sys.exit(qt_app.exec_())
+# if __name__ == "__main__":
+#     #
+#     sys._excepthook = sys.excepthook
+#
+#     def exception_hook(exctype, value, tracebook):
+#         sys._excepthook(exctype, value, tracebook)
+#         sys.exit(1)
+#
+#     sys.excepthook = exception_hook
+#
+#     # Load AS64 config file
+#     config.load()
+#
+#     # Qt Application
+#     import os
+#     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+#
+#     qt_app = QApplication(sys.argv)
+#     qt_app.setStyle('Fusion')
+#     # qt_app.setAttribute(Qt.AA_EnableHighDpiScaling)
+#
+#     # Load font
+#     id = QFontDatabase.addApplicationFont('resources\\fonts\\MyriadProRegular.ttf')
+#     font_string = QFontDatabase.applicationFontFamilies(id)[0]
+#     font = QFont(font_string, 11)
+#     font.setHintingPreference(QFont.HintingPreference.PreferNoHinting);
+#     font.setLetterSpacing(QFont.PercentageSpacing, 110)
+#     qt_app.setFont(font)
+#
+#
+#
+#     qt_app.setApplicationName('AutoSplit 64')
+#     qt_app.setOrganizationName('AutoSplit 64')
+#     qt_app.setOrganizationDomain('https://autosplit64.com')
+#
+#     # AutoSplit64 Application
+#     _main = AutoSplit64(qt_app)
+#
+#     # Exit
+#     sys.exit(qt_app.exec_())
