@@ -44,9 +44,14 @@ class RTA(Plugin):
         
         self._state_machine: StateMachine = None
         self._game_status: GameStatus = None
+        self._game_controller: GameController = None
+        self._event_emitter: EventEmitter = None
     
     def initialize(self, ev):
         self._game_status: GameStatus = ev.status
+        self._game_controller: GameController = ev.controller
+        self._event_emitter: EventEmitter = ev.emitter
+
         state_machine = StateMachine(event=ev)
         
         # States
@@ -55,6 +60,7 @@ class RTA(Plugin):
         lblj_split = LBLJSplitStateMachine(ev)
         mips_split = MipsSplitStateMachine(ev)
         bowser_split = BowserSplitStateMachine(ev)
+        custom_split = CustomSplitStateMachine(ev)
         
         # Transitions
         # Add intro state to main state machine (remove from normal), in execute have add if not in_intro to if check
@@ -63,6 +69,7 @@ class RTA(Plugin):
         state_machine.add_transition(None, normal_split, SplitType.STAR)
         state_machine.add_transition(None, mips_split, SplitType.MIPS)
         state_machine.add_transition(None, bowser_split, SplitType.BOWSER)
+        state_machine.add_transition(None, custom_split, SplitType.CUSTOM)
         
         # Set initial state
         state_machine.set_initial_state(intro)
@@ -81,7 +88,17 @@ class RTA(Plugin):
         
     def on_external_split_update(self):
         print("External Split Update!")
+
+        if self._game_status.in_intro:
+            self._game_status.in_intro = False
+            self._game_controller.allow_star_jump = True
+            self._event_emitter.on(Event.STAR_COLLECTED, self._disable_star_jump)
+
         self._state_machine.trigger(self._game_status.current_split.split_type)
+
+    def _disable_star_jump(self, data):
+        self._game_controller.allow_star_jump = False
+        self._event_emitter.off(Event.STAR_COLLECTED, self._disable_star_jump)
         
     def execute(self, ev):
         self._state_machine.update()
@@ -98,6 +115,7 @@ class AS64State(Enum):
     PostKey = auto()
     Final = auto()
     PortalFound = auto()
+    SplitOnXCam = auto()
     
     
 class IntroStateMachine(StateMachine):
@@ -137,6 +155,29 @@ class NormalSplitStateMachine(StateMachine):
         self.add_transition(None, fade_out, AS64State.Fadeout)
         self.add_transition(None, fade_in, AS64State.Fadein)
         
+        # Initial State
+        self.set_initial_state(in_game)
+
+
+class CustomSplitStateMachine(StateMachine):
+    def __init__(self, ev):
+        super().__init__(ev)
+
+        self._initialize()
+
+    def _initialize(self):
+        # States
+        in_game = CustomInGameState()
+        fade_out = FadeoutState()
+        fade_in = FadeinState()
+        split_on_x_cam = SplitOnXCamState()
+
+        # Transitions
+        self.add_transition(None, in_game, AS64State.InGame)
+        self.add_transition(None, fade_out, AS64State.Fadeout)
+        self.add_transition(None, fade_in, AS64State.Fadein)
+        self.add_transition(in_game, split_on_x_cam, AS64State.SplitOnXCam)
+
         # Initial State
         self.set_initial_state(in_game)
         
@@ -206,10 +247,11 @@ class IntroState(State):
         # print("CURRENT STAR:", game.star_count, "INITIAL STAR:", game.route.initial_star)
 
         if game.star_count == game.route.initial_star:
+            print("Emit Game Start")
             game.in_intro = False
             emitter.emit(Event.GAME_START, ev)
             sm.trigger(game.current_split.split_type)
-        # TODO: If current star prediction contained within split, jump to star
+
         # elif game.
 
 
@@ -247,9 +289,10 @@ class SplitOnXCamState(State):
     def __init__(self):
         super().__init__()
 
-        self._has_split = False
+        self._split_available = False
 
     def on_enter(self, sm, ev):
+        game: GameStatus = ev.status
         controller: GameController = ev.controller
 
         controller.fps = 29.97
@@ -257,14 +300,18 @@ class SplitOnXCamState(State):
         controller.count_x_cams = True
         controller.count_fades = True
 
-        self._has_split = False
+        self._split_available = not game.in_x_cam
+
+        ev.emitter.on(Event.EXIT_XCAM, self._set_split_available, 1)
+
+    def _set_split_available(self):
+        self._split_available = True
 
     def on_update(self, sm, ev):
         game: GameStatus = ev.status
         controller: GameController = ev.controller
 
-        if game.in_x_cam and not self._has_split:
-            self._has_split = True
+        if game.in_x_cam and self._split_available:
             controller.split()
             sm.trigger(game.route.splits[game.current_split_index].split_type)
 
@@ -288,6 +335,67 @@ class InGameState(State):
             sm.trigger(AS64State.Fadeout)
         elif game.fade_status == FadeStatus.FADE_IN_PARTIAL:
             sm.trigger(AS64State.Fadein)
+
+
+class CustomInGameState(State):
+    def __init__(self):
+        super().__init__()
+
+        self._game = None
+        self._controller = None
+        self._should_split_on_next_x_cam = False
+
+    def on_enter(self, sm, ev):
+        print("ENTER CUSTOM IN GAME STATE")
+
+        game: GameStatus = ev.status
+        controller: GameController = ev.controller
+        event_emitter: EventEmitter = ev.emitter
+
+        self._should_split_on_next_x_cam = (
+            (game.fade_out_count == game.current_split.fadeout or game.current_split.fadeout is None) and
+            (game.fade_in_count == game.current_split.fadein or game.current_split.fadein is None) and
+            (game.star_count == game.current_split.star_count or game.current_split.star_count is None) and
+            game.x_cam_count == game.current_split.xcam - 1
+        )
+
+        print("Out:", game.fade_out_count, "In:", game.fade_in_count, "Star count:", game.star_count, "XCAM:", game.x_cam_count)
+
+        controller.fps = 6
+        controller.predict_star_count = True
+        controller.count_x_cams = True
+        controller.count_fades = True
+
+        #
+        self._game = game
+        self._controller = controller
+
+        # Connect events
+        if game.current_split.xcam is not None:
+            event_emitter.on(Event.ENTER_XCAM, self.evaluate_should_split_on_next_x_cam)
+
+    def evaluate_should_split_on_next_x_cam(self):
+        self._should_split_on_next_x_cam = (
+                (self._game.fade_out_count == self._game.current_split.fadeout or self._game.current_split.fadeout is None) and
+                (self._game.fade_in_count == self._game.current_split.fadein or self._game.current_split.fadein is None) and
+                (self._game.star_count == self._game.current_split.star_count or self._game.current_split.star_count is None) and
+                (self._game.current_split.xcam and self._game.x_cam_count == self._game.current_split.xcam - 1)
+        )
+
+        print("EVALUATED SHOULD SPLIT", self._should_split_on_next_x_cam)
+
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+
+        if game.fade_status == FadeStatus.FADE_OUT_PARTIAL:
+            sm.trigger(AS64State.Fadeout)
+        elif game.fade_status == FadeStatus.FADE_IN_PARTIAL:
+            sm.trigger(AS64State.Fadein)
+        elif self._should_split_on_next_x_cam:
+            sm.trigger(AS64State.SplitOnXCam)
+
+    def on_exit(self, sm, ev):
+        ev.emitter.off(Event.ENTER_XCAM, self.evaluate_should_split_on_next_x_cam)
       
         
 class BaseFadeoutState(State):
@@ -476,6 +584,8 @@ class WaitForBowserState(State):
         controller.predict_star_count = True
         controller.count_x_cams = True
         controller.count_fades = True
+
+        print("ENTER WAIT FOR BOWSER, FPS:", controller.fps)
         
     def on_update(self, sm, ev):
         game: GameStatus = ev.status
@@ -554,7 +664,7 @@ class PostKeyState(State):
             return
         
         # TODO: Catch index exception?
-        sm.trigger(game.route.splits[game.current_split_index + 1].split_type)
+        sm.trigger(game.route.splits[game.current_split_index].split_type)
             
 
 class FinalBowserState(State):
@@ -631,5 +741,3 @@ class WaitForReset(State):
         
         if game.fade_status == FadeStatus.FADE_OUT_PARTIAL or game.fade_status == FadeStatus.FADE_OUT_COMPLETE:
             sm.trigger(AS64State.Fadeout)
-            
-         

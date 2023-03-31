@@ -38,11 +38,11 @@ class BaseWindow(QDialog):
 
         # Load route
         self._route = route.load(config.get('route', 'path'))
-        
+
         #
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setStyleSheet(global_style_sheet)
-                 
+
         # Layouts
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -51,10 +51,10 @@ class BaseWindow(QDialog):
         self._top_layout = QVBoxLayout()
         self._top_layout.setContentsMargins(20, 20, 20, 20)
         self._top_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         self._bottom_layout = QHBoxLayout()
         self._bottom_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self._bottom_left_layout = QVBoxLayout()
         self._bottom_left_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -62,7 +62,7 @@ class BaseWindow(QDialog):
         self._bottom_right_layout.setContentsMargins(20, 0, 20, 10)
         self._bottom_right_layout.setSpacing(10)
         self._bottom_right_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
-        
+
         # Widgets
         self._side_menu = SideMenu(self)
         self._side_menu.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -71,23 +71,24 @@ class BaseWindow(QDialog):
         self._route_title.setFixedHeight(38)
         self._route_title.setReadOnly(True)
         self._route_title.setTextMargins(5, 0, 5, 0)
-        
+
         self._splits_list = ModernListWidget(self)
-        self._splits_list.set_display_count(11)
         self._splits_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        self._splits_list.set_display_count(11)
         self.update_route_display()
-        
+        self._splits_list.set_selected_index(0)
+
         self._status_bar = QLineEdit(self)
         self._status_bar.setFixedHeight(38)
         self._status_bar.setReadOnly(True)
-        
+
         # Populate Layouts
         self._bottom_left_layout.addWidget(self._side_menu)
-        
+
         self._bottom_right_layout.addWidget(self._splits_list)
         self._bottom_right_layout.addWidget(self._status_bar)
-        
+
         self._bottom_layout.addLayout(self._bottom_left_layout)
         self._bottom_layout.addLayout(self._bottom_right_layout)
 
@@ -95,7 +96,7 @@ class BaseWindow(QDialog):
 
         self._layout.addLayout(self._top_layout)
         self._layout.addLayout(self._bottom_layout)
-        
+
         # Signals
         self._side_menu.menu_click.connect(self.on_menu_click)
         self._side_menu.action_click.connect(self.on_start_clicked)
@@ -111,6 +112,9 @@ class BaseWindow(QDialog):
 
         # Set route title
         self._route_title.setText(self._route.title)
+
+    def set_selected_split(self, index):
+        self._splits_list.set_selected_index(index)
 
     def set_started(self, started: bool) -> None:
         if started:

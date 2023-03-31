@@ -47,9 +47,11 @@ class LiveSplit(SplitPlugin):
         self._socket.close()
 
     def split(self):
-        print("SPLIT")
         self._send(LiveSplit.Command.SPLIT)
         self._set_split_index(self._game_status.current_split_index + 1)
+
+        self._reset_status_count()
+
         self._emitter.emit(Event.SPLIT)
     
     def skip(self):
@@ -60,12 +62,17 @@ class LiveSplit(SplitPlugin):
     def undo(self):
         self._send(LiveSplit.Command.UNDO)
         self._set_split_index(self._game_status.current_split_index - 1)
+
+        self._reset_status_count()
+
         self._emitter.emit(Event.UNDO)
     
     def reset(self):
-        print("RESET")
         self._send(LiveSplit.Command.RESET)
         self._set_split_index(-1)
+
+        self._reset_status_count()
+
         self._emitter.emit(Event.RESET)
         
     def index(self):
@@ -116,5 +123,15 @@ class LiveSplit(SplitPlugin):
         
     def _set_split_index(self, index):
         self._game_status.current_split_index = index
-        self._game_status.current_split = self._game_status.route.splits[self._game_status.current_split_index]
+
+        try:
+            self._game_status.current_split = self._game_status.route.splits[self._game_status.current_split_index]
+        except IndexError:
+            print("Indx")
+
         self._game_status.external_split_update = False
+
+    def _reset_status_count(self):
+        self._game_status.fade_out_count = 0
+        self._game_status.fade_in_count = 0
+        self._game_status.x_cam_count = 0

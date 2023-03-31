@@ -96,10 +96,19 @@ class Star(Plugin):
         next_star = status.star_count + 1 if status.star_count is not None else status.route.initial_star
         
         # Last 2 predictions must meet the threshold for a star to be confirmed
-        star_confirmed = (previous_prediction in self._star_links[str(next_star)] and
-                          previous_probability >= self._probability_threshold and
-                          status.prediction in self._star_links[str(next_star)] and
-                          status.probability >= self._probability_threshold)
+        if not controller.allow_star_jump:
+            star_confirmed = (previous_prediction in self._star_links[str(next_star)] and
+                              previous_probability >= self._probability_threshold and
+                              status.prediction in self._star_links[str(next_star)] and
+                              status.probability >= self._probability_threshold)
+        else:
+            print("ALLOW STAR JUMP")
+            star_confirmed = (previous_prediction <= 120 and
+                              previous_prediction == status.prediction and
+                              previous_probability >= self._probability_threshold and
+                              status.probability >= self._probability_threshold)
+
+            next_star = status.prediction
         
         if star_confirmed:
             self._set_star_count(status, next_star)

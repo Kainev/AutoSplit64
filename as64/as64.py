@@ -1,4 +1,5 @@
 import time
+from functools import partial
 
 from pymitter import EventEmitter
 
@@ -7,13 +8,13 @@ from as64.constants import (
     Version
 )
 
-from as64 import config
+from as64 import config, route
+from as64.constants import Event
 from as64.capture import GameCapture, get_handle
-
-
 from as64.plugin.plugin import Plugin, SplitPlugin
-from as64 import route
 from as64.route import Route, Split
+
+
 
 
 class GameStatus(object):
@@ -59,6 +60,7 @@ class GameController(object):
         self.predict_star_count: bool = True
         self.count_fades: bool = False
         self.count_x_cams: bool = False
+        self.allow_star_jump: bool = False
        
         self.undo = split_plugin.undo
         self.skip = split_plugin.skip
@@ -74,7 +76,11 @@ class GameEvent(object):
 
 
 class AS64(object):
-    def __init__(self, system_plugins: dict, user_plugins: list=[]) -> None:
+    def __init__(self, system_plugins: dict, user_plugins: list=[], update_callback=None) -> None:
+        #
+        self._update_callback = update_callback
+
+        #
         self._running: bool = False
         
         self._hwnd = get_handle(config.get('capture', 'process'))
@@ -100,7 +106,15 @@ class AS64(object):
         
         # Initialize Plugins
         self._initialize_system_plugins()
-        
+
+        # Register event callbacks
+        self._event_emitter.on(Event.STAR_COLLECTED, self._call_update_callback)
+        self._event_emitter.on(Event.SPLIT, self._call_update_callback)
+        self._event_emitter.on(Event.EXTERNAL_SPLIT_UPDATE, self._call_update_callback)
+
+    def _call_update_callback(self, data=None):
+        self._update_callback(self._game_status)
+
     def run(self) -> None:
         self._running = True
         self._start_plugins(self._game_event)

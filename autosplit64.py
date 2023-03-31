@@ -29,13 +29,15 @@ from PyQt5.QtGui import (
 )
 
 # AS64
-from as64 import AS64, config, constants
+from as64 import AS64, config, constants, GameStatus
 from as64.plugin import import_plugins, initialize_plugins
 from as64ui.application import Application
 
 
 class AutoSplit64(QObject):  
     MINIMUM_SPLASH_SCREEN_TIME = 2
+
+    splitter_update = pyqtSignal(GameStatus)
     
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
@@ -50,6 +52,7 @@ class AutoSplit64(QObject):
         
         # Signals
         self._app.start.connect(self.toggle_start)
+        self.splitter_update.connect(self._app.on_splitter_update)
         
         # Initialize
         self.initialize()    
@@ -108,7 +111,6 @@ class AutoSplit64(QObject):
 
                 sys.exit(1)
 
-
     def load_plugins(self) -> None:
         # Initialize user plugins
         user_plugin_classes = import_plugins(constants.USER_PLUGIN_DIR)
@@ -123,13 +125,15 @@ class AutoSplit64(QObject):
         # self._system_plugins = initialize_plugins(system_plugin_classes)
         self._system_plugin_classes = {cls.__module__.split('.')[-1]: cls for cls in system_plugin_classes}
         
-        # TODO: Check if all system plugins are present, give user an warning if not (?)
-
+        # TODO: Check if all system plugins are present, give user a warning if not (?)
 
     def start(self):
-        self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins)
+        self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins, update_callback=self.on_update_callback)
         self._app.set_started(True)
         self._as64.run()
+
+    def on_update_callback(self, status):
+        self.splitter_update.emit(status)
 
     
 if __name__ == "__main__":    

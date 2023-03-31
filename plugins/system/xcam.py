@@ -60,16 +60,17 @@ class XCam(Plugin):
         self._state_machine = state_machine
         
         # Events
-        emitter.on(Event.GAME_START, analyze_x_cam.calibrate) # Automatically calibrate x-cams when the intro ends
+        # emitter.on(Event.GAME_START, analyze_x_cam.calibrate) # Automatically calibrate x-cams when the intro ends TODO: RE ASSESS THIS
         emitter.on(Event.XCAM_CALIBRATED, post_fade_out.on_calibrate) # Update the post_fade_out x-cam values after a calibration has occured
 
     def execute(self, ev):
-       self._state_machine.update()
+        self._state_machine.update()
        
 
 class XCamSignal(Enum):
     Analyze = auto()
     PostFadeOut = auto()
+
 
 def _in_x_cam(image: ndarray, point_1: List[int], point_2: List[int], colour_1: List[int], colour_2: List[int], threshold: float) -> bool:
     """Determines if the image is an 'x-cam' by analyzing two given points
@@ -94,7 +95,8 @@ def _in_x_cam(image: ndarray, point_1: List[int], point_2: List[int], colour_1: 
                       colour_2[2] - threshold < image[point_2[1], point_2[0], 2] < colour_2[2] + threshold)
     
     return point_1_result and point_2_result
-    
+
+
 class AnalyzeXCamState(State):
     def __init__(self, p1, p2):
         super().__init__()

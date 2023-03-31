@@ -73,13 +73,13 @@ class ModernListWidget(QWidget):
                 path = QPainterPath()
                 
                 if i == 0:
-                    path.addRoundedRect(QRectF(0, y_pos, item_width, height / 2), 10, 10)
+                    path.addRoundedRect(QRectF(0, y_pos, item_width, height / 2), 5, 5)
                     painter.fillPath(path, colour)
                     
                     painter.fillRect(0, y_pos + 10, item_width, height - 10,
                                      colour)
                 elif i == self._display_count - 1:
-                    path.addRoundedRect(QRectF(0, y_pos + height / 2, item_width, height / 2), 10, 10)
+                    path.addRoundedRect(QRectF(0, y_pos + height / 2, item_width, height / 2), 5, 5)
                     painter.fillPath(path, colour)
                     
                     painter.fillRect(0, y_pos, item_width, height - 10,
@@ -97,10 +97,10 @@ class ModernListWidget(QWidget):
     def add_item(self, text):
         self.menu_items.append(text)
         self.repaint()
-        
+
     def set_display_count(self, count):
         self._display_count = count
-        
+
     def wheelEvent(self, event):
         self.scroll_vertically(event.angleDelta())
         event.accept()
@@ -120,6 +120,12 @@ class ModernListWidget(QWidget):
         self.repaint()
         
     def set_selected_index(self, index):
+        if index > len(self.menu_items) - 1:
+            index = len(self.menu_items) - 1
+
+        if index < 0:
+            index = 0
+
         max_displayed_index = self._display_index + self._display_count - 1
         if index > max_displayed_index:
             self._display_index += index - max_displayed_index
@@ -131,7 +137,7 @@ class ModernListWidget(QWidget):
         self.repaint()
 
         self.index_changed.emit(index)
-        
+
     def eventFilter(self, source, event):
         super().eventFilter(source, event)
         

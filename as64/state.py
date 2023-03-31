@@ -3,11 +3,14 @@ from typing import Any, Dict, List
 
 class State(object):
     def __init__(self):
-        self._transitions: Dict[Any : State] = {}
+        self._transitions: Dict[Any: State] = {}
         self._parent: StateMachine = None
 
     def on_enter(self, sm, ev):
-        pass
+        try:
+            self._current_state.on_enter(sm, ev)
+        except AttributeError:
+            pass
 
     def on_update(self, sm, ev):
         pass

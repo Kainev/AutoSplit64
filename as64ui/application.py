@@ -45,6 +45,9 @@ class Application(QObject):
         self._window.openDialog.connect(self.open_dialog)
         self._window.start.connect(self.start.emit)
         self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
+
+    def on_splitter_update(self, status):
+        self._window.set_selected_split(status.current_split_index)
         
     def open_dialog(self, dialog):
         self._dialogs[dialog].show()
