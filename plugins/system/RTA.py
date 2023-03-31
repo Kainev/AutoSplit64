@@ -97,6 +97,7 @@ class AS64State(Enum):
     Key = auto()
     PostKey = auto()
     Final = auto()
+    PortalFound = auto()
     
     
 class IntroStateMachine(StateMachine):
@@ -143,8 +144,25 @@ class NormalSplitStateMachine(StateMachine):
 class MipsSplitStateMachine(StateMachine):
     def __init__(self, ev):
         super().__init__(ev)
-        
-    
+
+        self._initialize()
+
+    def _initialize(self):
+        # States
+        in_game = SearchForDDDPortalState()
+        fade_out = BaseFadeoutState()
+        split_on_enter = SplitOnXCamState()
+
+        # Transitions
+        self.add_transition(in_game, fade_out, AS64State.Fadeout)
+        self.add_transition(in_game, split_on_enter, AS64State.PortalFound)
+        self.add_transition(fade_out, in_game, AS64State.InGame)
+
+        self.add_transition(split_on_enter, fade_out, AS64State.Fadeout)
+
+        self.set_initial_state(in_game)
+
+
 class LBLJSplitStateMachine(StateMachine):
     def __init__(self, ev):
         super().__init__(ev)
@@ -194,13 +212,68 @@ class IntroState(State):
         # TODO: If current star prediction contained within split, jump to star
         # elif game.
 
-    
+
+class SearchForDDDPortalState(State):
+    def __init__(self):
+        super().__init__()
+
+        self._black_lower_bound = np.array(config.get("colour_bounds", "black_lower_bound"), dtype='uint8')
+        self._black_upper_bound = np.array(config.get("colour_bounds", "black_upper_bound"), dtype='uint8')
+        self._black_threshold = config.get("thresholds", "black")
+
+        self._portal_lower_bound = np.array(config.get('colour_bounds', 'ddd_portal_lower'), dtype='uint8')
+        self._portal_upper_bound = np.array(config.get('colour_bounds', 'ddd_portal_upper'), dtype='uint8')
+
+    def on_enter(self, sm, ev):
+        controller: GameController = ev.controller
+
+        controller.fps = 10
+        controller.predict_star_count = False
+        controller.count_x_cams = True
+        controller.count_fades = True
+
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+
+        game_region = game.get_region(Region.GAME)
+
+        result = cv2.inRange(game_region, self._portal_lower_bound, self._portal_upper_bound)
+
+        if np.count_nonzero(result) / result.size > 0.04:
+            sm.trigger(AS64State.PortalFound)
+
+
+class SplitOnXCamState(State):
+    def __init__(self):
+        super().__init__()
+
+        self._has_split = False
+
+    def on_enter(self, sm, ev):
+        controller: GameController = ev.controller
+
+        controller.fps = 29.97
+        controller.predict_star_count = False
+        controller.count_x_cams = True
+        controller.count_fades = True
+
+        self._has_split = False
+
+    def on_update(self, sm, ev):
+        game: GameStatus = ev.status
+        controller: GameController = ev.controller
+
+        if game.in_x_cam and not self._has_split:
+            self._has_split = True
+            controller.split()
+            sm.trigger(game.route.splits[game.current_split_index].split_type)
+
+
 class InGameState(State):
     def __init__(self):
         super().__init__()
         
     def on_enter(self, sm, ev):
-        controller: GameController = ev.controller
         controller: GameController = ev.controller
 
         controller.fps = 6
