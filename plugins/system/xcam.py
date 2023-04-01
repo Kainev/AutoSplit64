@@ -17,8 +17,9 @@ import cv2
 
 
 class XCamDefinition(Definition):
-    NAME = "XCam Analyzer"
+    NAME = "X-Cam Analyzer"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class XCam(Plugin):

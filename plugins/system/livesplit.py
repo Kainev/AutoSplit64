@@ -12,6 +12,7 @@ from as64.constants import Event
 class LiveSplitDefinition(Definition):
     NAME = "LiveSplit"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class LiveSplit(SplitPlugin):

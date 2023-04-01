@@ -11,6 +11,7 @@ from as64.constants import Event, FadeStatus, Region
 class FadeDefinition(Definition):
     NAME = "Fade Analyzer"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class Fade(Plugin):

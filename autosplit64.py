@@ -13,11 +13,16 @@ from time import sleep, time
 # PySide6
 from PySide6.QtCore import (
     QObject,
-    Signal
+    Signal,
 )
 
 from PySide6.QtWidgets import (
     QApplication,
+)
+
+from PySide6.QtGui import (
+    QFontDatabase,
+    QFont,
 )
 
 # AS64
@@ -40,7 +45,7 @@ class AutoSplit64(QObject):
         self._system_plugin_classes: dict = {}
 
         # UI
-        self._app: Application = Application(self)
+        self._app: Application = Application(self._user_plugins, self._system_plugin_classes, self)
         
         # Signals
         self._app.start.connect(self.toggle_start)
@@ -60,6 +65,7 @@ class AutoSplit64(QObject):
         # Load plugins
         load_start_time = time()
         self.load_plugins()
+        self._app.on_plugins_loaded(self._user_plugins, self._system_plugin_classes)
         load_end_time = time()
 
         # Ensure minimum display time for splash screen
@@ -108,12 +114,24 @@ class AutoSplit64(QObject):
 
 
 if __name__ == "__main__":
+    import os
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+
     # Load AS64 config file
     config.load()
 
     app = QApplication(sys.argv)
+    app.setStyle('Fusion')
     app.setApplicationName('AutoSplit64')
     app.setOrganizationName('Kainev')
+
+    # Load font
+    font_id = QFontDatabase.addApplicationFont('resources\\fonts\\MyriadProRegular.ttf')
+    font_string = QFontDatabase.applicationFontFamilies(font_id)[0]
+    font = QFont(font_string, 11)
+    font.setHintingPreference(QFont.HintingPreference.PreferNoHinting);
+    font.setLetterSpacing(QFont.PercentageSpacing, 110)
+    app.setFont(font)
 
     _main = AutoSplit64(app)
 

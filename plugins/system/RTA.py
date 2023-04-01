@@ -34,6 +34,7 @@ from as64.image import in_colour_range
 class RTADefinition(Definition):
     NAME = "RTA"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class RTA(Plugin):

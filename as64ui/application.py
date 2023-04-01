@@ -17,8 +17,7 @@ from PySide6.QtGui import (
 )
 
 from as64.api import config
-# from as64ui.dialog.route_editor import RouteEditor
-from as64ui.dialog.splash_screen import SplashScreen
+from as64ui.dialog import RouteEditor, PluginManager, SplashScreen
 from as64ui.main_window import MainWindow
 from as64ui.colours import Colours
 from as64ui.utils import apply_gradient
@@ -28,8 +27,13 @@ class Application(QObject):
     start = Signal()
     exit = Signal()
 
-    def __init__(self, parent):
+    def __init__(self, user_plugins, system_plugins, parent):
         super().__init__(parent)
+
+        #
+        self._user_plugins = user_plugins
+        self._system_plugins = system_plugins
+
         # Load Theme/Colours
         self.load_theme(config.get("appearance", "theme"))
         
@@ -39,14 +43,20 @@ class Application(QObject):
         # Main window and dialogs
         self._window = MainWindow()
         
-        self._dialogs = {
-            # "Route": RouteEditor()
-        }
+        self._dialogs = {}
         
         # Connect signals
         self._window.openDialog.connect(self.open_dialog)
         self._window.start.connect(self.start.emit)
-        # self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
+
+    def on_plugins_loaded(self, user_plugins, system_plugins):
+        print(user_plugins, system_plugins)
+        self._dialogs = {
+            "Route": RouteEditor(),
+            "Plugins": PluginManager(user_plugins, system_plugins),
+        }
+
+        self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
 
     def on_splitter_update(self, status):
         self._window.set_selected_split(status.current_split_index)

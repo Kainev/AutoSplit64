@@ -17,6 +17,7 @@ import numpy as np
 class BitBltDefinition(Definition):
     NAME = "BitBlt Capture"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class BitBlt(CapturePlugin):

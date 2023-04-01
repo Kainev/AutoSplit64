@@ -127,14 +127,22 @@ QCheckBox::indicator:checked
     image: url(resources/icons/checkbox_checked_42_14.png)
 }
 
-QScrollBar:vertical
-{
-    width:50px;
+
+QTabBar::tab {
+    background: palette(base);
+    min-height: 50px;
+    font-size: 16px;
 }
 
-QScrollBar::handle:vertical
-{
-    min-height: 30px;
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: palette(highlight);
 }
+
+QTabWidget {
+    background: palette(base);
+    border: none;
+}
+
+QTabWidget::pane { border: none; }
 
 """

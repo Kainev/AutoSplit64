@@ -1,21 +1,20 @@
 # Plugin
 import cv2
-import time
+
+# Tensorflow/Keras
+import tensorflow as tf
+from keras import backend as K
+from keras.models import load_model
+from keras.utils.image_utils import img_to_array
+
+# Numpy
+import numpy as np
+
+# AS64
 from as64 import config
 from as64.as64 import GameController, GameStatus
 from as64.constants import Event, Region
 from as64.plugin import Plugin, Definition
-
-# Keras
-from keras import backend as K
-from keras.models import load_model
-from keras.utils.image_utils import img_to_array
-import tensorflow as tf
-#
-# tf.compat.v1.disable_v2_behavior()
-
-# Numpy
-import numpy as np
 
 
 def _convert_to_np(img):
@@ -59,6 +58,7 @@ class Model(object):
 class StarDefinition(Definition):
     NAME = "Star Analyzer"
     VERSION = "1.0.0"
+    AUTHOR = "Synozure"
 
 
 class Star(Plugin):
