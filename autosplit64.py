@@ -27,7 +27,7 @@ from PySide6.QtGui import (
 
 # AS64
 from as64 import AS64, config, constants, GameStatus
-from as64.plugin import import_plugins, initialize_plugins
+from as64.plugin import import_plugins, initialize_plugins, initialize_plugin
 from as64ui.application import Application
 
 
@@ -41,6 +41,7 @@ class AutoSplit64(QObject):
         
         # Core components
         self._as64: AS64 = None
+        self._user_plugin_classes: list = []
         self._user_plugins: list = []
         self._system_plugin_classes: dict = {}
 
@@ -49,6 +50,7 @@ class AutoSplit64(QObject):
         
         # Signals
         self._app.start.connect(self.toggle_start)
+        # self._app.plugin_loaded.connect(self.on_plugin_load)
         self.splitter_update.connect(self._app.on_splitter_update)
         
         # Initialize
@@ -90,19 +92,23 @@ class AutoSplit64(QObject):
 
     def load_plugins(self) -> None:
         # Initialize user plugins
-        user_plugin_classes = import_plugins(constants.USER_PLUGIN_DIR)
-        self._user_plugins = initialize_plugins(user_plugin_classes)
+        self._user_plugins = initialize_plugins(import_plugins(constants.USER_PLUGIN_DIR, include=config.get('plugins', 'user')))
+        print("Load Plugins", self._user_plugins)
 
-        # Update config for user plugins
-        config.set('plugins', 'user', [cls.__module__.split('.')[-1] for cls in user_plugin_classes])
-        config.save()
+        # # Update config for user plugins
+        # config.set('plugins', 'user', [cls.__module__.split('.')[-1] for cls in self._user_plugin_classes])
+        # config.save()
 
         # Import system plugins
         system_plugin_classes = import_plugins(constants.SYSTEM_PLUGIN_DIR)
-        # self._system_plugins = initialize_plugins(system_plugin_classes)
         self._system_plugin_classes = {cls.__module__.split('.')[-1]: cls for cls in system_plugin_classes}
-        
+
+        # Initialize user plugins
+
         # TODO: Check if all system plugins are present, give user a warning if not (?)
+
+    # def on_plugin_load(self, cls) -> None:
+    #     self._user_plugins.append(initialize_plugin(cls))
 
     def start(self):
         self._as64 = AS64(system_plugins=self._system_plugin_classes, user_plugins=self._user_plugins, update_callback=self.on_update_callback)

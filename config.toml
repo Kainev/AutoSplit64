@@ -11,10 +11,10 @@ width = 67
 height = 40
 
 [plugins]
-user = []
+user = [ "reset_statistics", "split_notes",]
 
 [route]
-path = "P:/Current/AutoSplit64/routes/16_lblj.as64"
+path = "P:/Current/AS64/AutoSplit64/routes/16_lblj.as64"
 
 [advanced]
 reset_frame_one = "templates/generated_reset_one.jpg"

@@ -16,6 +16,7 @@ from PySide6.QtGui import (
     QPalette
 )
 
+from as64.plugin import Plugin
 from as64.api import config
 from as64ui.dialog import RouteEditor, PluginManager, SplashScreen
 from as64ui.main_window import MainWindow
@@ -26,6 +27,7 @@ from as64ui.utils import apply_gradient
 class Application(QObject):
     start = Signal()
     exit = Signal()
+    plugin_loaded = Signal(Plugin)
 
     def __init__(self, user_plugins, system_plugins, parent):
         super().__init__(parent)
@@ -50,13 +52,14 @@ class Application(QObject):
         self._window.start.connect(self.start.emit)
 
     def on_plugins_loaded(self, user_plugins, system_plugins):
-        print(user_plugins, system_plugins)
         self._dialogs = {
             "Route": RouteEditor(),
             "Plugins": PluginManager(user_plugins, system_plugins),
         }
 
+        # Signals
         self._dialogs["Route"].route_changed.connect(self._window.update_route_display)
+        self._dialogs["Plugins"].plugin_loaded.connect(self.plugin_loaded.emit)
 
     def on_splitter_update(self, status):
         self._window.set_selected_split(status.current_split_index)

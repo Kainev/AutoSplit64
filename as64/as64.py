@@ -11,7 +11,7 @@ from as64.constants import (
 from as64 import config, route
 from as64.constants import Event
 from as64.capture import GameCapture, get_handle
-from as64.plugin.plugin import Plugin, SplitPlugin
+from as64.plugin.plugin import Plugin, SplitPlugin, Definition
 from as64.route import Route, Split
 
 
@@ -95,6 +95,9 @@ class AS64(object):
                 
         # Store user plugins (User plugins are initialized on AS64 launch)
         self._user_plugins: list = user_plugins
+
+        self._frame_plugins: list = [user_plugin for user_plugin in self._user_plugins if user_plugin.DEFINITION.EXECUTION == Definition.Execution.FRAME]
+        print("Frame Plugins", self._frame_plugins)
         
         # Event System
         self._event_emitter = EventEmitter()
@@ -133,7 +136,7 @@ class AS64(object):
             self._logic_plugin.execute(self._game_event)
             
             # Execute user plugins
-            for plugin in self._user_plugins:
+            for plugin in self._frame_plugins:
                 plugin.execute(self._game_event)
 
             # Limit FPS 
@@ -163,7 +166,7 @@ class AS64(object):
         self._logic_plugin.initialize(self._game_event)
         
     def _start_plugins(self, ev):
-        self._split_plugin.start(self._game_event)
+        self._split_plugin.start(ev)
         self._fade_plugin.start(ev)
         self._star_plugin.start(ev)
         self._xcam_plugin.start(ev)

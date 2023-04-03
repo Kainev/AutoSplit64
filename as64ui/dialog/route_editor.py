@@ -59,13 +59,14 @@ class RouteEditor(QDialog):
         # Layouts
         self._layout = QHBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
 
         self._left_layout = QVBoxLayout()
-        self._left_layout.setContentsMargins(0, 0, 10, 0)
+        self._left_layout.setContentsMargins(0, 0, 0, 0)
 
         self._right_layout = QVBoxLayout()
-        self._right_layout.setContentsMargins(10, 20, 10, 10)
-        self._right_layout.setSpacing(15)
+        self._right_layout.setContentsMargins(0, 0, 0, 0)
+        self._right_layout.setSpacing(5)
 
         # Widgets
         self._side_menu = SideMenu(self)
@@ -233,7 +234,7 @@ class RoutePropertiesWidget(QFrame):
 
         # Properties
         self.setMinimumHeight(150)
-        self.setStyleSheet("QFrame { background: palette(Alternate-Base); border-radius: 5px; }")
+        self.setStyleSheet("QFrame { background: palette(window); border-radius: 0px; }")
 
         # Layout
         self._layout = QGridLayout(self)
@@ -267,7 +268,7 @@ class RoutePropertiesWidget(QFrame):
 
         self._title_le.setFixedHeight(27)
         self._title_le.setStyleSheet(
-            "QLineEdit { background-color: palette(Window); border-radius: 5px; padding-left: 10px}")
+            "QLineEdit { background-color: palette(base); border-radius: 5px; padding-left: 10px}")
 
         self._star_sb.setStyleSheet(global_style_sheet)
         self._star_sb.setObjectName('NoArrowSpinBox')
@@ -277,7 +278,7 @@ class RoutePropertiesWidget(QFrame):
 
         self._category_combo.setView(QListView())
         self._category_combo.setFixedHeight(27)
-        self._category_combo.setObjectName("WindowColourCombo")
+        self._category_combo.setObjectName("BaseColourCombo")
         self._category_combo.setEditable(True)
         # self._category_combo.lineEdit().setStyleSheet("background-color: transparent")
         self._category_combo.setStyleSheet(global_style_sheet)
@@ -286,14 +287,14 @@ class RoutePropertiesWidget(QFrame):
         self._timing_combo.setView(QListView())
         self._timing_combo.setFixedHeight(27)
         self._timing_combo.setFixedWidth(150)
-        self._timing_combo.setObjectName("WindowColourCombo")
+        self._timing_combo.setObjectName("BaseColourCombo")
         self._timing_combo.setStyleSheet(global_style_sheet)
         self._timing_combo.addItem('RTA')
 
         self._version_combo.setView(QListView())
         self._version_combo.setFixedHeight(27)
         self._version_combo.setFixedWidth(150)
-        self._version_combo.setObjectName("WindowColourCombo")
+        self._version_combo.setObjectName("BaseColourCombo")
         self._version_combo.setStyleSheet(global_style_sheet)
         self._version_combo.addItems([version.value for version in Version])
 
@@ -401,7 +402,7 @@ class SplitWidget(QWidget):
 
         self._star_lb.setObjectName("BaseColourLabel")
 
-        self._star_sb.setObjectName('NoArrowSpinBox')
+        self._star_sb.setObjectName('NoArrowSpinBoxWindow')
         self._star_sb.setFixedSize(50, 30)
         self._star_sb.setRange(0, 120)
 
@@ -495,22 +496,21 @@ class RouteSplitsWidget(QFrame):
         self.setStyleSheet("""
                             QFrame
                             {
-                                background: palette(Alternate-Base);
+                                background: palette(window);
                                 border-radius: 5px;
                             }
                             
                            QScrollBar::vertical
                             {
-                                width: 12px;
-                                background: rgba(0, 0, 0, 0);
+                                width: 18px;
+                                background: palette(window);
                             }
                             
                             QScrollBar::handle:vertical
                             {
-                                background: palette(Window);
-                                border-radius: 3px;
-                                margin-left: 5px;
-                                margin-left: 5px;
+                                margin: 4px;
+                                background: palette(base);
+                                border-radius: 5px;
                             }
                             
                             QScrollBar::sub-line:vertical
@@ -521,12 +521,12 @@ class RouteSplitsWidget(QFrame):
                             QScrollBar::add-line:vertical
                             {
                                 background: none;
-                            } 
+                            }
                             """)
 
         # Layout
         self._layout = QVBoxLayout(self)
-        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(5, 0, 5, 0)
 
         # Widgets
         self._list = QListWidget(self)
@@ -656,7 +656,7 @@ class RouteButtonBar(QFrame):
         self.setStyleSheet("""
                             QFrame
                             {
-                                border-radius: 5px;
+                                background-color: palette(window);
                             }
                             
                             QPushButton
@@ -743,19 +743,19 @@ class CustomDetailWidget(QWidget):
         self._x_cam_lb.setObjectName("BaseColourLabel")
         self._x_cam_lb.setFixedHeight(30)
 
-        self._star_sb.setObjectName('NoArrowSpinBox')
+        self._star_sb.setObjectName('NoArrowSpinBoxWindow')
         self._star_sb.setFixedSize(50, 30)
         self._star_sb.setRange(0, 120)
 
-        self._fadeout_sb.setObjectName('NoArrowSpinBox')
+        self._fadeout_sb.setObjectName('NoArrowSpinBoxWindow')
         self._fadeout_sb.setFixedSize(50, 30)
         self._fadeout_sb.setMinimum(0)
 
-        self._fadein_sb.setObjectName('NoArrowSpinBox')
+        self._fadein_sb.setObjectName('NoArrowSpinBoxWindow')
         self._fadein_sb.setFixedSize(50, 30)
         self._fadein_sb.setMinimum(0)
 
-        self._x_cam_sb.setObjectName('NoArrowSpinBox')
+        self._x_cam_sb.setObjectName('NoArrowSpinBoxWindow')
         self._x_cam_sb.setFixedSize(50, 30)
         self._x_cam_sb.setMinimum(0)
 
@@ -838,11 +838,14 @@ class CustomDetailWidget(QWidget):
             self._x_cam_cb.setChecked(True)
             self._x_cam_sb.setValue(split.xcam)
 
-    def _set_option_enabled(self, checkbox, label, line_edit) -> None:
+    def _set_option_enabled(self, checkbox, label, line_edit, what=None) -> None:
+        print("What?", what)
         disabled = not checkbox.isChecked()
 
         label.setDisabled(disabled)
         line_edit.setDisabled(disabled)
+
+        print("Disabled", disabled)
 
         if disabled:
             line_edit.clear()

@@ -9,10 +9,12 @@ import select
 from as64 import GameStatus, EventEmitter, config 
 from as64.constants import Event
 
+
 class LiveSplitDefinition(Definition):
     NAME = "LiveSplit"
     VERSION = "1.0.0"
     AUTHOR = "Synozure"
+    TYPE = Definition.Type.SYSTEM
 
 
 class LiveSplit(SplitPlugin):

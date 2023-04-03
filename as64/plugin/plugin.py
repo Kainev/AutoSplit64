@@ -2,31 +2,45 @@ from enum import Enum, auto
 
 
 class Definition(object):
-    class Schedule(Enum):
+    class Execution(Enum):
         FRAME = auto()
-        ONCE = auto()
-        TIMER = auto()
+        EVENT_ONLY = auto()
 
-    SCHEDULE = Schedule.FRAME
+    class Type(Enum):
+        USER = auto()
+        SYSTEM = auto()
 
-    SETTINGS = {}
-    
+    NAME = None
+    VERSION = None
+    AUTHOR = None
+    TYPE = Type.USER
+    EXECUTION = Execution.FRAME
+
 
 class BasePlugin(object):
     DEFINITION = None
     
     def __init__(self):
         pass
-    
+
     def initialize(self, ev=None):
+        pass
+    
+    def ready(self, ev=None):
         pass
 
     def start(self, ev=None):
         pass
+
+    def stop(self, ev=None):
+        pass
+
+    def exit(self):
+        pass
     
     def is_valid(self):
         return True
-        
+
 
 class CapturePlugin(BasePlugin):
     def capture(self, hwnd):    
@@ -63,5 +77,3 @@ class Plugin(BasePlugin):
     def stop(self, ev=None):
         pass
 
-    def exit(self, ev=None):
-        pass

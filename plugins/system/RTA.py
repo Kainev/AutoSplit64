@@ -35,6 +35,7 @@ class RTADefinition(Definition):
     NAME = "RTA"
     VERSION = "1.0.0"
     AUTHOR = "Synozure"
+    TYPE = Definition.Type.SYSTEM
 
 
 class RTA(Plugin):

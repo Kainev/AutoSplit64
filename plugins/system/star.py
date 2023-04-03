@@ -59,6 +59,7 @@ class StarDefinition(Definition):
     NAME = "Star Analyzer"
     VERSION = "1.0.0"
     AUTHOR = "Synozure"
+    TYPE = Definition.Type.SYSTEM
 
 
 class Star(Plugin):

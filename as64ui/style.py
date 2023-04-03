@@ -1,7 +1,7 @@
 global_style_sheet = """
 
 QSpinBox {
-    background-color: palette(Window);
+    background-color: palette(base);
     border-radius: 5px;
     padding-left: 10px;
     padding-right: 0px;
@@ -30,6 +30,14 @@ QSpinBox::up-arrow {
 
 
 
+QSpinBox#NoArrowSpinBox {
+    background-color: palette(base);
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 0px;
+    margin: 0px;
+}
+
 QSpinBox#NoArrowSpinBox::down-button {
     background-color: transparent;
     width: 0px;
@@ -50,6 +58,40 @@ QSpinBox#NoArrowSpinBox::up-arrow {
     image: none;
 }
 
+
+
+QSpinBox#NoArrowSpinBoxWindow {
+    background-color: palette(window);
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 0px;
+    margin: 0px;
+}
+
+QSpinBox#NoArrowSpinBoxWindow::down-button {
+    background-color: transparent;
+    width: 0px;
+    height: 0px;
+}
+
+QSpinBox#NoArrowSpinBoxWindow::down-arrow {
+    image: none;
+}
+
+QSpinBox#NoArrowSpinBoxWindow::up-button {
+    background-color: transparent;
+    width: 0px;
+    height: 0px;
+}
+
+QSpinBox#NoArrowSpinBoxWindow::up-arrow {
+    image: none;
+}
+
+
+
+
+
 QLineEdit {
     border-radius: 5px;
 }
@@ -64,7 +106,11 @@ QLabel:disabled#BaseColourLabel {
 }
 
 QComboBox#WindowColourCombo {
-    background-color: palette(Window)
+    background-color: palette(window)
+}
+
+QComboBox#BaseColourCombo {
+    background-color: palette(base)
 }
 
 QComboBox {
