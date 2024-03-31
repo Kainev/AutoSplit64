@@ -1,4 +1,4 @@
-VERSION = "0.2.5"
+VERSION = "0.2.6"
 TITLE = "AutoSplit 64"
 AUTHOR = "Synozure"
 

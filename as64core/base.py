@@ -40,8 +40,7 @@ class Base(Thread):
         config.load_config()
 
         # Connect to LiveSplit
-        self._ls_socket = livesplit.init_socket()
-        livesplit.connect(self._ls_socket)
+        self._ls_socket = livesplit.connect()
 
         # Load Route
         self._route = load_route(config.get("route", "path"))
@@ -187,7 +186,7 @@ class Base(Thread):
             return False
 
         if not livesplit.check_connection(self._ls_socket):
-            self._error_occurred("Could not connect to LiveSplit. Ensure the LiveSplit Server is started.")
+            self._error_occurred("Could not connect to LiveSplit.\nIs LiveSplit running?\nIf Connection mode is TCP, ensure the LiveSplit Server is started.")
             return False
 
         if not self._route:
@@ -204,6 +203,7 @@ class Base(Thread):
         self._running = False
 
         livesplit.disconnect(self._ls_socket)
+        # self._ls_socket = None
 
     def run(self):
         try:
@@ -224,7 +224,11 @@ class Base(Thread):
                 except:
                     self._error_occurred("Unable to capture " + config.get("game", "process_name"))
 
-                ls_index = max(livesplit.split_index(self._ls_socket), 0)
+                try:
+                    ls_index = max(livesplit.split_index(self._ls_socket), 0)
+                except:
+                    self._error_occurred("Connection to LiveSplit lost.")
+
                 if ls_index != self.split_index():
                     self.set_split_index(ls_index)
 

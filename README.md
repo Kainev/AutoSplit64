@@ -7,6 +7,7 @@
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Release](#release)
 - [Features](#features)
@@ -14,12 +15,13 @@
   - [Interface](#interface)
   - [LiveSplit Server](#livesplit-server)
   - [Game Capture](#game-capture)
+  - [Routes](#routes)
 - [Troubleshooting](#troubleshooting)
-- [Running/Building From Source](#running/building-source)
+- [Running/Building from Source](#runningbuilding-from-source)
 - [Credit](#credit)
 - [Contact](#contact)
 - [Donate](#donate)
-- [Author](#release)
+- [Author](#author)
 
 ## Introduction
 
@@ -31,7 +33,7 @@ Virtual Console is not supported.
 
 ## Release
 
-[Version 0.2.5](https://github.com/synozure/AutoSplit64/releases)
+[Version 0.2.6](https://github.com/Kainev/AutoSplit64/releases)
 
 ## Features
 
@@ -63,9 +65,9 @@ All windows and options are accessed via the right-click menu:
 
 ### LiveSplit Server
 
-AutoSplit64 communicates with LiveSplit via the LiveSplit Server component.
+AutoSplit64 communicates with LiveSplit via the LiveSplit Server component. This is included in current LiveSplit releases.
 
-Please download the latest version [here](https://github.com/LiveSplit/LiveSplit.Server).
+Add the LiveSplit Server Component in your LiveSplit Layout.
 
 ### Game Capture
 
@@ -102,7 +104,7 @@ The Route Editor has been designed to look and function similar to the split edi
 If you encounter any issues, please run through all steps below.
 
 - Check capture coordinates are correct (`Right Click -> Edit Coordinates`)
-- Ensure LiveSplit server is running (`Right Click LiveSplit -> Control -> Start Server')
+- When using TCP connection, ensure LiveSplit server is running (`Right Click LiveSplit -> Control -> Start Server')
 - Check the correct route is loaded, and that the route file is accurate (i.e. correct star counts, fadeout/fadein counts)
 - Make sure SRL Mode (Right Click -> SRL Mode) is disabled if you want AutoSplit64 to detect console resets
 - Generate reset templates (`Right Click -> Generate Reset Templates`)
@@ -111,7 +113,7 @@ If you encounter any issues, please run through all steps below.
 - If using an unpowered splitter, compare the whiteness of your star select screens to other players. If it is extremely dull you may need to increase your capture brightness
 - Ensure your capture is set to a 4:3 aspect ratio (or close to)
 
-## Running/Building Source
+## Running/Building from Source
 
 - **Python:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3.6.8`<br/>
 - **Dependencies:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See `requirements.txt`<br/>
@@ -120,6 +122,8 @@ If you encounter any issues, please run through all steps below.
 ## Credit
 
 A big thanks to Gerardo Cervantes for open-sourcing his project!
+
+**Davi Be** - Added named pipe connection mode. Manually starting the LiveSplit Server every time is no longer necessary!
 
 ## Contact
 
