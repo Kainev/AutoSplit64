@@ -47,7 +47,6 @@ def disconnect(ls_socket) -> None:
 def check_connection(ls_socket) -> bool:
     # Check if connection has been established
     if (ls_socket == False):
-        # print("Failed to connect to LiveSplit")
         return False
     # Check if communication is possible and response is received
     try:
@@ -63,12 +62,10 @@ def send(ls_socket, command) -> None:
     # Check if connection type is pipe or socket
     # If it is a socket:
     if isinstance(ls_socket, socket.socket):
-        # print("Sending command to socket: " + command)
         # Send the command to the socket
         ls_socket.send(command.encode('utf-8'))
     # If it is a pipe:
     else:
-        # print("Sending command to pipe: " + command)
         # Send the command to the pipe
         win32file.WriteFile(ls_socket, command.encode('utf-8'))
 
@@ -97,7 +94,6 @@ def split_index(ls_socket):
         try:
             ls_socket.send("getsplitindex\r\n".encode('utf-8'))
         except:
-            # print("Failed to write to socket")
             raise Exception("Failed to write to socket")
         
         # Wait for response
@@ -105,13 +101,11 @@ def split_index(ls_socket):
         if readable[0]:
             try:
                 data = (ls_socket.recv(1000)).decode("utf-8")
-                # print("Data: " + data)
                 if not isinstance(data, bool):
                     return int(data)
                 else:
                     return False
             except:
-                # print("Failed to read from socket")
                 raise Exception("Failed to read from socket")
         else:
             return False
@@ -121,7 +115,6 @@ def split_index(ls_socket):
         try:
             win32file.WriteFile(ls_socket, "getsplitindex\r\n".encode('utf-8'))
         except:
-            # print("Failed to write to pipe")
             raise Exception("Failed to write to pipe")
         # Get current time
         start_time = time.time()
@@ -131,7 +124,6 @@ def split_index(ls_socket):
         while True:
             # Check if the timeout has occurred
             if time.time() - start_time > timeout:
-                # print("Failed to read from pipe")
                 raise Exception("Failed to read from pipe")
             # Peek at the pipe to see if there is data as it is non-blocking
             peek_data, available , _ = win32pipe.PeekNamedPipe(ls_socket, 1000)
@@ -139,7 +131,6 @@ def split_index(ls_socket):
             if available > 0:
                 # Read the data from the pipe
                 data = win32file.ReadFile(ls_socket, 1000)[1].decode("utf-8")
-                # print("Data: " + data)
                 if not isinstance(data, bool):
                     return int(data)
                 else:

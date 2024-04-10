@@ -203,7 +203,6 @@ class Base(Thread):
         self._running = False
 
         livesplit.disconnect(self._ls_socket)
-        # self._ls_socket = None
 
     def run(self):
         try:
