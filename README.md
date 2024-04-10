@@ -65,7 +65,9 @@ All windows and options are accessed via the right-click menu:
 
 ### LiveSplit Server
 
-AutoSplit64 communicates with LiveSplit via the LiveSplit Server component. This is included in current LiveSplit releases.
+AutoSplit64 communicates with LiveSplit via the LiveSplit Server component. This is included in LiveSplit releases after 1.8.29.
+
+If you are using LiveSplit 1.8.28 ot older, please download the latest version [here](https://github.com/LiveSplit/LiveSplit.Server).
 
 Add the LiveSplit Server Component in your LiveSplit Layout.
 
