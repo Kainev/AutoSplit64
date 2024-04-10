@@ -710,6 +710,7 @@ class ConnectionMenu(BaseMenu):
         self.host_le.setText(str(config.get('connection', 'ls_host')))
         self.port_le.setText(str(config.get('connection', 'ls_port')))
         self.ls_pipe_host_le.setText(str(config.get('connection', 'ls_pipe_host')))
+        self.ls_mode_combo.setCurrentIndex(config.get('connection', 'ls_connection_type'))
 
     def update_preferences(self):
         config.set_key('connection', 'ls_host', self.host_le.text())
