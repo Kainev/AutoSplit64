@@ -49,13 +49,10 @@ def check_connection(ls_socket) -> bool:
     if (ls_socket == False):
         return False
     # Check if communication is possible and response is received
-    try:
-        if split_index(ls_socket) is False:
-            return False
-        else:
-            return True
-    except:
+    if split_index(ls_socket) is False:
         return False
+    else:
+        return True
 
 
 def send(ls_socket, command) -> None:
@@ -94,7 +91,7 @@ def split_index(ls_socket):
         try:
             ls_socket.send("getsplitindex\r\n".encode('utf-8'))
         except:
-            raise Exception("Failed to write to socket")
+            return False
         
         # Wait for response
         readable = select.select([ls_socket], [], [], 0.5)
@@ -106,7 +103,7 @@ def split_index(ls_socket):
                 else:
                     return False
             except:
-                raise Exception("Failed to read from socket")
+                return False
         else:
             return False
     # If it is a pipe:
@@ -115,7 +112,7 @@ def split_index(ls_socket):
         try:
             win32file.WriteFile(ls_socket, "getsplitindex\r\n".encode('utf-8'))
         except:
-            raise Exception("Failed to write to pipe")
+            return False
         # Get current time
         start_time = time.time()
         # Set timeout to 0.5 seconds
@@ -124,7 +121,7 @@ def split_index(ls_socket):
         while True:
             # Check if the timeout has occurred
             if time.time() - start_time > timeout:
-                raise Exception("Failed to read from pipe")
+                return False
             # Peek at the pipe to see if there is data as it is non-blocking
             peek_data, available , _ = win32pipe.PeekNamedPipe(ls_socket, 1000)
             # If there is data available:

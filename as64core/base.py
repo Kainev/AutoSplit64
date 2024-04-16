@@ -223,10 +223,7 @@ class Base(Thread):
                 except:
                     self._error_occurred("Unable to capture " + config.get("game", "process_name"))
 
-                try:
-                    ls_index = max(livesplit.split_index(self._ls_socket), 0)
-                except:
-                    self._error_occurred("Connection to LiveSplit lost.")
+                ls_index = max(livesplit.split_index(self._ls_socket), 0)
 
                 if ls_index != self.split_index():
                     self.set_split_index(ls_index)
