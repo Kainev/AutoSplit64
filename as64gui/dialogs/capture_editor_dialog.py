@@ -12,7 +12,6 @@ from ..constants import (
     ICON_PATH
 )
 
-
 class CaptureEditor(QtWidgets.QDialog):
 
     applied = QtCore.pyqtSignal()
@@ -49,6 +48,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.process_lb = QtWidgets.QLabel("Process:")
         self.process_combo = QtWidgets.QComboBox()
         self.capture_btn = QtWidgets.QPushButton("Capture")
+        self.auto_region_btn = QtWidgets.QPushButton("Auto Region")
 
         # Graphics View
         self.graphics_scene = CaptureGraphicsScene()
@@ -68,7 +68,6 @@ class CaptureEditor(QtWidgets.QDialog):
         self.setLayout(self.main_layout)
         self.left_widget.setLayout(self.left_layout)
         self.right_widget.setLayout(self.right_layout)
-
         self.right_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         # Configure Top Level Widgets
@@ -90,8 +89,9 @@ class CaptureEditor(QtWidgets.QDialog):
         self.left_layout.addWidget(self.process_lb, 0, 0)
         self.left_layout.addWidget(self.process_combo, 0, 1)
         self.left_layout.addWidget(self.capture_btn, 1, 0, 1, 2)
+        self.left_layout.addWidget(self.auto_region_btn, 2, 0, 1, 2)
 
-        self.left_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 3, 0)
+        self.left_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 4, 0)
 
         # Right Widget
         self.apply_btn.setDefault(False)
@@ -116,6 +116,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.cancel_btn.clicked.connect(self.cancel_clicked)
         self.game_region_panel.updated.connect(self.on_game_region_panel_update)
         self.process_combo.currentIndexChanged.connect(self.refresh_graphics_scene)
+        self.auto_region_btn.clicked.connect(self.auto_detect_region)
 
         self.refresh_graphics_scene()
 
@@ -276,6 +277,49 @@ class CaptureEditor(QtWidgets.QDialog):
 
         return result
 
+    def auto_detect_region(self):
+        try:
+            # Capture new image
+            preview_image = self.shmem_capture.capture()
+            if preview_image is None:
+                return
+                
+            # Convert to grayscale
+            gray = cv2.cvtColor(preview_image, cv2.COLOR_BGR2GRAY)
+            
+            # Use a threshold that considers pixels "black" if they're below intensity 20
+            # This helps handle dark regions that aren't perfectly black
+            _, thresh = cv2.threshold(gray, 20, 255, cv2.THRESH_BINARY)
+            
+            # Apply some morphological operations to remove noise
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            
+            # Find coordinates of non-black pixels
+            non_zero = cv2.findNonZero(thresh)
+            if non_zero is None:
+                return
+                
+            # Get bounding rectangle
+            x, y, w, h = cv2.boundingRect(non_zero)
+            
+            # Add a small padding (5 pixels) to account for border pixels
+            x = max(0, x + 2)
+            y = max(0, y + 2)
+            w = min(preview_image.shape[1] - x, w - 4)
+            h = min(preview_image.shape[0] - y, h - 4)
+            
+            # Update region selector and panel
+            self.game_region_selector.resize(w, h)
+            self.game_region_selector.setPos(x, y)
+            self.game_region_panel.update_text(str(x), str(y), str(w), str(h))
+            
+            # Refresh the scene
+            self.refresh_graphics_scene()
+            
+        except Exception as e:
+            print(f"Auto region detection failed: {str(e)}")
+
 
 class RectangleCapturePanel(QtWidgets.QWidget):
     updated = QtCore.pyqtSignal(list)
@@ -336,7 +380,6 @@ class RectangleCapturePanel(QtWidgets.QWidget):
         self.main_layout.addWidget(self.yoffset_lb, 3, 0)
         self.main_layout.addWidget(self.width_lb, 4, 0)
         self.main_layout.addWidget(self.height_lb, 5, 0)
-
         self.main_layout.addWidget(self.xoffset_le, 2, 1)
         self.main_layout.addWidget(self.yoffset_le, 3, 1)
         self.main_layout.addWidget(self.width_le, 4, 1)
@@ -374,4 +417,3 @@ class RectangleCapturePanel(QtWidgets.QWidget):
 
 class CaptureGraphicsScene(QtWidgets.QGraphicsScene):
     item_update = QtCore.pyqtSignal(object)
-
