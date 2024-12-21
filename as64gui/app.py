@@ -12,16 +12,13 @@ from as64core import route_loader, config
 from as64core.resource_utils import base_path, resource_path, absolute_path, rel_to_abs
 from . import constants
 from .widgets import PictureButton, StateButton, StarCountDisplay, SplitListWidget
-from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, UpdateDialog, OutputDialog
+from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, OutputDialog
 
 
 class App(QtWidgets.QMainWindow):
     start = QtCore.pyqtSignal()
     stop = QtCore.pyqtSignal()
     closed = QtCore.pyqtSignal()
-    check_update = QtCore.pyqtSignal()
-    ignore_update = QtCore.pyqtSignal()
-    install_update = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -68,7 +65,6 @@ class App(QtWidgets.QMainWindow):
             "settings_dialog": SettingsDialog(self),
             "route_editor": RouteEditor(self),
             "reset_dialog": ResetGeneratorDialog(self),
-            "update_dialog": UpdateDialog(self),
             "output_dialog": OutputDialog(self)
         }
 
@@ -139,9 +135,7 @@ class App(QtWidgets.QMainWindow):
         self.dialogs["route_editor"].route_updated.connect(self._on_route_update)
         self.dialogs["settings_dialog"].applied.connect(self.settings_updated)
         self.dialogs["capture_editor"].applied.connect(self._reset)
-        self.dialogs["update_dialog"].ignore_btn.clicked.connect(lambda: self.ignore_update.emit())
-        self.dialogs["update_dialog"].update_btn.clicked.connect(lambda: self.install_update.emit())
-
+ 
     def settings_updated(self):
         self.set_always_on_top(config.get("general", "on_top"))
         self._reset()
@@ -230,19 +224,6 @@ class App(QtWidgets.QMainWindow):
         if file_path:
             self._save_open_route(file_path)
 
-    def update_found(self, info):
-        # TODO: RENAME FUNCTION
-        if info["found"]:
-            self.dialogs["update_dialog"].set_update_info(info)
-            self.dialogs["update_dialog"].show()
-        elif info["override_ignore"]:
-            msg = QtWidgets.QMessageBox(self)
-            msg.setFixedWidth(200)
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setWindowTitle("Updater")
-            msg.setText("Up to date!")
-            msg.show()
-
     def contextMenuEvent(self, event):
         context_menu = QtWidgets.QMenu(self)
         route_menu = QtWidgets.QMenu("Open Route")
@@ -288,7 +269,6 @@ class App(QtWidgets.QMainWindow):
         on_top_action.setChecked(config.get("general", "on_top"))
         context_menu.addSeparator()
         about_action = context_menu.addAction("About")
-        # update_action = context_menu.addAction("Check for Updates..")
         context_menu.addSeparator()
         exit_action = context_menu.addAction("Exit")
 
@@ -322,8 +302,6 @@ class App(QtWidgets.QMainWindow):
             self.set_always_on_top(config.get("general", "on_top"))
         elif action == about_action:
             self.dialogs["about_dialog"].show()
-        # elif action == update_action:
-        #     self.check_update.emit()
         elif action == exit_action:
             self.close()
         else:

@@ -4,7 +4,7 @@ from PyQt5 import QtCore as QtCore
 
 import cv2
 
-from as64core import capture_window, config
+from as64core import capture_shmem, config
 from as64core import resource_utils
 from ..widgets import HLine
 from ..graphics import RectangleSelector
@@ -22,6 +22,9 @@ class CaptureEditor(QtWidgets.QDialog):
 
         self.window_title = "Game Capture Editor"
         self.setWindowIcon(QtGui.QIcon(resource_utils.resource_path(ICON_PATH)))
+        
+        # Initialize SharedMemoryCapture
+        self.shmem_capture = capture_shmem.SharedMemoryCapture()
 
         # File Paths
         # TODO: ADD TO CONSTANTS
@@ -118,8 +121,11 @@ class CaptureEditor(QtWidgets.QDialog):
 
     def _refresh_process_list(self):
         self.process_combo.clear()
-        self._process_list = capture_window.get_visible_processes()
-        self.process_combo.addItems([proc[0].name() for proc in self._process_list])
+        # self._process_list = capture_window.get_visible_processes()
+        self._process_list = []
+        #self.process_combo.addItems([proc[0].name() for proc in self._process_list])
+        # Add default Shared Memory Name
+        self.process_combo.addItem("Shared Memory")
 
     def show(self):
         # Load game_region from preferences
@@ -138,6 +144,9 @@ class CaptureEditor(QtWidgets.QDialog):
                 self.process_combo.setCurrentIndex(i)
 
         self.refresh_graphics_scene()
+        
+        # Open the shared memory connection
+        self.shmem_capture.open_shmem()
 
         config.create_rollback()
         super().show()
@@ -156,15 +165,20 @@ class CaptureEditor(QtWidgets.QDialog):
         config.set_key("game", "process_name", self.process_combo.currentText())
 
         try:
-            config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
+            #config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
+            config.set_key("game", "capture_size", self.shmem_capture.get_capture_size())
         except:
             pass
 
         config.save_config()
+        # Close the shared memory connection
+        self.shmem_capture.close_shmem()
         self.applied.emit()
         self.close()
 
     def cancel_clicked(self):
+        # Close the shared memory connection
+        self.shmem_capture.close_shmem()
         self.close()
 
     def on_graphics_item_update(self, e):
@@ -189,21 +203,28 @@ class CaptureEditor(QtWidgets.QDialog):
         self.graphics_scene.clear()
         self.graphics_view.update()
 
-        # Update screen capture
-        selected_hwnd = 0
+        # # Update screen capture
+        # selected_hwnd = 0
 
+        # try:
+        #     selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
+        # except IndexError:
+        #     pass
+
+        # if selected_hwnd:
+        #     try:
+        #         preview_image = capture_window.capture(selected_hwnd)
+        #         cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+        #     except:
+        #         pass
+            
         try:
-            selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
-        except IndexError:
+            # preview_image = capture_window.capture(selected_hwnd)
+            preview_image = self.shmem_capture.capture()
+            cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+        except:
             pass
-
-        if selected_hwnd:
-            try:
-                preview_image = capture_window.capture(selected_hwnd)
-                cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
-            except:
-                pass
-
+            
         self.preview_pixmap.load(resource_utils.resource_path(self.preview_image_path))
 
         # Re-add all items to scene
@@ -232,6 +253,8 @@ class CaptureEditor(QtWidgets.QDialog):
             return True
 
     def closeEvent(self, e):
+        # Close the shared memory connection
+        self.shmem_capture.close_shmem()
         config.rollback()
         super().closeEvent(e)
 

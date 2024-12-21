@@ -201,8 +201,11 @@ class Base(Thread):
 
     def stop(self):
         self._running = False
-
+    	# stop the livesplit connection
         livesplit.disconnect(self._ls_socket)
+        # Destruct the shared memory connection
+        if self._game_capture.is_valid():
+            self._game_capture.close()
 
     def run(self):
         try:

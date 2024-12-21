@@ -1,4 +1,4 @@
-from . import capture_window
+from . import capture_shmem
 
 from .constants import (
     GAME_US,
@@ -28,7 +28,9 @@ from .constants import (
 
 class GameCapture(object):
     def __init__(self, process_name, game_region, version):
-        self._hwnd: int = capture_window.get_hwnd_from_list(process_name, capture_window.get_visible_processes())
+        #self._hwnd: int = capture_window.get_hwnd_from_list(process_name, capture_window.get_visible_processes())
+        # Initialize SharedMemoryCapture
+        self._shmem = capture_shmem.SharedMemoryCapture()
         self._game_region: list = game_region
         self._version = version
 
@@ -66,14 +68,17 @@ class GameCapture(object):
         self._regions[XCAM_REGION] = calc_region(calc_ratio(XCAM_REGION_RATIO, GAME_REGION_BASE))
 
     def is_valid(self) -> bool:
-        return bool(self._hwnd)
+        return self._shmem.open_shmem()
+        # return bool(self._hwnd)
 
     def capture(self) -> None:
-        self._window_image = capture_window.capture(self._hwnd)
+        self._window_image = self._shmem.capture()
+        #self._window_image = capture_window.capture(self._hwnd)
         self._region_images = {}
 
     def get_capture_size(self):
-        return capture_window.get_capture_size(self._hwnd)
+        return self._shmem.get_capture_size()
+        #return capture_window.get_capture_size(self._hwnd)
 
     def get_region(self, region):
         if self._window_image is None:
@@ -96,4 +101,8 @@ class GameCapture(object):
 
     def _crop(self, x, y, width, height):
         return self._window_image[y:y + height, x:x + width]
+    
+    # Destructor
+    def close(self):
+        self._shmem.close_shmem()
 
