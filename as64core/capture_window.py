@@ -63,29 +63,37 @@ def get_hwnd_from_list(process_name, process_list):
             return p[1]
 
 
-def capture(hwnd):
+def capture(hwnd, client_area=True):
     """
     https://stackoverflow.com/a/24352388
+    Modified to support client area capture
     """
-    left, top, right, bot = win32gui.GetWindowRect(hwnd)
+    if client_area:
+        # Get client area dimensions
+        left, top, right, bot = win32gui.GetClientRect(hwnd)
+        # Convert client coordinates to screen coordinates
+        pt = win32gui.ClientToScreen(hwnd, (left, top))
+        left, top = pt
+        pt = win32gui.ClientToScreen(hwnd, (right, bot))
+        right, bot = pt
+    else:
+        left, top, right, bot = win32gui.GetWindowRect(hwnd)
+        
     w = right - left
     h = bot - top
-
 
     hwnd_dc = win32gui.GetWindowDC(hwnd)
     mfc_dc = win32ui.CreateDCFromHandle(hwnd_dc)
     save_dc = mfc_dc.CreateCompatibleDC()
-
     save_bitmap = win32ui.CreateBitmap()
     save_bitmap.CreateCompatibleBitmap(mfc_dc, w, h)
-
     save_dc.SelectObject(save_bitmap)
 
-    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 2)
+    # Use PW_CLIENTONLY (2) flag for client area only
+    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 2 if client_area else 0)
 
     bmp_info = save_bitmap.GetInfo()
     bmp_str = save_bitmap.GetBitmapBits(True)
-
     image = np.fromstring(bmp_str, np.uint8).reshape(bmp_info['bmHeight'], bmp_info['bmWidth'], 4)[:,:,:3]
 
     win32gui.DeleteObject(save_bitmap.GetHandle())

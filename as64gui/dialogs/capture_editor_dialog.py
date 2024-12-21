@@ -4,7 +4,7 @@ from PyQt5 import QtCore as QtCore
 
 import cv2
 
-from as64core import capture_shmem, config
+from as64core import capture_shmem, capture_window, config
 from as64core import resource_utils
 from ..widgets import HLine
 from ..graphics import RectangleSelector
@@ -45,10 +45,11 @@ class CaptureEditor(QtWidgets.QDialog):
         self.cancel_btn = QtWidgets.QPushButton("Cancel")
 
         # Left Panel Widgets
+        self.use_obs_cb = QtWidgets.QCheckBox("Use OBS Plugin")
         self.process_lb = QtWidgets.QLabel("Process:")
         self.process_combo = QtWidgets.QComboBox()
-        self.capture_btn = QtWidgets.QPushButton("Capture")
-        self.auto_region_btn = QtWidgets.QPushButton("Auto Region")
+        self.capture_btn = QtWidgets.QPushButton("Capture Screen")
+        self.auto_region_btn = QtWidgets.QPushButton("Auto Detect Region")
 
         # Graphics View
         self.graphics_scene = CaptureGraphicsScene()
@@ -82,16 +83,22 @@ class CaptureEditor(QtWidgets.QDialog):
         # Left Widget
         self.capture_btn.setDefault(False)
         self.capture_btn.setAutoDefault(False)
+        self.auto_region_btn.setDefault(False)
+        self.auto_region_btn.setAutoDefault(False)
         self.process_combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         self._refresh_process_list()
 
-        self.left_layout.addWidget(self.process_lb, 0, 0)
-        self.left_layout.addWidget(self.process_combo, 0, 1)
-        self.left_layout.addWidget(self.capture_btn, 1, 0, 1, 2)
-        self.left_layout.addWidget(self.auto_region_btn, 2, 0, 1, 2)
+        self.left_layout.addWidget(self.use_obs_cb, 0, 0, 1, 2)
+        self.left_layout.addWidget(self.process_lb, 1, 0)
+        self.left_layout.addWidget(self.process_combo, 1, 1)
+        self.left_layout.addWidget(self.capture_btn, 2, 0, 1, 2)
+        self.left_layout.addWidget(self.auto_region_btn, 3, 0, 1, 2)
 
         self.left_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 4, 0)
+
+        # Add connection for checkbox
+        self.use_obs_cb.stateChanged.connect(self.toggle_capture_method)
 
         # Right Widget
         self.apply_btn.setDefault(False)
@@ -120,13 +127,21 @@ class CaptureEditor(QtWidgets.QDialog):
 
         self.refresh_graphics_scene()
 
+    def toggle_capture_method(self, state):
+        use_obs = bool(state)
+        self.process_lb.setVisible(not use_obs)
+        self.process_combo.setVisible(not use_obs)
+
+        # Save the preference
+        config.set_key("capture", "use_obs", use_obs)
+
+        # Refresh the view with new capture method
+        self.refresh_graphics_scene()
+
     def _refresh_process_list(self):
         self.process_combo.clear()
-        # self._process_list = capture_window.get_visible_processes()
-        self._process_list = []
-        #self.process_combo.addItems([proc[0].name() for proc in self._process_list])
-        # Add default Shared Memory Name
-        self.process_combo.addItem("Shared Memory")
+        self._process_list = capture_window.get_visible_processes()
+        self.process_combo.addItems([proc[0].name() for proc in self._process_list])
 
     def show(self):
         # Load game_region from preferences
@@ -144,10 +159,12 @@ class CaptureEditor(QtWidgets.QDialog):
             if self._process_list[i][0].name() == p_name:
                 self.process_combo.setCurrentIndex(i)
 
+        # Load use_obs preference
+        use_obs = config.get("game", "use_obs")
+        self.use_obs_cb.setChecked(use_obs)
+        self.toggle_capture_method(use_obs)
+
         self.refresh_graphics_scene()
-        
-        # Open the shared memory connection
-        self.shmem_capture.open_shmem()
 
         config.create_rollback()
         super().show()
@@ -163,11 +180,14 @@ class CaptureEditor(QtWidgets.QDialog):
 
         # Config
         config.set_key("game", "game_region", self.game_region_panel.get_data())
-        config.set_key("game", "process_name", self.process_combo.currentText())
+        if not self.use_obs_cb.isChecked():
+            config.set_key("game", "process_name", self.process_combo.currentText())
 
         try:
-            #config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
-            config.set_key("game", "capture_size", self.shmem_capture.get_capture_size())
+            if self.use_obs_cb.isChecked():
+                config.set_key("game", "capture_size", self.shmem_capture.get_capture_size())
+            else:
+                config.set_key("game", "capture_size", capture_window.get_capture_size(self._process_list[self.process_combo.currentIndex()][1]))
         except:
             pass
 
@@ -203,28 +223,29 @@ class CaptureEditor(QtWidgets.QDialog):
         # Clear scene and update viewport
         self.graphics_scene.clear()
         self.graphics_view.update()
+        
+        # Check capture method
+        if self.use_obs_cb.isChecked():
+            try:
+                preview_image = self.shmem_capture.capture()
+                cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+            except:
+                pass
+        else:
+            # Update screen capture
+            selected_hwnd = 0
 
-        # # Update screen capture
-        # selected_hwnd = 0
-
-        # try:
-        #     selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
-        # except IndexError:
-        #     pass
-
-        # if selected_hwnd:
-        #     try:
-        #         preview_image = capture_window.capture(selected_hwnd)
-        #         cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
-        #     except:
-        #         pass
-            
-        try:
-            # preview_image = capture_window.capture(selected_hwnd)
-            preview_image = self.shmem_capture.capture()
-            cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
-        except:
-            pass
+            try:
+                selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
+            except IndexError:
+                pass
+        
+            if selected_hwnd:
+                try:
+                    preview_image = capture_window.capture(selected_hwnd)
+                    cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+                except:
+                    pass
             
         self.preview_pixmap.load(resource_utils.resource_path(self.preview_image_path))
 
@@ -279,8 +300,42 @@ class CaptureEditor(QtWidgets.QDialog):
 
     def auto_detect_region(self):
         try:
-            # Capture new image
-            preview_image = self.shmem_capture.capture()
+            # Check capture method
+            if self.use_obs_cb.isChecked():
+                try:
+                    preview_image = self.shmem_capture.capture()
+                except:
+                    pass
+            else:
+                selected_hwnd = 0
+                try:
+                    selected_hwnd = self._process_list[self.process_combo.currentIndex()][1]
+                    # Check if the selected process is Amarec
+                except IndexError:
+                    pass
+                if selected_hwnd:
+                    try:
+                        preview_image = capture_window.capture(selected_hwnd)
+                        # Check if the selected process is Amarec
+                        if self._process_list[self.process_combo.currentIndex()][0].name() == "AmaRecTV.exe": 
+                            # Set the Top and Bottom bars to black to avoid detection
+                            # Set the top bar to black
+                            preview_image[0:68, 0:preview_image.shape[1]] = 0
+                            
+                            actual_height = 1000
+                            # From the bottom up, check for the first pixel that is not black in the 30th column
+                            for row in range(preview_image.shape[0]-1, -1, -1):
+                            # Check if pixel is not black (sum of RGB values > 0)
+                                pixel = preview_image[row][30]
+                                if sum(pixel) > 0:
+                                    actual_height = row
+                                    break
+                            
+                            # Set the bottom bar to black (actual_height - 23 is the height of the game window)
+                            preview_image[actual_height-22:preview_image.shape[0], 0:preview_image.shape[1]] = 0
+
+                    except:
+                        pass
             if preview_image is None:
                 return
                 
