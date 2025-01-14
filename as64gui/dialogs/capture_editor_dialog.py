@@ -275,8 +275,10 @@ class CaptureEditor(QtWidgets.QDialog):
             return True
 
     def closeEvent(self, e):
-        # Close the shared memory connection
-        self.shmem_capture.close_shmem()
+        try:
+            self.shmem_capture.close_shmem()
+        except:
+            pass  # Ignore any errors during close
         config.rollback()
         super().closeEvent(e)
 

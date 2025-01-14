@@ -1,6 +1,7 @@
 import mmap
 import ctypes
 import numpy as np
+import time
 
 # Constants
 FILE_MAP_READ = 0x0004
@@ -33,8 +34,13 @@ class SharedMemoryCapture(object):
 
     def close_shmem(self):
         """Close the shared memory connection"""
-        # if self.shmem:
-        #     self.shmem.close()
+        try:
+            if hasattr(self, 'shmem') and self.shmem is not None:
+                self.shmem.close()
+                self.shmem = None
+        except ValueError:
+            # Handle case where memory is already closed
+            self.shmem = None
         if self.shmem_handle:
             ctypes.windll.kernel32.CloseHandle(self.shmem_handle)
             self.shmem_handle = None
@@ -80,12 +86,26 @@ class SharedMemoryCapture(object):
         
         if not self.shmem:
             raise Exception("Shared memory not initialized")
-
-        self.shmem.seek(0)
-        data = self.shmem.read(self.shmem_size)
         
-        # Convert the data to a numpy array
-        return np.frombuffer(data, dtype=np.uint8, offset=16).reshape((self.height, self.width, 3))
+        if self.width <= 0 or self.height <= 0 or self.shmem_size <= 16:
+            raise Exception("Invalid dimensions or shared memory size")
+
+        try:
+            self.shmem.seek(0)
+            data = self.shmem.read(self.shmem_size)
+            
+            if len(data) != self.shmem_size:
+                raise Exception("Incomplete data read from shared memory")
+            
+            # Convert the data to a numpy array and reshape to (height, width, 3) for BGR
+            frame = np.frombuffer(data, dtype=np.uint8, offset=16)
+            expected_size = self.height * self.width * 4
+            if len(frame) != expected_size:
+                raise Exception(f"Data size mismatch: got {len(frame)}, expected {expected_size}")
+            
+            return frame.reshape(self.height, self.width, 4)[:,:,:3]
+        except Exception as e:
+            raise Exception(f"Failed to capture frame: {str(e)}")
 
 def test_capture():
     """Test function to demonstrate shared memory capture with OpenCV visualization"""
@@ -106,8 +126,11 @@ def test_capture():
             
             # Capture new frame when 'w' is pressed
             if key == ord('w'):
+                start_time = time.time()  # Start timing
                 frame = cap.capture()
-                print("New frame captured")
+                end_time = time.time()  # End timing
+                elapsed_time = (end_time - start_time) * 1000  # Convert to milliseconds
+                print(f"New frame captured in {elapsed_time:.2f} ms")
             
             # Display the last captured frame if available
             if frame is not None:

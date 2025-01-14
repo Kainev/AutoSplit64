@@ -1,5 +1,5 @@
-from keras import backend as K
-from keras.models import load_model
+from tf_keras import backend as K
+from tf_keras.models import load_model
 import numpy as np
 
 from .image_utils import convert_to_np
@@ -16,7 +16,6 @@ class Model(object):
         K.clear_session()
         try:
             self.model = load_model(model_path)
-            self.model._make_predict_function()
         except OSError:
             self.model = None
 
@@ -31,9 +30,8 @@ class Model(object):
 
     def predict(self, image) -> PredictionInfo:
         np_img = convert_to_np([image])
-        model_output = self.model.predict(np_img)
+        model_output = self.model.predict(np_img, verbose=0)
         prediction = np.argmax(model_output)
         probability = np.max(model_output)
 
         return PredictionInfo(prediction, probability)
-

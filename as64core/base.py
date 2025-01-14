@@ -225,14 +225,11 @@ class Base(Thread):
                     self._game_capture.capture()
                 except:
                     self._error_occurred("Unable to capture " + config.get("game", "process_name"))
-
                 ls_index = max(livesplit.split_index(self._ls_socket), 0)
-
                 if ls_index != self.split_index():
                     self.set_split_index(ls_index)
 
                 self.analyze_fade_status()
-
                 if self._make_predictions:
                     self.analyze_star_count()
 
@@ -246,12 +243,13 @@ class Base(Thread):
                         self._processor_switch.execute(SPLIT_INITIAL)
                 except ConnectionAbortedError:
                     self._error_occurred("LiveSplit connection failed")
-
+                
                 try:
                     as64.execution_time = time.time() - as64.current_time
                     time.sleep(1 / as64.fps - as64.execution_time)
                 except ValueError:
                     pass
+                
         except Exception:
             self.logger.error("Fatal Error", exc_info=True)
 
@@ -316,7 +314,15 @@ class Base(Thread):
 
     def _analyze_star_count_probability_mode(self):
         try:
-            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
+            resized_image = cv2.resize(
+                convert_to_cv2(self._game_capture.get_region(STAR_REGION)), 
+                (self._model.width, self._model.height)
+            )
+            try:
+                as64.prediction_info = self._model.predict(resized_image)
+            except (AttributeError, tf.errors.InvalidArgumentError) as e:
+                self._error_occurred(f"Model prediction failed: {str(e)}")
+                return
         except cv2.error:
             self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
             return
@@ -348,7 +354,15 @@ class Base(Thread):
 
     def _analyze_star_count_confirmation_mode(self):
         try:
-            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
+            resized_image = cv2.resize(
+                convert_to_cv2(self._game_capture.get_region(STAR_REGION)), 
+                (self._model.width, self._model.height)
+            )
+            try:
+                as64.prediction_info = self._model.predict(resized_image)
+            except (AttributeError, tf.errors.InvalidArgumentError) as e:
+                self._error_occurred(f"Model prediction failed: {str(e)}")
+                return
         except cv2.error:
             self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
             return
