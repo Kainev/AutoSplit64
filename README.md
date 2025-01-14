@@ -117,9 +117,9 @@ If you encounter any issues, please run through all steps below.
 
 ## Running/Building from Source
 
-- **Python:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3.6.8`<br/>
+- **Python:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`3.12.8`<br/>
 - **Dependencies:** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;See `requirements.txt`<br/>
-- **Build Command:** &nbsp;`pyinstaller -windowed --icon="resources\gui\icons\icon.ico" AutoSplit64.py`
+- **Build Command:** &nbsp;`pyinstaller AutoSplit64.spec`
 
 ## Credit
 

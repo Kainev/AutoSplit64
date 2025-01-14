@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 
 class SplitListWidget(QtWidgets.QWidget):
@@ -29,12 +29,15 @@ class SplitListWidget(QtWidgets.QWidget):
                 y_pos = split_height * i
 
                 if split_index == self._selected_index:
-                    painter.fillRect(0, int(y_pos), int(split_width), int(split_height), QtWidgets.QApplication.palette().color(QtGui.QPalette.Highlight))
+                    painter.fillRect(0, int(y_pos), int(split_width), int(split_height), 
+                                     QtWidgets.QApplication.palette().color(QtGui.QPalette.ColorRole.Highlight))
 
                 if self.splits[split_index].pixmap:
                     painter.drawPixmap(int(pixmap_spacing), int(split_height * i + pixmap_spacing), int(pixmap_dimension), int(pixmap_dimension), self.splits[split_index].pixmap)
 
-                painter.drawText(int(x_pos), int(y_pos), int(text_width), int(split_height), QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, self.splits[split_index].text)
+                painter.drawText(int(x_pos), int(y_pos), int(text_width), int(split_height), 
+                                 QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter, 
+                                 self.splits[split_index].text)
             except IndexError:
                 pass
 

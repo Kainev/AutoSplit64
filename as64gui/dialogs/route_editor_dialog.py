@@ -4,8 +4,8 @@ import re
 import xml.etree.ElementTree as ET
 from functools import partial
 
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QIcon, QIntValidator
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtGui import QIcon, QIntValidator, QAction
 
 from as64core import resource_utils
 from as64core import route_loader, config
@@ -115,7 +115,7 @@ class RouteEditor(QtWidgets.QMainWindow):
 
         # Configure Widgets
         self.split_table.setIconSize(QtCore.QSize(30, 30))
-        self.split_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.split_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
         self.split_table.setColumnCount(7)
         self.split_table.setHorizontalHeaderLabels(["Icon", "Split Title", "Star count", "Fadeout", "Fadein", "X-Cam", "Split Type"])
 
@@ -128,14 +128,14 @@ class RouteEditor(QtWidgets.QMainWindow):
         self.apply_btn.setMaximumWidth(100)
         self.cancel_btn.setMaximumWidth(100)
 
-        self.title_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.init_star_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.version_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.category_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.timing_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.title_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.init_star_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.version_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.category_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.timing_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.title_lb.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.init_star_lb.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.title_lb.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.init_star_lb.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
 
         self.init_star_le.setValidator(self.int_validator)
 
@@ -156,16 +156,16 @@ class RouteEditor(QtWidgets.QMainWindow):
         self.init_star_le.setFixedWidth(45)
 
         # add_delete Layout
-        self.add_delete_layout.setAlignment(QtCore.Qt.AlignLeft)
+        self.add_delete_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.add_delete_layout.addWidget(self.insert_above_btn)
         self.add_delete_layout.addWidget(self.insert_below_btn)
         self.add_delete_layout.addWidget(self.remove_btn)
         self.add_delete_layout.addWidget(self.move_up_btn)
         self.add_delete_layout.addWidget(self.move_down_btn)
-        self.add_delete_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding))
+        self.add_delete_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
 
         # apply_close Layout
-        self.apply_close_layout.setAlignment(QtCore.Qt.AlignRight)
+        self.apply_close_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
         self.apply_close_layout.addWidget(self.apply_btn)
         self.apply_close_layout.addWidget(self.cancel_btn)
 
@@ -207,12 +207,12 @@ class RouteEditor(QtWidgets.QMainWindow):
         file_sub_menu = self.menu_bar.addMenu('File')
 
         # Create Actions
-        new_action = QtWidgets.QAction('New', self)
-        open_action = QtWidgets.QAction('Open', self)
-        save_action = QtWidgets.QAction('Save', self)
-        save_as_action = QtWidgets.QAction('Save As..', self)
-        convert_action = QtWidgets.QAction('Convert LSS', self)
-        exit_action = QtWidgets.QAction('Exit', self)
+        new_action = QAction('New', self)
+        open_action = QAction('Open', self)
+        save_action = QAction('Save', self)
+        save_as_action = QAction('Save As..', self)
+        convert_action = QAction('Convert LSS', self)
+        exit_action = QAction('Exit', self)
 
         # Configure ToolTips
         new_action.setStatusTip('Create new route')
@@ -287,7 +287,7 @@ class RouteEditor(QtWidgets.QMainWindow):
             self.split_table.removeRow(idx)
             self._insert_row(new_idx, row_data[0], row_data[1], row_data[2], row_data[3], row_data[4], row_data[5], row_data[6])
 
-        self.split_table.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+        self.split_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.MultiSelection)
 
         for idx in new_indexes:
             for col in range(self.split_table.columnCount()):
@@ -296,7 +296,7 @@ class RouteEditor(QtWidgets.QMainWindow):
                 except AttributeError:
                     pass
 
-        self.split_table.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.split_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
 
     def remove_clicked(self):
         indexes = sorted(set(item.row() for item in self.split_table.selectedItems()), reverse=True)
@@ -333,7 +333,7 @@ class RouteEditor(QtWidgets.QMainWindow):
 
         item.setIcon(QIcon(file_path))
         item.setToolTip(file_path)
-        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled | QtCore.Qt.ItemFlag.ItemIsSelectable)
         self.split_table.setItem(x, 0, item)
 
     def load_route(self, route_path=None):
@@ -404,7 +404,7 @@ class RouteEditor(QtWidgets.QMainWindow):
             item = QtWidgets.QTableWidgetItem()
             item.setIcon(QIcon(self.route.splits[i].icon_path))
             item.setToolTip(self.route.splits[i].icon_path)
-            item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled | QtCore.Qt.ItemFlag.ItemIsSelectable)
             self.split_table.setItem(i, 0, item)
             self.split_table.setItem(i, 1, QtWidgets.QTableWidgetItem(self.route.splits[i].title))
             self.split_table.setItem(i, 2, QtWidgets.QTableWidgetItem(str(self.route.splits[i].star_count)))
@@ -426,7 +426,7 @@ class RouteEditor(QtWidgets.QMainWindow):
         :return:
         """
         msg = QtWidgets.QMessageBox(self)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setWindowTitle(title)
         msg.setText(message)
         msg.show()
@@ -732,35 +732,35 @@ class RouteEditor(QtWidgets.QMainWindow):
         try:
             if self.split_types_flags[row_type] & RouteEditor.DISABLE_FADEOUT == RouteEditor.DISABLE_FADEOUT:
                 self.split_table.item(row, 3).setText("-")
-                self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.split_table.item(row, 3).setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
             else:
                 self.split_table.item(row, 3).setText(fadeouts)
                 self.split_table.item(row, 3).setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+                    QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEditable | QtCore.Qt.ItemFlag.ItemIsEnabled)
 
             if self.split_types_flags[row_type] & RouteEditor.DISABLE_FADEIN == RouteEditor.DISABLE_FADEIN:
                 self.split_table.item(row, 4).setText("-")
-                self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.split_table.item(row, 4).setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
             else:
                 self.split_table.item(row, 4).setText(fadeins)
                 self.split_table.item(row, 4).setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+                    QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEditable | QtCore.Qt.ItemFlag.ItemIsEnabled)
 
             if self.split_types_flags[row_type] & RouteEditor.DISABLE_XCAM == RouteEditor.DISABLE_XCAM:
                 self.split_table.item(row, 5).setText("-")
-                self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.split_table.item(row, 5).setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
             else:
                 self.split_table.item(row, 5).setText(xcam)
                 self.split_table.item(row, 5).setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+                    QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEditable | QtCore.Qt.ItemFlag.ItemIsEnabled)
 
             if self.split_types_flags[row_type] & RouteEditor.DISABLE_STAR_COUNT == RouteEditor.DISABLE_STAR_COUNT:
                 self.split_table.item(row, 2).setText("-")
-                self.split_table.item(row, 2).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.split_table.item(row, 2).setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
             else:
                 self.split_table.item(row, 2).setText(star_count)
                 self.split_table.item(row, 2).setFlags(
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
+                    QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEditable | QtCore.Qt.ItemFlag.ItemIsEnabled)
         except KeyError:
             pass
 
@@ -777,7 +777,7 @@ class RouteEditor(QtWidgets.QMainWindow):
             item = QtWidgets.QTableWidgetItem()
             item.setIcon(QIcon(icon_path))
             item.setToolTip(icon_path)
-            item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+            item.setFlags(QtCore.Qt.ItemFlag.ItemIsEnabled | QtCore.Qt.ItemFlag.ItemIsSelectable)
             self.split_table.setItem(index, 0, item)
 
         self.split_table.setItem(index, 1, QtWidgets.QTableWidgetItem(title))

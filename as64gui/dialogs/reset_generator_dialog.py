@@ -2,7 +2,7 @@ import time
 import os
 import shutil
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 import cv2
 
 from ..constants import (
@@ -26,7 +26,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
     line3 = """While in-game, press generate, then RESET your console. Ensure the generated images look similar to the examples. """
 
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.window_title = "Reset Template Generator Help"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
@@ -61,7 +61,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
         self.text_edit.setEnabled(False)
 
         # Child Layouts
-        self.button_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        self.button_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.button_layout.addWidget(self.ok_btn)
 
         # Configure Layout
@@ -75,7 +75,7 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
     TEMPLATE_DIR = "templates/"
     
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.window_title = "Reset Template Generator"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
@@ -120,7 +120,7 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
         self.def_2_px.setPixmap(QtGui.QPixmap(ResetGeneratorDialog.TEMPLATE_DIR + "default_reset_two.jpg"))
 
         self.button_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.button_layout.addWidget(self.help_btn)
         self.button_layout.addWidget(self.cancel_btn)
         self.button_layout.addWidget(self.generate_btn)

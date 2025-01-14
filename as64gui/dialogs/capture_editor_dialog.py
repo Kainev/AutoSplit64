@@ -1,6 +1,4 @@
-from PyQt5 import QtWidgets
-from PyQt5 import QtGui as QtGui
-from PyQt5 import QtCore as QtCore
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 import cv2
 
@@ -17,7 +15,7 @@ class CaptureEditor(QtWidgets.QDialog):
     applied = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
 
         self.window_title = "Game Capture Editor"
         self.setWindowIcon(QtGui.QIcon(resource_utils.resource_path(ICON_PATH)))
@@ -69,7 +67,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.setLayout(self.main_layout)
         self.left_widget.setLayout(self.left_layout)
         self.right_widget.setLayout(self.right_layout)
-        self.right_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.right_widget.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
 
         # Configure Top Level Widgets
         self.left_widget.setFixedWidth(220)
@@ -85,7 +83,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.capture_btn.setAutoDefault(False)
         self.auto_region_btn.setDefault(False)
         self.auto_region_btn.setAutoDefault(False)
-        self.process_combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.process_combo.setSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Minimum)
 
         self._refresh_process_list()
 
@@ -95,7 +93,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.left_layout.addWidget(self.capture_btn, 2, 0, 1, 2)
         self.left_layout.addWidget(self.auto_region_btn, 3, 0, 1, 2)
 
-        self.left_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 4, 0)
+        self.left_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Expanding), 4, 0)
 
         # Add connection for checkbox
         self.use_obs_cb.stateChanged.connect(self.toggle_capture_method)
@@ -107,7 +105,7 @@ class CaptureEditor(QtWidgets.QDialog):
         self.cancel_btn.setAutoDefault(False)
 
         self.right_layout.addWidget(self.game_region_panel, 5, 0, 1, 2)
-        self.right_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 9, 0)
+        self.right_layout.addItem(QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Policy.MinimumExpanding, QtWidgets.QSizePolicy.Policy.Expanding), 9, 0)
         self.right_layout.addWidget(HLine(), 10, 0, 1, 2)
         self.right_layout.addWidget(self.apply_btn, 15, 0)
         self.right_layout.addWidget(self.cancel_btn, 15, 1)
@@ -117,7 +115,6 @@ class CaptureEditor(QtWidgets.QDialog):
 
         # Connections
         self.graphics_scene.item_update.connect(self.on_graphics_item_update)
-
         self.capture_btn.clicked.connect(self.refresh_graphics_scene)
         self.apply_btn.clicked.connect(self.apply_clicked)
         self.cancel_btn.clicked.connect(self.cancel_clicked)
@@ -171,8 +168,8 @@ class CaptureEditor(QtWidgets.QDialog):
 
     def apply_clicked(self):
         if not self._is_correct_ratio():
-             if self.display_warning("A non 4:3 game ratio was detected, you may experience sub-optimal performance."):
-                 return
+            if self.display_warning("A non 4:3 game ratio was detected, you may experience sub-optimal performance."):
+                return
 
         if not self._is_minimum_size():
             if self.display_warning("Game width and height are below the recommended minimum (614, 448). You may experience sub-optimal performance."):
@@ -290,15 +287,15 @@ class CaptureEditor(QtWidgets.QDialog):
         back_btn.setFixedSize(150, 30)
 
         msg = QtWidgets.QMessageBox(self)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setWindowTitle(title)
         msg.setText(message)
-        msg.addButton(ignore_btn, QtWidgets.QMessageBox.NoRole)
-        msg.addButton(back_btn, QtWidgets.QMessageBox.YesRole)
-
-        result = msg.exec_()
-
-        return result
+        msg.addButton(ignore_btn, QtWidgets.QMessageBox.ButtonRole.ApplyRole)
+        msg.addButton(back_btn, QtWidgets.QMessageBox.ButtonRole.YesRole)
+        
+        result = msg.exec()
+        
+        return result != 2  # True if back_btn, False if ignore_btn
 
     def auto_detect_region(self):
         try:
@@ -413,10 +410,10 @@ class RectangleCapturePanel(QtWidgets.QWidget):
         self.width_lb.setFixedWidth(70)
         self.height_lb.setFixedWidth(70)
 
-        self.xoffset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.yoffset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.width_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.height_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.xoffset_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.yoffset_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.width_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.height_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
         self.xoffset_le.setMinimumWidth(80)
         self.yoffset_le.setMinimumWidth(80)
