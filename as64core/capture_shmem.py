@@ -24,7 +24,7 @@ class SharedMemoryCapture(object):
         """Open the shared memory connection"""
         self.shmem_handle = ctypes.windll.kernel32.OpenFileMappingW(FILE_MAP_READ, False, SHMEM_NAME)
         if not self.shmem_handle:
-            raise Exception("Could not open shared memory")
+            raise Exception("Could not find OBS Grabber Plugin!\n\nPlease make sure the plugin is enabled and OBS is running.")
         
         # Read initial header to set up first mapping
         self._update_dimensions()

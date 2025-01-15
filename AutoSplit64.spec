@@ -33,14 +33,23 @@ a = Analysis(
     noarchive=False,
     optimize=0,
 )
+
+splash = Splash(
+    'resources\\gui\\icons\\as64plus.png',
+    binaries=a.binaries,
+    datas=a.datas
+)
+
 pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
+    splash,            
+    splash.binaries,
     [],
     exclude_binaries=True,
-    name='AutoSplit64',
+    name='AutoSplit64plus',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -51,9 +60,10 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['resources\\gui\\icons\\icon.ico'],
+    icon=['resources\\gui\\icons\\as64plus.ico'],
     contents_directory='.'
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
@@ -61,5 +71,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='AutoSplit64',
+    name='AutoSplit64plus',
 )

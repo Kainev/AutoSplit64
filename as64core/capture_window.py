@@ -100,7 +100,7 @@ def capture(hwnd, client_area=True):
     save_dc.DeleteDC()
     mfc_dc.DeleteDC()
     win32gui.ReleaseDC(hwnd, hwnd_dc)
-
+    
     return image
 
 

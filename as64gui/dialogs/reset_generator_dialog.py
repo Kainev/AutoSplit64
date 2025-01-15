@@ -52,7 +52,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
 
     def initialize_window(self):
         self.setWindowTitle(self.window_title)
-        self.resize(400, 225)
+        self.resize(400, 260)
 
         # Create Layout
         self.setLayout(self.menu_layout)
@@ -272,10 +272,11 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
         :return:
         """
         msg = QtWidgets.QMessageBox(self)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setWindowTitle(title)
         msg.setText(message)
-        msg.show()
+        msg.exec()
+        self.hide()
 
 
 class ResetGenerator(QtCore.QThread):
@@ -287,7 +288,7 @@ class ResetGenerator(QtCore.QThread):
     def __init__(self):
         super().__init__()
         self._running = False
-        self._game_capture = GameCapture(config.get("game", "process_name"), config.get("game", "game_region"), GAME_JP)
+        self._game_capture = GameCapture(config.get("game", "use_obs"), config.get("game", "process_name"), config.get("game", "game_region"), GAME_JP)
 
     def run(self):
         self._running = True
@@ -295,15 +296,22 @@ class ResetGenerator(QtCore.QThread):
         frame = 0
 
         generated_frames = []
+        
+        try:
+            self._game_capture.is_valid()
+        except Exception as e:
+            self.error.emit(str(e))
+            self.stop()
+            return
 
         while self._running:
             c_time = time.time()
             try:
                 self._game_capture.capture()
-            except:
-                self.error.emit("Unable to capture " + config.get("game", "process_name"))
+            except Exception as e:
+                self.error.emit(str(e))
                 self.stop()
-                break
+                return
 
             reset_region = self._game_capture.get_region(RESET_REGION)
             fadeout_region = self._game_capture.get_region(FADEOUT_REGION)

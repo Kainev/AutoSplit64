@@ -2,9 +2,6 @@ import os
 from threading import Thread
 from functools import partial
 import re
-import json
-
-import requests
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -73,6 +70,13 @@ class App(QtWidgets.QMainWindow):
 
         self.initialize()
         self.show()
+        
+        # Handle splash screen closure
+        try:
+            import pyi_splash
+            pyi_splash.close()
+        except (ImportError, ModuleNotFoundError):
+            pass
 
     def set_always_on_top(self, on_top):
         if on_top:
@@ -158,6 +162,14 @@ class App(QtWidgets.QMainWindow):
             self.star_count.split_star = self.route.splits[0].star_count
             self.stop.emit()
         elif self.start_btn.get_state() == "start":
+            # Check reset template files
+            reset_frame_one = resource_path(config.get("advanced", "reset_frame_one"))
+            reset_frame_two = resource_path(config.get("advanced", "reset_frame_two"))
+        
+            if not os.path.exists(reset_frame_one) or not os.path.exists(reset_frame_two):
+                self.display_error_message("Reset template files are missing!\n\nPlease generate reset templates first.")
+                return
+            
             self.start_btn.set_state("init")
             self.start.emit()
 
@@ -334,7 +346,7 @@ class App(QtWidgets.QMainWindow):
         except AttributeError:
             pass
 
-    def display_error_message(self, message, title="Core Error"):
+    def display_error_message(self, message, title="Error"):
         """
         Display a warning dialog with given title and message
         :param title: Window title

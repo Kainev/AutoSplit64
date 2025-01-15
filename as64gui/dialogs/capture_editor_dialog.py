@@ -7,7 +7,9 @@ from as64core import resource_utils
 from ..widgets import HLine
 from ..graphics import RectangleSelector
 from ..constants import (
-    ICON_PATH
+    ICON_PATH,
+    PLACEHOLDER_PATH,
+    PREVIEW_PATH
 )
 
 class CaptureEditor(QtWidgets.QDialog):
@@ -22,11 +24,6 @@ class CaptureEditor(QtWidgets.QDialog):
         
         # Initialize SharedMemoryCapture
         self.shmem_capture = capture_shmem.SharedMemoryCapture()
-
-        # File Paths
-        # TODO: ADD TO CONSTANTS
-        self.preview_image_path = r'resources/game_preview.png'
-        self.preview_not_found_image_path = r'resources/game_preview_not_found.png'
 
         # Layouts
         self.main_layout = QtWidgets.QHBoxLayout()
@@ -129,9 +126,6 @@ class CaptureEditor(QtWidgets.QDialog):
         self.process_lb.setVisible(not use_obs)
         self.process_combo.setVisible(not use_obs)
 
-        # Save the preference
-        config.set_key("capture", "use_obs", use_obs)
-
         # Refresh the view with new capture method
         self.refresh_graphics_scene()
 
@@ -176,6 +170,7 @@ class CaptureEditor(QtWidgets.QDialog):
                 return
 
         # Config
+        config.set_key("game", "use_obs", self.use_obs_cb.isChecked())
         config.set_key("game", "game_region", self.game_region_panel.get_data())
         if not self.use_obs_cb.isChecked():
             config.set_key("game", "process_name", self.process_combo.currentText())
@@ -225,8 +220,11 @@ class CaptureEditor(QtWidgets.QDialog):
         if self.use_obs_cb.isChecked():
             try:
                 preview_image = self.shmem_capture.capture()
-                cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+                cv2.imwrite(resource_utils.resource_path(PREVIEW_PATH), preview_image)
             except:
+                # If capture fails, display a placeholder image
+                cv2.imwrite(resource_utils.resource_path(PREVIEW_PATH), cv2.imread(resource_utils.resource_path(PLACEHOLDER_PATH)))                
+                
                 pass
         else:
             # Update screen capture
@@ -240,11 +238,11 @@ class CaptureEditor(QtWidgets.QDialog):
             if selected_hwnd:
                 try:
                     preview_image = capture_window.capture(selected_hwnd)
-                    cv2.imwrite(resource_utils.resource_path(self.preview_image_path), preview_image)
+                    cv2.imwrite(resource_utils.resource_path(PREVIEW_PATH), preview_image)
                 except:
                     pass
             
-        self.preview_pixmap.load(resource_utils.resource_path(self.preview_image_path))
+        self.preview_pixmap.load(resource_utils.resource_path(PREVIEW_PATH))
 
         # Re-add all items to scene
         self.graphics_scene.addPixmap(self.preview_pixmap)
