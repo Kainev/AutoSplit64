@@ -2,7 +2,7 @@ import time
 import os
 import shutil
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 import cv2
 
 from ..constants import (
@@ -26,7 +26,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
     line3 = """While in-game, press generate, then RESET your console. Ensure the generated images look similar to the examples. """
 
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.window_title = "Reset Template Generator Help"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
@@ -52,7 +52,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
 
     def initialize_window(self):
         self.setWindowTitle(self.window_title)
-        self.resize(400, 225)
+        self.resize(400, 260)
 
         # Create Layout
         self.setLayout(self.menu_layout)
@@ -61,7 +61,7 @@ class ResetGeneratorHelpDialog(QtWidgets.QDialog):
         self.text_edit.setEnabled(False)
 
         # Child Layouts
-        self.button_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        self.button_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.button_layout.addWidget(self.ok_btn)
 
         # Configure Layout
@@ -75,7 +75,7 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
     TEMPLATE_DIR = "templates/"
     
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.window_title = "Reset Template Generator"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
@@ -120,7 +120,7 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
         self.def_2_px.setPixmap(QtGui.QPixmap(ResetGeneratorDialog.TEMPLATE_DIR + "default_reset_two.jpg"))
 
         self.button_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.button_layout.addWidget(self.help_btn)
         self.button_layout.addWidget(self.cancel_btn)
         self.button_layout.addWidget(self.generate_btn)
@@ -272,10 +272,11 @@ class ResetGeneratorDialog(QtWidgets.QDialog):
         :return:
         """
         msg = QtWidgets.QMessageBox(self)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setWindowTitle(title)
         msg.setText(message)
-        msg.show()
+        msg.exec()
+        self.hide()
 
 
 class ResetGenerator(QtCore.QThread):
@@ -287,7 +288,7 @@ class ResetGenerator(QtCore.QThread):
     def __init__(self):
         super().__init__()
         self._running = False
-        self._game_capture = GameCapture(config.get("game", "process_name"), config.get("game", "game_region"), GAME_JP)
+        self._game_capture = GameCapture(config.get("game", "use_obs"), config.get("game", "process_name"), config.get("game", "game_region"), GAME_JP)
 
     def run(self):
         self._running = True
@@ -295,15 +296,22 @@ class ResetGenerator(QtCore.QThread):
         frame = 0
 
         generated_frames = []
+        
+        try:
+            self._game_capture.is_valid()
+        except Exception as e:
+            self.error.emit(str(e))
+            self.stop()
+            return
 
         while self._running:
             c_time = time.time()
             try:
                 self._game_capture.capture()
-            except:
-                self.error.emit("Unable to capture " + config.get("game", "process_name"))
+            except Exception as e:
+                self.error.emit(str(e))
                 self.stop()
-                break
+                return
 
             reset_region = self._game_capture.get_region(RESET_REGION)
             fadeout_region = self._game_capture.get_region(FADEOUT_REGION)

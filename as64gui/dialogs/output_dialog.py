@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 import time
 
 from ..constants import (
@@ -14,7 +14,7 @@ class OutputDialog(QtWidgets.QDialog):
     open_capture = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
         self.window_title = "Output"
         self.setWindowIcon(QtGui.QIcon(resource_utils.base_path(ICON_PATH)))
 
@@ -59,22 +59,22 @@ class OutputDialog(QtWidgets.QDialog):
 
     def initialize_window(self):
         self.setWindowTitle(self.window_title)
-        self.setFixedSize(240, 375)
+        self.setFixedSize(250, 375)
 
         # Create Layout
         self.setLayout(self.primary_layout)
 
         # Configure Widgets
-        self.fade_status_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.fade_out_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.fade_in_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.xcam_percent_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.xcam_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.xcam_status_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.prediction_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.probability_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.execution_lb.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.update_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.fade_status_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.fade_out_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.fade_in_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_percent_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_status_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.prediction_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.probability_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.execution_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.update_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
         self.fade_status_le.setDisabled(True)
         self.fade_out_le.setDisabled(True)
@@ -120,10 +120,10 @@ class OutputDialog(QtWidgets.QDialog):
         self.primary_layout.addWidget(self.fade_in_le, 3, 1)
 
         self.primary_layout.addItem(
-            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 4, 0)
         self.primary_layout.addWidget(HLine(), 5, 0, 1, 4)
         self.primary_layout.addItem(
-            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 6, 0)
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 6, 0)
 
         self.primary_layout.addWidget(self.xcam_percent_lb, 7, 0)
         self.primary_layout.addWidget(self.xcam_percent_le, 8, 0)
@@ -144,13 +144,13 @@ class OutputDialog(QtWidgets.QDialog):
         self.primary_layout.addWidget(self.execution_lb, 18, 0)
         self.primary_layout.addWidget(self.execution_le, 19, 0)
 
-        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 20, 0)
+        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 20, 0)
         self.primary_layout.addWidget(HLine(), 21, 0, 1, 4)
-        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 22, 0)
+        self.primary_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 22, 0)
 
         self.primary_layout.addLayout(update_rate_layout, 23, 1)
 
-        self.primary_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 40, 0)
+        self.primary_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 40, 0)
 
         # Connections
         self.update_le.editingFinished.connect(self._update_rate_changed)

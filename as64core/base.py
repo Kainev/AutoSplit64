@@ -40,8 +40,7 @@ class Base(Thread):
         config.load_config()
 
         # Connect to LiveSplit
-        self._ls_socket = livesplit.init_socket()
-        livesplit.connect(self._ls_socket)
+        self._ls_socket = livesplit.connect()
 
         # Load Route
         self._route = load_route(config.get("route", "path"))
@@ -57,7 +56,7 @@ class Base(Thread):
                 version = config.get("route", "path")
 
         # Initialize the Game Capture
-        self._game_capture = GameCapture(config.get("game", "process_name"), config.get("game", "game_region"), version)
+        self._game_capture = GameCapture(config.get("game", "use_obs"), config.get("game", "process_name"), config.get("game", "game_region"), version)
 
         # Initialise Prediction Model
         self._model = Model(config.get("model", "path"), config.get("model", "width"), config.get("model", "height"))
@@ -170,14 +169,18 @@ class Base(Thread):
         self.logger = logging.getLogger(".log")
 
     def validity_check(self):
-        if not self._game_capture.is_valid():
-            self._error_occurred("Could not find " + config.get("game", "process_name"))
+
+        
+        try:
+            self._game_capture.is_valid()
+        except Exception as e:
+            self._error_occurred(str(e))
             return False
 
         try:
             self._game_capture.capture()
-        except:
-            self._error_occurred("Could not capture " + config.get("game", "process_name"))
+        except Exception as e:
+            self._error_occurred(str(e))
             return False
 
         current_capture_size = self._game_capture.get_capture_size()
@@ -187,7 +190,7 @@ class Base(Thread):
             return False
 
         if not livesplit.check_connection(self._ls_socket):
-            self._error_occurred("Could not connect to LiveSplit. Ensure the LiveSplit Server is started.")
+            self._error_occurred("Could not connect to LiveSplit.\nIs LiveSplit running?\nIf Connection mode is TCP, ensure the LiveSplit Server is started.")
             return False
 
         if not self._route:
@@ -202,8 +205,10 @@ class Base(Thread):
 
     def stop(self):
         self._running = False
-
+    	# stop the livesplit connection
         livesplit.disconnect(self._ls_socket)
+        # Destruct the shared memory connection
+        self._game_capture.close()
 
     def run(self):
         try:
@@ -222,14 +227,12 @@ class Base(Thread):
                 try:
                     self._game_capture.capture()
                 except:
-                    self._error_occurred("Unable to capture " + config.get("game", "process_name"))
-
+                    self._error_occurred("Unable to capture frame")
                 ls_index = max(livesplit.split_index(self._ls_socket), 0)
                 if ls_index != self.split_index():
                     self.set_split_index(ls_index)
 
                 self.analyze_fade_status()
-
                 if self._make_predictions:
                     self.analyze_star_count()
 
@@ -243,12 +246,13 @@ class Base(Thread):
                         self._processor_switch.execute(SPLIT_INITIAL)
                 except ConnectionAbortedError:
                     self._error_occurred("LiveSplit connection failed")
-
+                
                 try:
                     as64.execution_time = time.time() - as64.current_time
                     time.sleep(1 / as64.fps - as64.execution_time)
                 except ValueError:
                     pass
+                
         except Exception:
             self.logger.error("Fatal Error", exc_info=True)
 
@@ -313,9 +317,17 @@ class Base(Thread):
 
     def _analyze_star_count_probability_mode(self):
         try:
-            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
+            resized_image = cv2.resize(
+                convert_to_cv2(self._game_capture.get_region(STAR_REGION)), 
+                (self._model.width, self._model.height)
+            )
+            try:
+                as64.prediction_info = self._model.predict(resized_image)
+            except (AttributeError, tf.errors.InvalidArgumentError) as e:
+                self._error_occurred(f"Model prediction failed: {str(e)}")
+                return
         except cv2.error:
-            self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
+            self._error_occurred("An error occurred while processing the frame")
             return
 
         total_predictions = len(self._predictions)
@@ -345,9 +357,17 @@ class Base(Thread):
 
     def _analyze_star_count_confirmation_mode(self):
         try:
-            as64.prediction_info = self._model.predict(cv2.resize(convert_to_cv2(self._game_capture.get_region(STAR_REGION)), (self._model.width, self._model.height)))
+            resized_image = cv2.resize(
+                convert_to_cv2(self._game_capture.get_region(STAR_REGION)), 
+                (self._model.width, self._model.height)
+            )
+            try:
+                as64.prediction_info = self._model.predict(resized_image)
+            except (AttributeError, tf.errors.InvalidArgumentError) as e:
+                self._error_occurred(f"Model prediction failed: {str(e)}")
+                return
         except cv2.error:
-            self._error_occurred("An error occurred while processing " + config.get("game", "process_name"))
+            self._error_occurred("An error occurred while processing the frame")
             return
 
         total_predictions = len(self._predictions)

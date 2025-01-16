@@ -2,33 +2,27 @@ import os
 from threading import Thread
 from functools import partial
 import re
-import json
 
-import requests
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from as64core import route_loader, config
 from as64core.resource_utils import base_path, resource_path, absolute_path, rel_to_abs
 from . import constants
 from .widgets import PictureButton, StateButton, StarCountDisplay, SplitListWidget
-from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, UpdateDialog, OutputDialog
+from .dialogs import AboutDialog, CaptureEditor, SettingsDialog, RouteEditor, ResetGeneratorDialog, OutputDialog
 
 
 class App(QtWidgets.QMainWindow):
     start = QtCore.pyqtSignal()
     stop = QtCore.pyqtSignal()
     closed = QtCore.pyqtSignal()
-    check_update = QtCore.pyqtSignal()
-    ignore_update = QtCore.pyqtSignal()
-    install_update = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
         # Window Properties
         self.title = constants.TITLE
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
+        self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.width = 365
         self.height = 259
         self.setWindowIcon(QtGui.QIcon(base_path(constants.ICON_PATH)))
@@ -68,7 +62,6 @@ class App(QtWidgets.QMainWindow):
             "settings_dialog": SettingsDialog(self),
             "route_editor": RouteEditor(self),
             "reset_dialog": ResetGeneratorDialog(self),
-            "update_dialog": UpdateDialog(self),
             "output_dialog": OutputDialog(self)
         }
 
@@ -77,12 +70,19 @@ class App(QtWidgets.QMainWindow):
 
         self.initialize()
         self.show()
+        
+        # Handle splash screen closure
+        try:
+            import pyi_splash
+            pyi_splash.close()
+        except (ImportError, ModuleNotFoundError):
+            pass
 
     def set_always_on_top(self, on_top):
         if on_top:
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
 
         self.show()
 
@@ -91,9 +91,9 @@ class App(QtWidgets.QMainWindow):
         self.setWindowTitle(self.title)
 
         if config.get("general", "on_top"):
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
 
         self.setFixedSize(self.width, self.height)
 
@@ -139,9 +139,7 @@ class App(QtWidgets.QMainWindow):
         self.dialogs["route_editor"].route_updated.connect(self._on_route_update)
         self.dialogs["settings_dialog"].applied.connect(self.settings_updated)
         self.dialogs["capture_editor"].applied.connect(self._reset)
-        self.dialogs["update_dialog"].ignore_btn.clicked.connect(lambda: self.ignore_update.emit())
-        self.dialogs["update_dialog"].update_btn.clicked.connect(lambda: self.install_update.emit())
-
+ 
     def settings_updated(self):
         self.set_always_on_top(config.get("general", "on_top"))
         self._reset()
@@ -164,6 +162,14 @@ class App(QtWidgets.QMainWindow):
             self.star_count.split_star = self.route.splits[0].star_count
             self.stop.emit()
         elif self.start_btn.get_state() == "start":
+            # Check reset template files
+            reset_frame_one = resource_path(config.get("advanced", "reset_frame_one"))
+            reset_frame_two = resource_path(config.get("advanced", "reset_frame_two"))
+        
+            if not os.path.exists(reset_frame_one) or not os.path.exists(reset_frame_two):
+                self.display_error_message("Reset template files are missing!\n\nPlease generate reset templates first.")
+                return
+            
             self.start_btn.set_state("init")
             self.start.emit()
 
@@ -230,19 +236,6 @@ class App(QtWidgets.QMainWindow):
         if file_path:
             self._save_open_route(file_path)
 
-    def update_found(self, info):
-        # TODO: RENAME FUNCTION
-        if info["found"]:
-            self.dialogs["update_dialog"].set_update_info(info)
-            self.dialogs["update_dialog"].show()
-        elif info["override_ignore"]:
-            msg = QtWidgets.QMessageBox(self)
-            msg.setFixedWidth(200)
-            msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setWindowTitle("Updater")
-            msg.setText("Up to date!")
-            msg.show()
-
     def contextMenuEvent(self, event):
         context_menu = QtWidgets.QMenu(self)
         route_menu = QtWidgets.QMenu("Open Route")
@@ -250,7 +243,7 @@ class App(QtWidgets.QMainWindow):
         category_menus = {}
 
         # SRL MODE Action
-        srl_action = QtWidgets.QAction("SRL Mode", self, checkable=True)
+        srl_action = QtGui.QAction("SRL Mode", self, checkable=True)
         context_menu.addAction(srl_action)
         srl_action.setChecked(config.get("general", "srl_mode"))
         context_menu.addSeparator()
@@ -283,16 +276,15 @@ class App(QtWidgets.QMainWindow):
         context_menu.addSeparator()
         output_action = context_menu.addAction("Show Output")
         context_menu.addSeparator()
-        on_top_action = QtWidgets.QAction("Always On Top", self, checkable=True)
+        on_top_action = QtGui.QAction("Always On Top", self, checkable=True)
         context_menu.addAction(on_top_action)
         on_top_action.setChecked(config.get("general", "on_top"))
         context_menu.addSeparator()
         about_action = context_menu.addAction("About")
-        # update_action = context_menu.addAction("Check for Updates..")
         context_menu.addSeparator()
         exit_action = context_menu.addAction("Exit")
 
-        action = context_menu.exec_(self.mapToGlobal(event.pos()))
+        action = context_menu.exec(self.mapToGlobal(event.pos()))
 
         # Connections
         if action == srl_action:
@@ -322,8 +314,6 @@ class App(QtWidgets.QMainWindow):
             self.set_always_on_top(config.get("general", "on_top"))
         elif action == about_action:
             self.dialogs["about_dialog"].show()
-        # elif action == update_action:
-        #     self.check_update.emit()
         elif action == exit_action:
             self.close()
         else:
@@ -333,29 +323,30 @@ class App(QtWidgets.QMainWindow):
                 pass
 
     def mousePressEvent(self, event):
-        if event.buttons() == QtCore.Qt.LeftButton:
+        if event.buttons() == QtCore.Qt.MouseButton.LeftButton:
             self._drag = True
-            self._drag_position = event.globalPos()-self.pos()
+            self._drag_position = event.globalPosition().toPoint() - self.pos()
             event.accept()
 
         self.dialogs["about_dialog"].close()
 
     def mouseReleaseEvent(self, event):
-        self._drag = False
-        event.accept()
+        if event.buttons() == QtCore.Qt.MouseButton.LeftButton:
+            self._drag = False
+            event.accept()
 
     def mouseMoveEvent(self, event):
         try:
-            if event.buttons() == QtCore.Qt.LeftButton:
+            if event.buttons() == QtCore.Qt.MouseButton.LeftButton:
                 try:
-                    self.move(event.globalPos() - self._drag_position)
+                    self.move(event.globalPosition().toPoint() - self._drag_position)
                 except TypeError:
                     pass
                 event.accept()
         except AttributeError:
             pass
 
-    def display_error_message(self, message, title="Core Error"):
+    def display_error_message(self, message, title="Error"):
         """
         Display a warning dialog with given title and message
         :param title: Window title
@@ -363,10 +354,10 @@ class App(QtWidgets.QMainWindow):
         :return:
         """
         msg = QtWidgets.QMessageBox(self)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setWindowTitle(title)
         msg.setText(message)
-        msg.show()
+        msg.exec()
 
     def _load_route_dir(self):
         self._routes = {}

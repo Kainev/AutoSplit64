@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QDropEvent
-from PyQt5.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem, QComboBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDropEvent
+from PyQt6.QtWidgets import QTableWidget, QAbstractItemView, QTableWidgetItem, QComboBox
 
 
 class TableWidgetDragRows(QTableWidget):
@@ -13,8 +13,8 @@ class TableWidgetDragRows(QTableWidget):
         # self.setDragDropOverwriteMode(False)
         # self.setDropIndicatorShown(True)
 
-        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         # self.setDragDropMode(QAbstractItemView.InternalMove)
 
     """def dropEvent(self, event: QDropEvent):

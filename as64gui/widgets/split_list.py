@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 
 class SplitListWidget(QtWidgets.QWidget):
@@ -14,12 +14,12 @@ class SplitListWidget(QtWidgets.QWidget):
     def paintEvent(self, event):
         painter = QtGui.QPainter()
 
-        split_height = event.rect().height() / self._display_count
+        split_height = int(event.rect().height() / self._display_count)
         split_width = event.rect().width()
         text_width = split_width - split_height
         x_pos = split_height
-        pixmap_dimension = split_height * 0.8
-        pixmap_spacing = (split_height - pixmap_dimension) / 2
+        pixmap_dimension = int(split_height * 0.8)
+        pixmap_spacing = int((split_height - pixmap_dimension) / 2)
 
         painter.begin(self)
 
@@ -29,12 +29,15 @@ class SplitListWidget(QtWidgets.QWidget):
                 y_pos = split_height * i
 
                 if split_index == self._selected_index:
-                    painter.fillRect(0, y_pos, split_width, split_height, QtWidgets.QApplication.palette().color(QtGui.QPalette.Highlight))
+                    painter.fillRect(0, int(y_pos), int(split_width), int(split_height), 
+                                     QtWidgets.QApplication.palette().color(QtGui.QPalette.ColorRole.Highlight))
 
                 if self.splits[split_index].pixmap:
-                    painter.drawPixmap(pixmap_spacing, split_height * i + pixmap_spacing, pixmap_dimension, pixmap_dimension, self.splits[split_index].pixmap)
+                    painter.drawPixmap(int(pixmap_spacing), int(split_height * i + pixmap_spacing), int(pixmap_dimension), int(pixmap_dimension), self.splits[split_index].pixmap)
 
-                painter.drawText(x_pos, y_pos, text_width, split_height, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, self.splits[split_index].text)
+                painter.drawText(int(x_pos), int(y_pos), int(text_width), int(split_height), 
+                                 QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter, 
+                                 self.splits[split_index].text)
             except IndexError:
                 pass
 

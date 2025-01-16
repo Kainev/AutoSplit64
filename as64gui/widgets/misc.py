@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtWidgets, QtGui
 
 from as64gui.widgets import PictureButton
 from as64gui import constants
@@ -8,10 +8,9 @@ class HLine(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setFrameShape(QtWidgets.QFrame.HLine)
-        #self.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.setFrameShape(QtWidgets.QFrame.Shape.HLine)
         palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(43, 45, 47))
+        palette.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(43, 45, 47))
         self.setPalette(palette)
 
 
@@ -30,12 +29,12 @@ class StarCountDisplay(QtWidgets.QWidget):
         self.setLayout(layout)
 
         # Configure Widgets
-        self.left_lb.setAlignment(QtCore.Qt.AlignRight)
-        self.right_lb.setAlignment(QtCore.Qt.AlignLeft)
+        self.left_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        self.right_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
 
-        self.left_lb.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.slash_lb.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        self.right_lb.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.left_lb.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.slash_lb.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.right_lb.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
 
         layout.addWidget(self.left_lb)
         layout.addWidget(self.slash_lb)

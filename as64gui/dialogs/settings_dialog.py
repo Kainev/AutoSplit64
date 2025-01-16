@@ -1,4 +1,5 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QSizePolicy
 
 from as64core import resource_utils
 from as64core import config
@@ -12,7 +13,7 @@ class SettingsDialog(QtWidgets.QDialog):
     applied = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        super().__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint)
+        super().__init__(parent, QtCore.Qt.WindowType.WindowSystemMenuHint | QtCore.Qt.WindowType.WindowCloseButtonHint)
 
         self.window_title = "Settings"
         self.setWindowIcon(QtGui.QIcon(resource_utils.resource_path(ICON_PATH)))
@@ -51,7 +52,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
         # Configure Widgets
         self.menu_list.setMinimumWidth(80)
-        self.menu_list.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.menu_list.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         self.menu_list.addItems(["General", "Connection", "Thresholds", "Colour Thresholds", "Error Correction", "Advanced"])
         self.menu_list.setSpacing(8)
 
@@ -62,10 +63,10 @@ class SettingsDialog(QtWidgets.QDialog):
         self.stacked_widget.addWidget(self.error_menu)
         self.stacked_widget.addWidget(self.adv_menu)
 
-        self.stacked_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.stacked_widget.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
 
         # Add Widgets
-        self.apply_cancel_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        self.apply_cancel_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.apply_cancel_layout.addWidget(self.apply_btn)
         self.apply_cancel_layout.addWidget(self.cancel_btn)
 
@@ -137,12 +138,12 @@ class BaseMenu(QtWidgets.QWidget):
 
         # Configure Widgets
         self.title_label.setFont(self.title_font)
-        self.title_label.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.title_label.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
-        self.title_line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.title_line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.title_line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        self.title_line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
 
-        self.menu_frame.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.menu_frame.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding)
 
         # Add Widgets
         self.primary_layout.addWidget(self.title_label)
@@ -181,23 +182,23 @@ class GeneralMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
-        self.mode_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.mode_lb.setMaximumWidth(120)
-        self.mode_combo.setMaximumWidth(120)
+        self.mode_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.mode_lb.setMaximumWidth(130)
+        self.mode_combo.setMaximumWidth(130)
         self.mode_combo.addItems(["Probability", "X-Cam"])
 
-        self.override_ver_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.override_ver_lb.setMaximumWidth(120)
+        self.override_ver_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.override_ver_lb.setMaximumWidth(130)
         self.override_ver_cb.setMaximumWidth(20)
-        self.override_ver_combo.setMaximumWidth(120)
+        self.override_ver_combo.setMaximumWidth(130)
         self.override_ver_combo.addItems(["JP", "US"])
 
-        self.mid_run_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.mid_run_lb.setMaximumWidth(120)
+        self.mid_run_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.mid_run_lb.setMaximumWidth(130)
         self.mid_run_cb.setMaximumWidth(20)
 
-        self.on_top_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.on_top_lb.setMaximumWidth(120)
+        self.on_top_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.on_top_lb.setMaximumWidth(130)
         self.on_top_cb.setMaximumWidth(20)
 
         # Add Widgets
@@ -205,42 +206,42 @@ class GeneralMenu(BaseMenu):
         self.menu_layout.addWidget(self.on_top_cb, 2, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 3, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 3, 0)
 
         self.menu_layout.addWidget(HLine(), 4, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 5, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 5, 0)
 
         self.menu_layout.addWidget(self.mode_lb, 6, 0)
         self.menu_layout.addWidget(self.mode_combo, 6, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 7, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 7, 0)
 
         self.menu_layout.addWidget(HLine(), 8, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 9, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 9, 0)
 
         self.menu_layout.addWidget(self.mid_run_lb, 10, 0)
         self.menu_layout.addWidget(self.mid_run_cb, 10, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 11, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 11, 0)
 
         self.menu_layout.addWidget(HLine(), 12, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 13, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 13, 0)
 
         self.menu_layout.addWidget(self.override_ver_lb, 14, 0)
         self.menu_layout.addWidget(self.override_ver_cb, 14, 1)
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 14, 2)
+            QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 14, 2)
         self.menu_layout.addWidget(self.override_ver_combo, 15, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 30, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 30, 0)
 
         # Connections
         self.override_ver_cb.clicked.connect(self.override_clicked)
@@ -316,33 +317,33 @@ class ThresholdsMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
-        self.prob_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.reset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.confirmation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.black_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.xcam_bg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.xcam_rg_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.xcam_bg_activation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.xcam_rg_activation_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.xcam_pixel_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.undo_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.prob_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.reset_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.confirmation_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.black_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_bg_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_rg_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_bg_activation_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_rg_activation_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.xcam_pixel_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.undo_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.prob_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.reset_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.confirmation_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.white_lb.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.black_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.white_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.xcam_bg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.xcam_rg_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.xcam_bg_activation_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.xcam_rg_activation_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.xcam_pixel_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.undo_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.prob_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.reset_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.confirmation_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.white_lb.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.black_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.white_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.xcam_bg_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.xcam_rg_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.xcam_bg_activation_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.xcam_rg_activation_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.xcam_pixel_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.undo_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         # Add Widgets
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 4, 0)
 
         self.menu_layout.addWidget(self.prob_lb, 5, 0)
         self.menu_layout.addWidget(self.prob_le, 5, 1)
@@ -352,12 +353,12 @@ class ThresholdsMenu(BaseMenu):
         self.menu_layout.addWidget(self.confirmation_le, 6, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 7, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 7, 0)
 
         self.menu_layout.addWidget(HLine(), 8, 0, 1, 4)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 9, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 9, 0)
 
         self.menu_layout.addWidget(self.black_lb, 10, 0)
         self.menu_layout.addWidget(self.black_le, 10, 1)
@@ -365,12 +366,12 @@ class ThresholdsMenu(BaseMenu):
         self.menu_layout.addWidget(self.white_le, 10, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 11, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 11, 0)
 
         self.menu_layout.addWidget(HLine(), 12, 0, 1, 4)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 13, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 13, 0)
 
         self.menu_layout.addWidget(self.xcam_bg_lb, 14, 0)
         self.menu_layout.addWidget(self.xcam_bg_le, 14, 1)
@@ -384,17 +385,17 @@ class ThresholdsMenu(BaseMenu):
         self.menu_layout.addWidget(self.xcam_pixel_le, 16, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 17, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 17, 0)
 
         self.menu_layout.addWidget(HLine(), 18, 0, 1, 4)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 19, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 19, 0)
 
         self.menu_layout.addWidget(self.undo_lb, 20, 0)
         self.menu_layout.addWidget(self.undo_le, 20, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 21, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 21, 0)
 
         self.prob_le.setValidator(self.double_validator)
         self.reset_le.setValidator(self.double_validator)
@@ -458,7 +459,7 @@ class ColourThresholdsMenu(BaseMenu):
         # Mips Split
         self.mips_widget = QtWidgets.QWidget()
         self.mips_widget.setLayout(QtWidgets.QGridLayout())
-        self.mips_widget.layout().setAlignment(QtCore.Qt.AlignLeft)
+        self.mips_widget.layout().setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.portal_lower_bound = SettingsColourWidget("Portal Lower Bound:", "split_ddd_enter", "portal_lower_bound", self.mips_widget)
         self.portal_upper_bound = SettingsColourWidget("Portal Upper Bound:", "split_ddd_enter", "portal_upper_bound", self.mips_widget)
         self.hat_lower_bound = SettingsColourWidget("Hat Lower Bound:", "split_ddd_enter", "hat_lower_bound", self.mips_widget)
@@ -467,7 +468,7 @@ class ColourThresholdsMenu(BaseMenu):
         # Final Bowser
         self.final_bowser_widget = QtWidgets.QWidget()
         self.final_bowser_widget.setLayout(QtWidgets.QGridLayout())
-        self.final_bowser_widget.layout().setAlignment(QtCore.Qt.AlignLeft)
+        self.final_bowser_widget.layout().setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.stage_lower_bound = SettingsColourWidget("Stage Lower Bound:", "split_final_star", "stage_lower_bound", self.final_bowser_widget)
         self.stage_upper_bound = SettingsColourWidget("Stage Upper Bound:", "split_final_star", "stage_upper_bound", self.final_bowser_widget)
         self.star_lower_bound = SettingsColourWidget("Star Lower Bound:", "split_final_star", "star_lower_bound", self.final_bowser_widget)
@@ -502,7 +503,7 @@ class ColourThresholdsMenu(BaseMenu):
         # DDD Split
         self.mips_widget.layout().addWidget(self.portal_lower_bound, 0, 0)
         self.mips_widget.layout().addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 1)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 0, 1)
         self.mips_widget.layout().addWidget(self.portal_upper_bound, 1, 0)
         self.mips_widget.layout().addWidget(self.hat_lower_bound, 2, 0)
         self.mips_widget.layout().addWidget(self.hat_upper_bound, 3, 0)
@@ -510,7 +511,7 @@ class ColourThresholdsMenu(BaseMenu):
         # Final Bowser Split
         self.final_bowser_widget.layout().addWidget(self.stage_lower_bound, 0, 0)
         self.final_bowser_widget.layout().addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 1)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 0, 1)
         self.final_bowser_widget.layout().addWidget(self.stage_upper_bound, 1, 0)
         self.final_bowser_widget.layout().addWidget(self.star_lower_bound, 2, 0)
         self.final_bowser_widget.layout().addWidget(self.star_upper_bound, 3, 0)
@@ -518,27 +519,27 @@ class ColourThresholdsMenu(BaseMenu):
         # X-Cam
         self.xcam_widget.layout().addWidget(self.xcam_lower_bound, 0, 0)
         self.xcam_widget.layout().addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 0, 1)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 0, 1)
         self.xcam_widget.layout().addWidget(self.xcam_upper_bound, 1, 0)
-        self.xcam_widget.layout().addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 2, 0)
+        self.xcam_widget.layout().addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 2, 0)
 
 
         # Layout
         self.menu_layout.addWidget(split_type_widget, 0, 0)
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding), 0, 2)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding), 0, 2)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 1, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 1, 0)
 
         self.menu_layout.addWidget(HLine(), 2, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 3, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 3, 0)
 
         self.menu_layout.addWidget(self.stacked_widget, 4, 0, 1, 3)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 15, 0)
+            QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 15, 0)
 
         self.load_preferences()
 
@@ -596,7 +597,7 @@ class SettingsColourWidget(QtWidgets.QWidget):
         self.blue.setValidator(self.int_validator)
 
         self.label.setFixedWidth(100)
-        self.label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
         self.red.setFixedWidth(50)
         self.green.setFixedWidth(50)
@@ -610,7 +611,7 @@ class SettingsColourWidget(QtWidgets.QWidget):
         layout.addWidget(self.red)
         layout.addWidget(self.green)
         layout.addWidget(self.blue)
-        layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
+        layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding))
 
     def load_config(self):
         val = config.get(self._config_section, self._config_key)
@@ -633,10 +634,14 @@ class ConnectionMenu(BaseMenu):
         self.menu_layout = QtWidgets.QGridLayout()
 
         # Widgets
-        self.host_lb = QtWidgets.QLabel("LiveSplit Host:")
+        self.ls_mode_lb = QtWidgets.QLabel("Connection Mode:")
+        self.ls_mode_combo = QtWidgets.QComboBox()
+        self.host_lb = QtWidgets.QLabel("LiveSplit TCP Host:")
         self.host_le = QtWidgets.QLineEdit("")
-        self.port_lb = QtWidgets.QLabel("LiveSplit Port:")
+        self.port_lb = QtWidgets.QLabel("LiveSplit TCP Port:")
         self.port_le = QtWidgets.QLineEdit("")
+        self.ls_pipe_host_lb = QtWidgets.QLabel("LiveSplit Pipe Host:")
+        self.ls_pipe_host_le = QtWidgets.QLineEdit("")
 
         self.int_validator = QtGui.QIntValidator()
 
@@ -647,27 +652,56 @@ class ConnectionMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
-        self.host_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.port_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.host_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.port_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.ls_mode_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.ls_pipe_host_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.host_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.port_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.host_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.port_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.ls_pipe_host_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self.host_le.setMaximumWidth(150)
         self.port_le.setMaximumWidth(150)
+        self.ls_pipe_host_le.setMaximumWidth(150)
+
+        self.ls_mode_combo.setMaximumWidth(120)
+        self.ls_mode_combo.addItems(["Named Pipe", "TCP"])
 
         # Add Widgets
-        self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+
+        
+        self.menu_layout.addWidget(self.ls_mode_lb, 1, 0)
+        self.menu_layout.addWidget(self.ls_mode_combo, 1, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 5, 2)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 2, 0)
+
+        self.menu_layout.addWidget(HLine(), 3, 0, 1, 3)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 4, 0)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 5, 2)
         self.menu_layout.addWidget(self.host_lb, 5, 0)
         self.menu_layout.addWidget(self.host_le, 5, 1)
         self.menu_layout.addWidget(self.port_lb, 6, 0)
         self.menu_layout.addWidget(self.port_le, 6, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 15, 0)
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 7, 0)
+        
+        self.menu_layout.addWidget(HLine(), 8, 0, 1, 3)
+
+        self.menu_layout.addItem(
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 9, 0)
+        
+        self.menu_layout.addWidget(self.ls_pipe_host_lb, 10, 0)
+        self.menu_layout.addWidget(self.ls_pipe_host_le, 10, 1)        
+
+
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 15, 0)
 
         self.port_le.setValidator(self.int_validator)
 
@@ -676,10 +710,14 @@ class ConnectionMenu(BaseMenu):
     def load_preferences(self):
         self.host_le.setText(str(config.get('connection', 'ls_host')))
         self.port_le.setText(str(config.get('connection', 'ls_port')))
+        self.ls_pipe_host_le.setText(str(config.get('connection', 'ls_pipe_host')))
+        self.ls_mode_combo.setCurrentIndex(config.get('connection', 'ls_connection_type'))
 
     def update_preferences(self):
         config.set_key('connection', 'ls_host', self.host_le.text())
         config.set_key('connection', 'ls_port', int(self.port_le.text()))
+        config.set_key('connection', 'ls_pipe_host', self.ls_pipe_host_le.text())
+        config.set_key("connection", "ls_connection_type", self.ls_mode_combo.currentIndex())
 
 
 class ErrorCorrectionMenu(BaseMenu):
@@ -716,18 +754,18 @@ class ErrorCorrectionMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
-        self.processing_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.undo_count_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.undo_threshold_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.star_skip_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.max_skip_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.skip_count_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.processing_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.undo_count_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.undo_threshold_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.star_skip_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.max_skip_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.skip_count_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.processing_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.undo_count_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.undo_threshold_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.max_skip_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.skip_count_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.processing_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.undo_count_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.undo_threshold_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.max_skip_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.skip_count_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self.processing_le.setMaximumWidth(50)
         self.undo_count_le.setMaximumWidth(50)
@@ -737,10 +775,10 @@ class ErrorCorrectionMenu(BaseMenu):
 
         # Add Widgets
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 4, 0)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum), 5, 2)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum), 5, 2)
         self.menu_layout.addWidget(self.processing_lb, 5, 0)
         self.menu_layout.addWidget(self.processing_le, 5, 1)
         self.menu_layout.addWidget(self.undo_count_lb, 6, 0)
@@ -749,12 +787,12 @@ class ErrorCorrectionMenu(BaseMenu):
         self.menu_layout.addWidget(self.undo_threshold_le, 7, 1)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 8, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 8, 0)
 
         self.menu_layout.addWidget(HLine(), 9, 0, 1, 4)
 
         self.menu_layout.addItem(
-            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 10, 0)
+            QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 10, 0)
 
         self.menu_layout.addWidget(self.star_skip_lb, 11, 0)
         self.menu_layout.addWidget(self.star_skip_cb, 11, 1)
@@ -763,7 +801,7 @@ class ErrorCorrectionMenu(BaseMenu):
         self.menu_layout.addWidget(self.skip_count_lb, 13, 0)
         self.menu_layout.addWidget(self.skip_count_le, 13, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 20, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 20, 0)
 
         self.processing_le.setValidator(self.int_validator)
         self.undo_count_le.setValidator(self.int_validator)
@@ -839,17 +877,17 @@ class AdvancedMenu(BaseMenu):
         self.set_menu_layout(self.menu_layout)
 
         # Configure Widgets
-        self.restart_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.file_select_offset_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.reset_one_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.reset_two_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.star_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.fadeout_delay_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.restart_delay_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.file_select_offset_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.reset_one_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.reset_two_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.star_delay_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.fadeout_delay_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.reset_one_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.reset_two_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.star_delay_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.fadeout_delay_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.reset_one_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.reset_two_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.star_delay_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.fadeout_delay_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self.star_delay_le.setMaximumWidth(50)
         self.fadeout_delay_le.setMaximumWidth(50)
@@ -858,13 +896,13 @@ class AdvancedMenu(BaseMenu):
         self.fadeout_delay_le.setValidator(self.double_validator)
 
         # configure model section
-        self.model_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.model_width_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.model_height_lb.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.model_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.model_width_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.model_height_lb.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.model_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.model_width_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.model_height_le.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        self.model_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.model_width_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.model_height_le.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self.model_width_le.setValidator(self.int_validator)
         self.model_height_le.setValidator(self.int_validator)
@@ -876,7 +914,7 @@ class AdvancedMenu(BaseMenu):
         self.restart_delay_sb.setMinimum(-48)
 
         # Add Widgets
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 4, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 4, 0)
 
         # self.menu_layout.addWidget(self.restart_delay_lb, 5, 0)
         # self.menu_layout.addWidget(self.restart_delay_sb, 5, 1, 1, 2)
@@ -884,9 +922,9 @@ class AdvancedMenu(BaseMenu):
         self.menu_layout.addWidget(self.file_select_offset_lb, 6, 0)
         self.menu_layout.addWidget(self.file_select_offset_sb, 6, 1, 1, 2)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 7, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 7, 0)
         self.menu_layout.addWidget(HLine(), 8, 0, 1, 4)
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 9, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 9, 0)
 
         self.menu_layout.addWidget(self.reset_one_lb, 18, 0)
         self.menu_layout.addWidget(self.reset_one_le, 18, 1, 1, 3)
@@ -896,9 +934,9 @@ class AdvancedMenu(BaseMenu):
         self.menu_layout.addWidget(self.reset_two_le, 19, 1, 1, 3)
         self.menu_layout.addWidget(self.reset_two_btn, 19, 4)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 20, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 20, 0)
         self.menu_layout.addWidget(HLine(), 21, 0, 1, 4)
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 22, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 22, 0)
 
         self.menu_layout.addWidget(self.star_delay_lb, 23, 0)
         self.menu_layout.addWidget(self.star_delay_le, 23, 1)
@@ -906,9 +944,9 @@ class AdvancedMenu(BaseMenu):
         self.menu_layout.addWidget(self.fadeout_delay_lb, 24, 0)
         self.menu_layout.addWidget(self.fadeout_delay_le, 24, 1)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 25, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 25, 0)
         self.menu_layout.addWidget(HLine(), 26, 0, 1, 4)
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum), 27, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(10, 5, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum), 27, 0)
 
         self.menu_layout.addWidget(self.model_lb, 28, 0)
         self.menu_layout.addWidget(self.model_le, 28, 1, 1, 3)
@@ -919,7 +957,7 @@ class AdvancedMenu(BaseMenu):
         self.menu_layout.addWidget(self.model_height_lb, 29, 2)
         self.menu_layout.addWidget(self.model_height_le, 29, 3)
 
-        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding), 30, 0)
+        self.menu_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding), 30, 0)
 
         # Connections
         self.reset_one_btn.clicked.connect(self.open_reset_one)
