@@ -1,6 +1,6 @@
-from PyQt6.QtCore import Qt, QRectF, QPointF
-from PyQt6.QtGui import QBrush, QPainterPath, QPainter, QColor, QPen
-from PyQt6.QtWidgets import QGraphicsRectItem, QGraphicsItem
+from PyQt5.QtCore import Qt, QRectF, QPointF
+from PyQt5.QtGui import QBrush, QPainterPath, QPainter, QColor, QPen
+from PyQt5.QtWidgets import QGraphicsRectItem, QGraphicsItem
 
 
 class RectangleSelector(QGraphicsRectItem):
@@ -17,14 +17,14 @@ class RectangleSelector(QGraphicsRectItem):
     handleSpace = -4.0
 
     handleCursors = {
-        handleTopLeft: Qt.CursorShape.SizeFDiagCursor,
-        handleTopMiddle: Qt.CursorShape.SizeVerCursor,
-        handleTopRight: Qt.CursorShape.SizeBDiagCursor,
-        handleMiddleLeft: Qt.CursorShape.SizeHorCursor,
-        handleMiddleRight: Qt.CursorShape.SizeHorCursor,
-        handleBottomLeft: Qt.CursorShape.SizeBDiagCursor,
-        handleBottomMiddle: Qt.CursorShape.SizeVerCursor,
-        handleBottomRight: Qt.CursorShape.SizeFDiagCursor,
+        handleTopLeft: Qt.SizeFDiagCursor,
+        handleTopMiddle: Qt.SizeVerCursor,
+        handleTopRight: Qt.SizeBDiagCursor,
+        handleMiddleLeft: Qt.SizeHorCursor,
+        handleMiddleRight: Qt.SizeHorCursor,
+        handleBottomLeft: Qt.SizeBDiagCursor,
+        handleBottomMiddle: Qt.SizeVerCursor,
+        handleBottomRight: Qt.SizeFDiagCursor,
     }
 
     def __init__(self, *args):
@@ -37,10 +37,10 @@ class RectangleSelector(QGraphicsRectItem):
         self.mousePressPos = None
         self.mousePressRect = None
         self.setAcceptHoverEvents(True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges, True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsFocusable, True)
+        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
         self.update_handle_pos()
 
         self.object_name = "RectangleSelector"
@@ -81,7 +81,7 @@ class RectangleSelector(QGraphicsRectItem):
         """
         if self.isSelected():
             handle = self.handle_at(move_event.pos())
-            cursor = Qt.CursorShape.ArrowCursor if handle is None else self.handleCursors[handle]
+            cursor = Qt.ArrowCursor if handle is None else self.handleCursors[handle]
             self.setCursor(cursor)
         super().hoverMoveEvent(move_event)
 
@@ -89,7 +89,7 @@ class RectangleSelector(QGraphicsRectItem):
         """
         Executed when the mouse leaves the shape (NOT PRESSED).
         """
-        self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.setCursor(Qt.ArrowCursor)
         super().hoverLeaveEvent(move_event)
 
     def mousePressEvent(self, mouse_event):
@@ -274,12 +274,12 @@ class RectangleSelector(QGraphicsRectItem):
         Paint the node in the graphic view.
         """
         painter.setBrush(QBrush(QColor(0, 0, 255, 25)))
-        painter.setPen(QPen(QColor(0, 0, 0), 1.0, Qt.PenStyle.SolidLine))
+        painter.setPen(QPen(QColor(0, 0, 0), 1.0, Qt.SolidLine))
         painter.drawRect(self.rect())
 
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(QBrush(QColor(255, 0, 0, 255)))
-        painter.setPen(QPen(QColor(0, 0, 0, 255), 1.0, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+        painter.setPen(QPen(QColor(0, 0, 0, 255), 1.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
         for handle, rect in self.handles.items():
             if self.handleSelected is None or handle == self.handleSelected:
                 painter.drawEllipse(rect)

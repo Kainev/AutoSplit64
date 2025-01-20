@@ -1,4 +1,4 @@
-from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class PictureButton(QtWidgets.QAbstractButton):
@@ -34,8 +34,8 @@ class PictureButton(QtWidgets.QAbstractButton):
         painter.drawPixmap(event.rect(), pix)
 
         if self._text:
-            painter.setPen(self.palette().color(QtGui.QPalette.ColorRole.ButtonText))
-            painter.drawText(event.rect(), QtCore.Qt.AlignmentFlag.AlignCenter, self._text)
+            painter.setPen(self.palette().color(QtGui.QPalette.ButtonText))
+            painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self._text)
         painter.end()
 
     def enterEvent(self, event):
@@ -80,8 +80,8 @@ class StateButton(QtWidgets.QAbstractButton):
         painter.drawPixmap(event.rect(), pix)
 
         if self._text:
-            painter.setPen(self.palette().color(QtGui.QPalette.ColorRole.ButtonText))
-            painter.drawText(event.rect(), QtCore.Qt.AlignmentFlag.AlignCenter, self._text)
+            painter.setPen(self.palette().color(QtGui.QPalette.ButtonText))
+            painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self._text)
         painter.end()
 
     def enterEvent(self, event):

@@ -1,23 +1,15 @@
 import sys
 from threading import Thread
-import os
 import logging
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 0=all, 1=info, 2=warnings, 3=errors
-logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
-# Filter out TensorFlow deprecation warnings
-import warnings
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-warnings.filterwarnings('ignore', category=FutureWarning)
-
-from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from as64gui.app import App
 
 import as64core
 from as64core.processing import register_process, insert_global_hook, insert_global_processor_hook, ProcessorGenerator
 from as64core.route_loader import load
+from as64core.updater import Updater
 
 from as64processes.standard import *
 from as64processes.xcam import *
@@ -35,11 +27,28 @@ class AutoSplit64(QtCore.QObject):
         # Initialize GUI
         self.app = App()
 
+        # Initialize updater
+        # self._updater = Updater()
+        # self._updater.set_exit_listener(self)
+
         # Connections
         self.app.start.connect(lambda: Thread(target=self.start).start())
         self.app.stop.connect(self.stop)
-        self.app.destroyed.connect(lambda: self.stop())
+        self.app.destroyed.connect(self.stop)
+        # self.app.check_update.connect(lambda: Thread(target=self.check_for_update, args=(True,)).start())
+        # self.app.ignore_update.connect(lambda: self._updater.set_ignore_update(True))
+        # self.app.install_update.connect(self._updater.install_update)
         self.error.connect(self.app.display_error_message)
+        # self.update_found.connect(self.app.update_found)
+
+    #     # Check for updates
+    #     Thread(target=self.check_for_update).start()
+    #
+    # def check_for_update(self, override_ignore=False):
+    #     if self._updater.check_for_update(override_ignore):
+    #         self.update_found.emit({"found": True, "current": self._updater.current_version_info(), "latest": self._updater.latest_version_info(), "override_ignore": override_ignore})
+    #     else:
+    #         self.update_found.emit({"found": False, "current": None, "latest": None, "override_ignore": override_ignore})
 
     def start(self):
         as64core.init()
@@ -131,21 +140,21 @@ if __name__ == "__main__":
     qt_app.setStyle('Fusion')
 
     palette = QtGui.QPalette()
-    palette.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(60, 63, 65))
-    palette.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(200, 203, 207))
-    palette.setColor(QtGui.QPalette.ColorRole.Link, QtGui.QColor(88, 157, 246))
-    palette.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(23, 25, 27))
-    palette.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(53, 55, 57))
-    palette.setColor(QtGui.QPalette.ColorRole.ToolTipBase, QtGui.QColor(255, 255, 255))
-    palette.setColor(QtGui.QPalette.ColorRole.ToolTipText, QtGui.QColor(255, 255, 255))
-    palette.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(200, 203, 207))
-    palette.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(53, 55, 57))
-    palette.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(200, 203, 207))
-    palette.setColor(QtGui.QPalette.ColorRole.BrightText, QtGui.QColor(255, 0, 0))
-    palette.setColor(QtGui.QPalette.ColorRole.Highlight, QtGui.QColor(75, 110, 175))
-    palette.setColor(QtGui.QPalette.ColorRole.HighlightedText, QtGui.QColor(0, 0, 0))
-    palette.setColor(QtGui.QPalette.ColorRole.Light, QtGui.QColor(105, 108, 112))
-    palette.setColor(QtGui.QPalette.ColorRole.Dark, QtGui.QColor(12, 12, 12))
+    palette.setColor(QtGui.QPalette.Window, QtGui.QColor(60, 63, 65))
+    palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(200, 203, 207))
+    palette.setColor(QtGui.QPalette.Link, QtGui.QColor(88, 157, 246))
+    palette.setColor(QtGui.QPalette.Base, QtGui.QColor(23, 25, 27))
+    palette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(53, 55, 57))
+    palette.setColor(QtGui.QPalette.ToolTipBase, QtCore.Qt.white)
+    palette.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
+    palette.setColor(QtGui.QPalette.Text, QtGui.QColor(200, 203, 207))
+    palette.setColor(QtGui.QPalette.Button, QtGui.QColor(53, 55, 57))
+    palette.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(200, 203, 207))
+    palette.setColor(QtGui.QPalette.BrightText, QtCore.Qt.red)
+    palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(75, 110, 175))
+    palette.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+    palette.setColor(QtGui.QPalette.Light, QtGui.QColor(105, 108, 112))
+    palette.setColor(QtGui.QPalette.Dark, QtGui.QColor(12, 12, 12))
 
     qt_app.setPalette(palette)
 
@@ -163,4 +172,4 @@ if __name__ == "__main__":
     autosplit64 = AutoSplit64(qt_app)
 
     # Exit
-    sys.exit(qt_app.exec())
+    sys.exit(qt_app.exec_())
