@@ -1,6 +1,6 @@
 <h1 align="center">🚧 Under Construction 🚧</h1>
 
-This project is currently undergoing an extensive rewrite from the ground up. Features, functionality, and documentation are subject to change as development continues.
+This project is currently undergoing an extensive rewrite from the ground up. Features, functionality, and documentation are subject to change as development continues. The project is around 75% complete, with current progress being systematically integrated into this repository.
 
 ### Legacy Version
 For the legacy version of AutoSplit64, please visit https://github.com/Kainev/AutoSplit64/tree/0.2.5
