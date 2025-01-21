@@ -4,7 +4,6 @@
 /build/
 
 # Vite
-/vite.config.ts
 /.vite/
 *.local
 
