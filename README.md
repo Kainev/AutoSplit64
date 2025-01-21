@@ -50,8 +50,6 @@ AutoSplit64 (AS64) is a tool for analyzing the game feed of Super Mario 64, dete
 
 AS64 is primarily designed to automate LiveSplit during speedruns, however it also features an extensible plugin system, enabling the creation of custom plugins that make use of real-time data to enhance the speedrunning experience.
 
-<br/>
-
 [![Python][Python-badge]][Python-url]
 [![C++][Cpp-badge]][Cpp-url]
 [![React][React-badge]][React-url]
@@ -74,7 +72,7 @@ This project is currently **not open source** and is under active development. Y
 The project will be released under the MIT open-source license in the near future. Stay tuned for updates!
 
 #### Legacy Project Licence
-The legacy project ([AutoSplit64 v0.2.5](https://github.com/Kainev/AutoSplit64/tree/0.2.5)), remains under the GPLv3 licence.
+The legacy project ([AutoSplit64 v0.2.5](https://github.com/Kainev/AutoSplit64/tree/0.2.5)) remains under the GPLv3 licence.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -82,7 +80,7 @@ The legacy project ([AutoSplit64 v0.2.5](https://github.com/Kainev/AutoSplit64/t
 
 <!-- AUTHOR -->
 ## Author
-Kainev ([@Synozure](https://twitter.com/synozure))
+Kainev ([@Synozure64](https://twitter.com/synozure64))
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
