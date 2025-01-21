@@ -1,0 +1,76 @@
+# Node.js
+/node_modules/
+/dist/
+/build/
+
+# Vite
+/vite.config.ts
+/.vite/
+*.local
+
+# Electron
+/out/
+!out/*.asar
+/temp/
+*.db
+*.log
+
+# Temporaries
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pycache/
+*.egg-info/
+.venv/
+env/
+env.bak/
+*.sqlite3
+
+# Ignore virtual environments
+pip-wheel-metadata/
+wheels/
+py/
+
+# C++
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.so
+*.dylib
+*.out
+*.a
+*.lo
+*.la
+*.gch
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Other
+/.env
+/.env.*
+/.cache/
+/coverage/
+/*.bak
