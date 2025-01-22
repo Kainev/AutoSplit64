@@ -43,7 +43,7 @@ class AS64Coordinator:
         self.as64_stop_event = threading.Event()
 
         # Event loop reference
-        self.loop: asyncio.AbstractEventLoop = None
+        self.event_loop: asyncio.AbstractEventLoop = None
 
     async def pipe_reader(self):
         """Asynchronously reads messages from the pipe."""
@@ -107,11 +107,11 @@ class AS64Coordinator:
         This method can be called from the AS64 processing thread.
         :param message: The message dictionary to send.
         """
-        if self.loop is None:
+        if self.event_loop is None:
             logger.error("[AS64Coordinator.enqueue_message] Event loop not set.")
             return
 
-        self.loop.call_soon_threadsafe(self.out_queue.put_nowait, message)
+        self.event_loop.call_soon_threadsafe(self.out_queue.put_nowait, message)
         logger.debug(f"[AS64Coordinator.enqueue_message] Enqueued message for writing: {message}")
 
     def start_as64(self):
@@ -159,7 +159,7 @@ class AS64Coordinator:
     async def run(self):
         """Main controller logic."""
         try:
-            self.loop = asyncio.get_running_loop()
+            self.event_loop = asyncio.get_running_loop()
 
             await self.pipe.create()
             await self.pipe.connect()
