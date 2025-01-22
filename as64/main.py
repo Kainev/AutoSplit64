@@ -14,20 +14,19 @@ import json
 import asyncio
 import time
 
-from utils.log import get_logger, configure_logging
-
-PIPE_NAME = r'\\.\pipe\AutoSplit64Pipe'
-
-
-logger = get_logger(__name__)
-
-
 from pipe import (
     AsyncPipe,
     PipeError,
     PipeWriteError,
     PipeReadError,
 )
+
+from utils.log import get_logger, configure_logging
+logger = get_logger(__name__)
+
+
+PIPE_NAME = r'\\.\pipe\AutoSplit64Pipe'
+
 
 class AS64Coordinator:
     def __init__(self, pipe_name: str):
