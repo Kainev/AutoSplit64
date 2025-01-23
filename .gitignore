@@ -73,3 +73,5 @@ Thumbs.db
 /.cache/
 /coverage/
 /*.bak
+
+config.toml
