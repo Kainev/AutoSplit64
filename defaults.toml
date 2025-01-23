@@ -1,0 +1,11 @@
+[model]
+path = "resources/model/default_model.onnx"
+width = 67
+height = 40
+
+[route]
+path = "routes/16_lblj.as64"
+
+[thresholds]
+probability = 0.6
+undo = 4.5
