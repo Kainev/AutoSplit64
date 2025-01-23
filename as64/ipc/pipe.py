@@ -17,7 +17,7 @@ import pywintypes
 
 import asyncio
 
-from log import get_logger
+from core.log import get_logger
 logger = get_logger(__name__)
 
 
