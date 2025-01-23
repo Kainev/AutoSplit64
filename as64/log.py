@@ -15,7 +15,7 @@ import logging.config
 from logging.handlers import RotatingFileHandler, QueueHandler, QueueListener
 
 
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
 LOG_FILE = os.getenv("LOG_FILE", "application.log")
 
 MAX_BYTES = 5 * 1024 * 1024

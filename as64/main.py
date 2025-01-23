@@ -14,6 +14,8 @@ import json
 import asyncio
 import time
 
+import config
+
 from pipe import (
     AsyncPipe,
     PipeError,
@@ -21,7 +23,7 @@ from pipe import (
     PipeReadError,
 )
 
-from utils.log import get_logger, configure_logging
+from log import get_logger, configure_logging
 logger = get_logger(__name__)
 
 
@@ -183,6 +185,7 @@ class AS64Coordinator:
             
 if __name__ == "__main__":
     configure_logging()
+    config.load()
 
     controller = AS64Coordinator(PIPE_NAME)
     
