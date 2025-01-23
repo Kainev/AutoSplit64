@@ -14,17 +14,19 @@ import json
 import asyncio
 import time
 
-import config
+from core import (
+    log,
+    config
+)
 
-from pipe import (
+from ipc.pipe import (
     AsyncPipe,
     PipeError,
     PipeWriteError,
     PipeReadError,
 )
 
-from log import get_logger, configure_logging
-logger = get_logger(__name__)
+logger = log.get_logger(__name__)
 
 
 PIPE_NAME = r'\\.\pipe\AutoSplit64Pipe'
@@ -184,11 +186,10 @@ class AS64Coordinator:
             
             
 if __name__ == "__main__":
-    configure_logging()
+    log.configure_logging()
     config.load()
 
     controller = AS64Coordinator(PIPE_NAME)
-    
     try:
         asyncio.run(controller.run())
     except KeyboardInterrupt:
