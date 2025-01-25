@@ -13,12 +13,14 @@ from as64 import (
     config,
 )
 
-from as64.enums import Version
-from as64.plugins import PluginManager, SplitPlugin
+from as64.core.route import Route, Split, load as load_route
 from as64.core.capture import GameCapture
 
+from as64.enums import Version, FadeStatus
+from as64.plugins import PluginManager, SplitPlugin
 
-class GameStatus(object):
+
+class GameState(object):
     def __init__(self, route, game_capture: GameCapture) -> None:
         # Timing
         self.current_time: float = 0        # Time the most recent analyzed frame occured
@@ -36,7 +38,7 @@ class GameStatus(object):
         self.x_cam_count: int = 0
         self.in_x_cam: bool = False
         self.in_bowser_fight: bool = False
-        # self.fade_status = FadeStatus.NO_FADE
+        self.fade_status = FadeStatus.NO_FADE
         self.in_intro: bool = True
 
         # Prediction
@@ -44,37 +46,52 @@ class GameStatus(object):
         self.probability: float = 0
 
         # Route
-        # self.route: Route = route
-        # self.current_split: Split = route.splits[0]
+        self.route: Route = route
+        self.current_split: Split = route.splits[0]
         self.current_split_index: int = -1
         self.external_split_update: bool = False
 
         # Regions
-        # self.get_region = game_capture.region_image
-        # self.region_rect = game_capture.region_rect
+        self.frame = game_capture.region_image
+        self.region = game_capture.region_rect
+        
+    # def _register_game_capture(game_capture: GameCapture)
+    #     self.frame
 
 class GameController(object):
-    def __init__(self, split_plugin) -> None:
+    def __init__(self) -> None:
         self.fps: float = 29.97
         self.predict_star_count: bool = True
-        self.count_fades: bool = False
+        self.count_fades: bool = True
         self.count_x_cams: bool = False
-        self.allow_star_jump: bool = False
+        self.allow_star_jump: bool = True
        
-        # self.undo = split_plugin.undo
-        # self.skip = split_plugin.skip
-        # self.split = split_plugin.split
-        # self.reset = split_plugin.reset
+        self.undo = None
+        self.skip = None
+        self.split = None
+        self.reset = None
+        
+    def _register_split_plugin(self, split_plugin):
+        self.undo = split_plugin.undo
+        self.skip = split_plugin.skip
+        self.split = split_plugin.split
+        self.reset = split_plugin.reset
 
 class AS64(object):
     def __init__(self, plugin_manager: PluginManager, event_emitter) -> None:
         self._plugin_manager = plugin_manager
+        self._plugin_manager.instantiate_game_state_plugins()
+        
+        self._route = load_route(config.get('route', 'path'))
         
         self._game_capture: GameCapture = GameCapture(Version.JP, config.get('capture', 'region'),  plugin_manager.get_capture_instance())
-        self._game_status = GameStatus(None, None)
-        self._split_plugin: SplitPlugin = plugin_manager.get_split_instance(self._game_status)
-        self._game_controller = GameController(None)
+        self._game_status = GameState(self._route, self._game_capture)
+        self._game_controller = GameController()
         
+        self._split_plugin: SplitPlugin = plugin_manager.get_split_instance(self._game_status)
+        
+        self._game_controller._register_split_plugin(self._split_plugin)
+        self._plugin_manager.initialize_game_state_plugins(self._game_status, self._game_controller)
         self._plugin_manager.start_lifecycle_plugins()
         
         
@@ -89,7 +106,7 @@ class AS64(object):
         
         # Execute GameState plugins
         for plugin in self._plugin_manager.game_state_plugins:
-            plugin.execute(None)
+            plugin.execute(self._game_status, self._game_controller)
             
         # Execute Real Time Plugins
         for plugin in self._plugin_manager.realtime_plugins:
@@ -101,6 +118,3 @@ class AS64(object):
             time.sleep(1 / self._game_controller.fps - self._game_status.delta)
         except ValueError:
             pass
-        
-        
-        
