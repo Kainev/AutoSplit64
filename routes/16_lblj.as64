@@ -1,0 +1,46 @@
+__route__ = true
+title = "16 LBLJ"
+category = "16 Star"
+initial_star = 0
+version = "JP"
+logic_plugin = "RTA"
+
+[SPLIT.LBLJ]
+split_type = "LBLJ"
+
+[SPLIT.DW]
+split_type = "BOWSER"
+
+[SPLIT.WF]
+star_count = 4
+split_type = "STAR"
+
+[SPLIT.SSL]
+star_count = 7
+split_type = "STAR"
+
+[SPLIT.LLL]
+star_count = 11
+split_type = "STAR"
+
+[SPLIT.HMC]
+star_count = 15
+split_type = "STAR"
+
+[SPLIT.Mips]
+split_type = "MIPS"
+
+[SPLIT.DDD]
+star_count = 16
+split_type = "STAR"
+
+[SPLIT.FS]
+split_type = "BOWSER"
+
+[SPLIT.BLJs]
+star_count = 16
+fade_out = 4
+split_type = "CUSTOM"
+
+[SPLIT.BiTS]
+split_type = "BOWSER"
