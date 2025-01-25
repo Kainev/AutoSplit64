@@ -7,6 +7,8 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
+import threading
+import logging
 from typing import Optional
 
 import win32file
@@ -17,8 +19,7 @@ import pywintypes
 
 import asyncio
 
-from core.log import get_logger
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PipeError(Exception):
@@ -206,6 +207,134 @@ class AsyncPipe:
                 win32file.CloseHandle(self.pipe)
                 self.pipe = None
                 logger.debug(f"[AsyncPipe.close] Pipe closed: {self.name}")
+
+
+
+class NamedPipeError(Exception):
+    """Base exception class for named pipe-related errors."""
+    pass
+
+
+class NamedPipeTimeoutError(NamedPipeError):
+    """Exception for named pipe read/write timeout."""
+    pass
+
+
+class NamedPipe:
+    def __init__(self, pipe_name: str, delimiter: str = "\n"):
+        self.pipe_name = pipe_name
+        self.pipe = None
+        self.lock = threading.Lock()
+        
+        self.delimiter = delimiter
+
+    def connect(self):
+        """Connect to the named pipe."""
+        try:
+            self.pipe = win32file.CreateFile(
+                self.pipe_name,
+                win32file.GENERIC_READ | win32file.GENERIC_WRITE,
+                0,
+                None,
+                win32file.OPEN_EXISTING,
+                0,
+                None,
+            )
+            
+            win32pipe.SetNamedPipeHandleState(
+                self.pipe,
+                win32pipe.PIPE_READMODE_BYTE,
+                None,
+                None,
+            )
+        except pywintypes.error as e:
+            raise NamedPipeError(f"Failed to connect to named pipe: {e}")
+
+    def write(self, payload: str):
+        """Send a command to the named pipe."""
+        if not self.pipe:
+            raise NamedPipeError("Pipe is not connected.")
+
+        with self.lock:
+            try:
+                payload_bytes = payload.encode("utf-8")
+                win32file.WriteFile(self.pipe, payload_bytes)
+            except pywintypes.error as e:
+                raise NamedPipeError(f"Failed to write to named pipe: {e}")
+
+    def read(self, timeout: float = 0.03) -> str:
+        """
+        Read a response from the named pipe with a timeout.
+
+        Parameters:
+            timeout (float): Maximum time to wait for a response (in seconds).
+
+        Returns:
+            str: The response data.
+
+        Raises:
+            NamedPipeTimeoutError: If no response is received within the timeout period.
+            NamedPipeError: For other pipe-related errors.
+        """
+        if not self.pipe:
+            raise NamedPipeError("Pipe is not connected.")
+
+        with self.lock:
+            overlapped = pywintypes.OVERLAPPED()
+            event = win32event.CreateEvent(None, True, False, None)
+            overlapped.hEvent = event
+
+            buffer = "" 
+
+            try:
+                while True:
+                    _, data = win32file.ReadFile(self.pipe, 4096, overlapped)
+                    wait_result = win32event.WaitForSingleObject(overlapped.hEvent, int(timeout * 1000))
+
+                    if wait_result == win32event.WAIT_TIMEOUT:
+                        raise NamedPipeTimeoutError(f"Timed out waiting for response after {timeout} seconds.")
+
+                    buffer += bytes(data).decode("utf-8", errors="ignore")
+
+                    if self.delimiter in buffer:
+                        message, buffer = buffer.split(self.delimiter, 1)
+
+                        if not message.strip():
+                            logger.warning("Empty or invalid message received.")
+                            continue
+
+                        return message.strip()
+
+            except pywintypes.error as e:
+                if e.winerror == 109:  # ERROR_BROKEN_PIPE
+                    raise NamedPipeError("Pipe broken: the connection has been closed.")
+                raise NamedPipeError(f"Failed to read from named pipe: {e}")
+
+    def send_and_receive(self, command: str, timeout: float = 0.03) -> str:
+        """Send a command and read the response.
+
+        Parameters:
+            command (str): The command to send.
+            timeout (float): Maximum time to wait for a response (in seconds).
+
+        Returns:
+            str: The response data.
+
+        Raises:
+            NamedPipeTimeoutError: If no response is received within the timeout period.
+            NamedPipeError: For other pipe-related errors.
+        """
+        self.write(command)
+        return self.read(timeout)
+
+    def close(self):
+        """Close the pipe."""
+        if self.pipe:
+            try:
+                win32file.CloseHandle(self.pipe)
+                self.pipe = None
+            except pywintypes.error as e:
+                raise NamedPipeError(f"Failed to close named pipe: {e}")
 
 
 
