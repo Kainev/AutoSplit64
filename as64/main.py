@@ -8,28 +8,26 @@
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
 import threading
+import logging
 import queue
 import json
 
 import asyncio
-import time
 
-from core import (
-    log,
-    config
-)
-
-from ipc.pipe import (
+from as64 import config, log
+from as64.core import AS64
+from as64.plugins import PluginManager
+from as64.ipc.pipe import (
     AsyncPipe,
     PipeError,
     PipeWriteError,
     PipeReadError,
 )
 
-logger = log.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
-PIPE_NAME = r'\\.\pipe\AutoSplit64Pipe'
+PIPE_NAME = r'\\.\pipe\AutoSplit64'
 
 
 class AS64Coordinator:
@@ -45,7 +43,10 @@ class AS64Coordinator:
 
         self.as64_thread: threading.Thread = None
         self.as64_stop_event = threading.Event()
-
+        
+        self.plugin_manager = PluginManager("plugins")
+        self.plugin_manager.load_plugins()
+                
         # Event loop reference
         self.event_loop: asyncio.AbstractEventLoop = None
 
@@ -154,9 +155,11 @@ class AS64Coordinator:
         """
         logger.info("[AS64Coordinator.as64_loop] AS64 Loop started.")
         
+        _as64 = AS64(self.plugin_manager, None)
+        
         try:
             while not self.as64_stop_event.is_set():
-                time.sleep(0.1)
+                _as64.run()
         finally:
             logger.info("[AS64Coordinator.as64_loop] AS64 loop exiting.")
 
@@ -184,7 +187,7 @@ class AS64Coordinator:
 
             await self.pipe.close()
             
-            
+
 if __name__ == "__main__":
     log.configure_logging()
     config.load()
