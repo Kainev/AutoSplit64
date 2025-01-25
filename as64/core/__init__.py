@@ -7,4 +7,6 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
-from .as64 import AS64
+from .as64 import AS64, GameController, GameState
+from .route import Route
+from .capture import GameCapture
