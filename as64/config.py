@@ -11,10 +11,10 @@ import os
 import toml
 import copy
 import threading
+import logging
 from typing import Any
 
-from core.log import get_logger
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 _CONFIG_FILE_NAME = "config.toml"
@@ -71,7 +71,7 @@ def save() -> None:
             raise RuntimeError(f"Failed to save configuration: {e}")
 
 
-def get(*keys: str) -> Any:
+def get(*keys: str, default: Any = None) -> Any:
     """Get a nested configuration value."""
     global _config
 
@@ -80,9 +80,11 @@ def get(*keys: str) -> Any:
         for key in keys:
             if key in value:
                 value = value[key]
+            elif default is not None:
+                return default
             else:
-                logger.error(f"[config.get] Configuration key not found: {'.'.join(keys)}")
-                raise KeyError(f"Configuration key not found: {'.'.join(keys)}")
+                logger.error(f"[config.get] Configuration key not found and no default set: {'.'.join(keys)}")
+                raise KeyError(f"Configuration key not found and no default specified: {'.'.join(keys)}")
             
         logger.debug(f"[config.get] Retrieved {'.'.join(keys)}: {value}")
         return value

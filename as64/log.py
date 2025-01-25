@@ -58,6 +58,7 @@ def configure_logging():
     listener = QueueListener(log_queue, file_handler, console_handler, respect_handler_level=True)
     listener.start()
 
+
 def get_logger(name: str = None) -> logging.Logger:
     """Retrieve a module-level logger, or the root if None is given."""
     return logging.getLogger(name)
