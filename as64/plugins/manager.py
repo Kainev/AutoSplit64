@@ -87,6 +87,9 @@ class PluginManager:
         # On-demand plugin classes
         self.capture_plugin_class: Optional[Type[CapturePlugin]] = None
         self.split_plugin_class: Optional[Type[SplitPlugin]] = None
+        
+        #
+        self.game_state_plugin_classes: List[Type[GameStatePlugin]] = []
 
         #
         self.plugin_class_map: Dict[str, Type[BasePlugin]] = {}
@@ -198,8 +201,10 @@ class PluginManager:
                     logger.error(f"[load_plugins] Configured plugin '{name}' not found among discovered classes.")
                     continue
 
-                if category in ("lifecycle", "realtime", "game_state"):
+                if category in ("lifecycle", "realtime"):
                     self._instantiate_lifecycle_plugin(cls)
+                elif category == 'game_state':
+                    self._register_game_state_plugin(cls)
                 elif category == "capture":
                     self._register_capture_plugin(cls)
                 elif category == "split":
@@ -215,8 +220,6 @@ class PluginManager:
 
             if isinstance(instance, RealtimePlugin):
                 self.realtime_plugins.append(instance)
-            elif isinstance(instance, GameStatePlugin):
-                self.game_state_plugins.append(instance)
             else:
                 self.lifecycle_plugins.append(instance)
 
@@ -225,17 +228,31 @@ class PluginManager:
 
     def _register_capture_plugin(self, cls: Type[CapturePlugin]) -> None:
         if self.capture_plugin_class is not None:
-            logger.warning(f"[_instantiate_lifecycle_plugin] Multiple capture plugins found; ignoring {cls.metadata.name}")
+            logger.warning(f"[_register_capture_plugin] Multiple capture plugins found; ignoring {cls.metadata.name}")
             return
         self.capture_plugin_class = cls
-        logger.info(f"[_instantiate_lifecycle_plugin] Registered capture plugin: {cls.metadata.name}")
+        logger.info(f"[_register_capture_plugin] Registered capture plugin: {cls.metadata.name}")
 
     def _register_split_plugin(self, cls: Type[SplitPlugin]) -> None:
         if self.split_plugin_class is not None:
-            logger.warning(f"[_instantiate_lifecycle_plugin] Multiple split plugins found; ignoring {cls.metadata.name}")
+            logger.warning(f"[_register_split_plugin] Multiple split plugins found; ignoring {cls.metadata.name}")
             return
         self.split_plugin_class = cls
-        logger.info(f"[_instantiate_lifecycle_plugin] Registered split plugin: {cls.metadata.name}")
+        logger.info(f"[_register_split_plugin] Registered split plugin: {cls.metadata.name}")
+        
+    def _register_game_state_plugin(self, cls: Type[GameStatePlugin]) -> None:
+
+        self.game_state_plugin_classes.append(cls)
+        logger.info(f"[_register_game_state_plugin] Registered game state plugin: {cls.metadata.name}")
+        
+    def instantiate_game_state_plugins(self):
+        for cls in self.game_state_plugin_classes:
+            plugin = cls()
+            self.game_state_plugins.append(plugin)
+            
+    def initialize_game_state_plugins(self, game, controller):        
+        for plugin in self.game_state_plugins:
+            plugin.initialize(game, controller)
 
     def initialize_lifecycle_plugins(self):
         for plugin in self.get_lifecycle_plugins():
@@ -270,10 +287,13 @@ class PluginManager:
                 logger.error(f"[initialize_lifecycle_plugins] Error shutting down plugin {plugin.metadata.name}: {e}")
 
     def get_lifecycle_plugins(self) -> List[LifecyclePlugin]:
-        return self.lifecycle_plugins + self.realtime_plugins + self.game_state_plugins
+        return self.lifecycle_plugins + self.realtime_plugins
     
     def get_realtime_plugins(self) -> List[RealtimePlugin]:
-        return self.game_state_plugins + self.realtime_plugins
+        return self.realtime_plugins
+    
+    def get_game_state_plugins(self) -> List[GameStatePlugin]:
+        return self.game_state_plugins
 
     def get_capture_instance(self) -> Optional[CapturePlugin]:
         if not self.capture_plugin_class:
