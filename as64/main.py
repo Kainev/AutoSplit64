@@ -13,8 +13,9 @@ import queue
 import json
 
 import asyncio
+from pymitter import EventEmitter
 
-from as64 import config, log
+from as64 import config, log, api
 from as64.core import AS64
 from as64.plugins import PluginManager
 from as64.ipc.pipe import (
@@ -49,6 +50,12 @@ class AS64Coordinator:
                 
         # Event loop reference
         self.event_loop: asyncio.AbstractEventLoop = None
+        
+        # Emitter
+        self.emitter = EventEmitter()
+        
+        # Register emitter with API
+        api.emitter._emitter = self.emitter
 
     async def pipe_reader(self):
         """Asynchronously reads messages from the pipe."""
