@@ -14,18 +14,18 @@ import cv2
 
 ColourBound = Union[Tuple[int, ...], List[int], np.ndarray]
 
-def in_color_range(image: np.ndarray, lower_bound: ColourBound, upper_bound: ColourBound, threshold: float) -> bool:
+def in_colour_range(image: np.ndarray, lower_bound: ColourBound, upper_bound: ColourBound, threshold: float) -> bool:
     """
-    Determines if the proportion of pixels within a specified color range exceeds the given threshold.
+    Determines if the proportion of pixels within a specified colour range exceeds the given threshold.
 
     Parameters:
-        image (np.ndarray): The input image in BGR or other color space.
-        lower_bound (tuple or list or np.ndarray): Lower bound for the color range (e.g., (B, G, R)).
-        upper_bound (tuple or list or np.ndarray): Upper bound for the color range (e.g., (B, G, R)).
+        image (np.ndarray): The input image in BGR or other colour space.
+        lower_bound (tuple or list or np.ndarray): Lower bound for the colour range (e.g., (B, G, R)).
+        upper_bound (tuple or list or np.ndarray): Upper bound for the colour range (e.g., (B, G, R)).
         threshold (float): The proportion threshold (between 0 and 1).
 
     Returns:
-        bool: True if the proportion of pixels within the color range exceeds the threshold, False otherwise.
+        bool: True if the proportion of pixels within the colour range exceeds the threshold, False otherwise.
 
     Raises:
         ValueError: If inputs are not within expected ranges or types (only if validate=True).
