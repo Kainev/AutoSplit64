@@ -62,6 +62,7 @@ class StateMachine(State):
         self._current_state: Optional[State] = None
         self._states: List[State] = []
         self._global_transitions: Dict[Any, State] = {}
+        self._has_started: bool = False
 
     def add_transition(self, source: Optional[State], destination: State, signal: Any, condition: Optional[callable] = None) -> None:
         """
@@ -103,9 +104,7 @@ class StateMachine(State):
         if state not in self._states:
             self._add_state(state)
         self._initial_state = state
-        if not self._current_state:
-            self._current_state = self._initial_state
-            self._current_state.on_enter(self, None)
+        self._current_state = self._initial_state
 
     def trigger(self, signal: Any, *args, **kwargs) -> None:
         """
@@ -144,6 +143,18 @@ class StateMachine(State):
         """
         Updates the current state.
         """
+        if not self._has_started:
+            if not self._initial_state:
+                logger.error("[update] Initial state is not set. Cannot start the state machine.")
+                return
+            
+            self._current_state = self._initial_state
+            self._has_started = True
+            
+            logger.debug(f"[update] StateMachine initialized with initial state: {self._current_state.__class__.__name__}")
+            
+            self._current_state.on_enter(self, *args, **kwargs)
+
         if self._current_state:
             self._current_state.on_update(self, *args, **kwargs)
 
