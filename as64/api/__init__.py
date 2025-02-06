@@ -16,7 +16,9 @@ from as64.core import (
 from as64.enums import (
     Event,
     FadeStatus,
-    Region
+    Region,
+    SplitType,
+    Camera
 )
 
 
@@ -48,3 +50,10 @@ from .state import (
 from .modifiers import (
     register_event
 )
+
+
+def get_game_state() -> GameState:
+    pass
+
+def get_game_controller() -> GameController:
+    pass
