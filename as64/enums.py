@@ -37,7 +37,7 @@ class Region(Enum):
     FADEIN = auto()
     RESET = auto()
     NO_HUD = auto()
-    XCAM = auto()
+    CAMERA = auto()
     FINAL_STAR = auto()
     
     
@@ -47,21 +47,41 @@ class Event(StringEnum):
     SKIP = auto()
     UNDO = auto()
     RESET = auto()
+    
     STAR_COLLECTED = auto()
+    
     ENTER_XCAM = auto()
     EXIT_XCAM = auto()
+    
+    ENTER_LAKITU_CAMERA = auto()
+    EXIT_LAKITU_CAMERA = auto()
+    ENTER_MARIO_CAMERA = auto()
+    EXIT_MARIO_CAMERA = auto()
+    ENTER_X_CAMERA = auto()
+    EXIT_X_CAMERA = auto()
+    
     FADEOUT_BEGIN = auto()
     FADEOUT_COMPLETE = auto()
     FADEOUT_END = auto()
     FADEIN_BEGIN = auto()
     FADEIN_COMPLETE = auto()
     FADEIN_END = auto()
+    
     DEATH = auto()
+    
     ENTER_SAVE_MENU = auto()
     EXIT_SAVE_MENU = auto()
+    
     BOWSER_FIGHT = auto()
     GAME_START = auto()
     FINISHED = auto()
+    
+
+class Camera(Enum):
+    LAKITU = auto()
+    MARIO = auto()
+    XCAM = auto()
+    NONE = auto()
         
         
 class SplitType(Enum):

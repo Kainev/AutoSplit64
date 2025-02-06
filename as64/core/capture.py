@@ -85,7 +85,7 @@ def _generate_regions(game_region, version):
     regions[Region.RESET] = _calculate_region(game_region, system_ratios['reset'])
     regions[Region.NO_HUD] = _calculate_region(game_region, system_ratios['no_hud'])
     regions[Region.FINAL_STAR] = _calculate_region(game_region, system_ratios['final_star'])
-    regions[Region.XCAM] = _calculate_region(game_region, system_ratios['xcam'])
+    regions[Region.CAMERA] = _calculate_region(game_region, system_ratios['camera'])
         
     return regions
     

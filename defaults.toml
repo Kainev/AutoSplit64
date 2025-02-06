@@ -6,10 +6,14 @@ height = 40
 [route]
 path = "routes/16_lblj.as64"
 
+[advanced]
+reset_frame_one = "templates/generated_reset_one.jpg"
+reset_frame_two = "templates/generated_reset_two.jpg"
+
 [capture]
-process = "chrome.exe"
-region = [ 278, 194, 938, 689,]
-size = [ 1936, 1048,]
+process = "vlc.exe"
+region = [ 23, 71, 928, 679,]
+size = [ 976, 832,]
 
 [regions.system]
 game = [ 0.0, 0.0, 1.0, 1.0,]
@@ -32,13 +36,14 @@ white = 0.9
 final_star = 0.02
 undo = 4.5
 
-[xcam]
-automatic_calibration = true
-point_1_ratio = [ 0.2608695652173913, 0.782608695652174,]
-point_2_ratio = [ 0.8260869565217391, 0.782608695652174,]
-point_1_colour = [ 18, 25, 147,]
-point_2_colour = [ 16, 25, 137,]
-threshold = 25
+[camera]
+lakitu_point_ratio = [ 0.446808510638297, 0.319148936170212]
+lakitu_point_colour = [ 207, 212, 214 ]
+lakitu_colour_threshold = 25
+mario_point_ratio = [ 0.184210526315789, 0.605263157894736 ]
+mario_rb_multiple = 3
+x_cam_fade_threshold = 50
+
 
 [colour_bounds]
 x_cam_lower = [0, 0, 30]
