@@ -8,5 +8,6 @@
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
 from as64.helpers.image import (
-    in_colour_range
+    in_colour_range,
+    is_white_like
 )

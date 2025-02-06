@@ -49,3 +49,24 @@ def in_colour_range(image: np.ndarray, lower_bound: ColourBound, upper_bound: Co
     proportion = count / mask.size
     
     return proportion > threshold
+
+
+def is_white_like(pixel: Tuple[int, int, int], similarity_threshold: int, brightness_threshold: int = 200) -> bool:
+    """
+    Determines if a pixel is "white-like" based on color channel similarity and brightness.
+
+    :param pixel: A tuple representing the (R, G, B) values of the pixel.
+    :param similarity_threshold: Maximum allowed difference between the highest and lowest channel values.
+    :param brightness_threshold: Minimum average brightness to consider the pixel as white.
+    :return: True if the pixel is white-like, False otherwise.
+    """
+    r, g, b = pixel
+    max_val = max(r, g, b)
+    min_val = min(r, g, b)
+    average = (int(r) + int(g) + int(b)) / 3
+
+    channels_similar = (max_val - min_val) < similarity_threshold
+    
+    is_bright = average > brightness_threshold
+
+    return channels_similar and is_bright
