@@ -18,6 +18,7 @@ from pymitter import EventEmitter
 from as64 import config, log, api
 from as64.core import AS64
 from as64.plugins import PluginManager
+from as64.ipc import rpc
 from as64.ipc.pipe import (
     AsyncPipe,
     PipeError,
@@ -56,6 +57,9 @@ class AS64Coordinator:
         
         # Register emitter with API
         api.emitter._emitter = self.emitter
+        
+        # Requests
+        self.pending_requests = {}
 
     async def pipe_reader(self):
         """Asynchronously reads messages from the pipe."""
@@ -67,12 +71,9 @@ class AS64Coordinator:
                         data = json.loads(message)
                         logger.debug(f"[AS64Coordinator.pipe_reader] Received message: {data}")
 
-                        # Process system commands, else pass to as64 processing thread
-                        system_cmd = data.get("system")
-                        if system_cmd == "start":
-                            self.start_as64()
-                        elif system_cmd == "stop":
-                            self.stop_as64()
+                        if "rpc" in data:
+                            await self.handle_rpc(data)
+                            continue
                         else:
                             self.in_queue.put(data)
 
@@ -112,6 +113,28 @@ class AS64Coordinator:
                     logger.exception(f"[AS64Coordinator.pipe_writer] Unexpected error: {e}")
         finally:
             logger.info("[AS64Coordinator.pipe_writer] Exiting write loop.")
+            
+    async def handle_rpc(self, data):
+        """Handle the RPC message (dispatcher call + sending the response)."""
+        proc_name = data["rpc"]
+        args = data.get("args", [])
+        kwargs = data.get("kwargs", {})
+        
+        request_id = data.get("requestId")
+
+        response = {"replyTo": request_id} if request_id else {}
+
+        result, error = await rpc.call(proc_name, args, kwargs)
+        if error is not None:
+            response["error"] = error
+        else:
+            response["result"] = result
+
+        if request_id:
+            try:
+                await self.pipe.write(json.dumps(response))
+            except PipeWriteError as e:
+                logger.error(f"[handle_rpc] Pipe write error: {e}")
 
     def enqueue_message(self, message: dict):
         """
@@ -132,7 +155,7 @@ class AS64Coordinator:
         """
         if self.as64_thread and self.as64_thread.is_alive():
             logger.warning("[AS64Coordinator.start_as64] AS64 thread is already running.")
-            return
+            return False
 
         logger.info("[AS64Coordinator.start_as64] Starting AS64 processing thread.")
         self.as64_stop_event.clear()
@@ -142,6 +165,8 @@ class AS64Coordinator:
             daemon=True
         )
         self.as64_thread.start()
+        
+        return True
 
     def stop_as64(self):
         """
@@ -153,8 +178,11 @@ class AS64Coordinator:
             self.as64_thread.join()
             self.as64_thread = None
             logger.info("[AS64Coordinator.stop_as64] AS64 processing thread stopped.")
+            
+            return True
         else:
             logger.warning("[AS64Coordinator.stop_as64] AS64 thread is not running.")
+            return False
 
     def as64_loop(self):
         """
@@ -200,6 +228,15 @@ if __name__ == "__main__":
     config.load()
 
     controller = AS64Coordinator(PIPE_NAME)
+    
+    @rpc.register("as64.start")
+    def start():
+        return controller.start_as64()
+    
+    @rpc.register("as64.stop")
+    def stop():
+        return controller.stop_as64()
+    
     try:
         asyncio.run(controller.run())
     except KeyboardInterrupt:

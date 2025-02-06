@@ -14,6 +14,8 @@ import threading
 import logging
 from typing import Any
 
+from as64.ipc import rpc
+
 logger = logging.getLogger(__name__)
 
 
@@ -56,7 +58,7 @@ def load() -> None:
             logger.warning(f"[config.load] Config file {_CONFIG_FILE_NAME} not found. Generating a new one.")
             _generate_config()
 
-
+@rpc.register("config.save")
 def save() -> None:
     """Save the current configuration to file."""
     global _config
@@ -70,7 +72,7 @@ def save() -> None:
             logger.error(f"[config.save] Failed to save configuration to {_CONFIG_FILE_NAME}: {e}")
             raise RuntimeError(f"Failed to save configuration: {e}")
 
-
+@rpc.register("config.get")
 def get(*keys: str, default: Any = None) -> Any:
     """Get a nested configuration value."""
     global _config
@@ -89,7 +91,7 @@ def get(*keys: str, default: Any = None) -> Any:
         logger.debug(f"[config.get] Retrieved {'.'.join(keys)}: {value}")
         return value
 
-
+@rpc.register("config.set")
 def set(*keys: Any) -> None:
     """Set a nested configuration value."""
     global _config

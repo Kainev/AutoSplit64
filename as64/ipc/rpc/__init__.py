@@ -7,3 +7,4 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
+from .registry import call, get, register

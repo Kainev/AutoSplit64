@@ -1,0 +1,1 @@
+from as64.ipc.rpc import register

@@ -36,6 +36,7 @@ from . import (
     emitter,
     windows,
     ipc,
+    rpc,
     state,
     image,
     modifiers,
