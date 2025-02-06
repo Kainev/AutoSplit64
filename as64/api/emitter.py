@@ -12,8 +12,11 @@ from pymitter import EventEmitter
 
 _emitter: EventEmitter = None
 
-def on(event: str, callback: Callable[..., Any]) -> None:
-    _emitter.on(event, callback)
+def on(event: str, callback: Callable[..., Any], ttl: int = -1) -> None:
+    _emitter.on(event, callback, ttl=ttl)
+    
+def once(event: str, callback: Callable[..., Any]) -> None:
+    _emitter.once(event, callback)
 
 def off(event: str, callback: Callable[..., Any]) -> None:
     _emitter.off(event, callback)
