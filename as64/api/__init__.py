@@ -27,7 +27,8 @@ from as64.plugins import (
     CapturePlugin,
     SplitPlugin,
     GameStatePlugin,
-    PluginMetaData
+    PluginMetaData,
+    PluginValidationError
 )
 
 

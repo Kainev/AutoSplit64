@@ -13,6 +13,11 @@ from typing import List
 from as64.plugins.metadata import PluginMetaData
 
 
+class PluginValidationError(Exception):
+    """Custom exception for plugin validation errors."""
+    pass
+
+
 class BasePlugin(ABC):
     metadata: PluginMetaData = None
     
@@ -26,6 +31,7 @@ class BasePlugin(ABC):
         [Lifecycle Function] This is automatically called before use
         
         [Use] Override if validation logic is needed, returning False will cause an error to fire.
+              May raise a PluginValidationError exception to provide the user a detailed message.
         """
         return True
     
