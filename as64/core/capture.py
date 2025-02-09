@@ -88,29 +88,3 @@ def _generate_regions(game_region, version):
     regions[Region.CAMERA] = _calculate_region(game_region, system_ratios['camera'])
         
     return regions
-    
-    
-def _get_window_handles():
-    handles = []
-    
-    def foreach_hwnd(hwnd, other):
-        if win32gui.IsWindowVisible(hwnd):
-            handles.append(hwnd)
-            
-    win32gui.EnumWindows(foreach_hwnd, None)
-    
-    return handles
-
-
-def get_handle(name: str):
-    handles = _get_window_handles()
-    
-    for handle in handles:
-        pid = win32process.GetWindowThreadProcessId(handle)
-        hdl = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid[1])
-        process_name = os.path.basename(win32process.GetModuleFileNameEx(hdl, 0))
-        
-        if process_name == name:
-            return handle
-        
-    return None
