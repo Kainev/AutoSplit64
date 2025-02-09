@@ -14,6 +14,13 @@ from xml.etree import ElementTree
 import toml
 
 from as64.enums import Version, SplitType
+from as64.ipc import rpc
+
+
+def route_rpc_processor(result):
+    if hasattr(result, "to_dict"):
+        return result.to_dict()
+    return result
 
 
 class RouteToken(object):
@@ -42,6 +49,16 @@ class Route(object):
         self.version: Version = version
         self.category: str = category
         self.logic_plugin: str = logic_plugin
+        
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "splits": [split.to_dict() for split in self.splits],
+            "initial_star": self.initial_star,
+            "version": self.version.name,
+            "category": self.category,
+            "logic_plugin": self.logic_plugin,
+        }
 
 
 class Split(object):
@@ -53,7 +70,17 @@ class Split(object):
         self.xcam: int = xcam
         self.split_type: SplitType = split_type
         
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "star_count": self.star_count,
+            "fadeout": self.fadeout,
+            "fadein": self.fadein,
+            "xcam": self.xcam,
+            "split_type": self.split_type.value if self.split_type is not None else None,
+        }
         
+@rpc.register("route.load", route_rpc_processor)
 def load(file_path: str):
     try:
         with open(file_path) as file:
@@ -122,16 +149,16 @@ def decode(data) -> Route:
         except KeyError:
             xcam = None
 
-        split = Split(title=key,
-                      star_count=star_count,
-                      fadeout=fadeout,
-                      fadein=fadein,
-                      xcam=xcam,
-                      split_type=SplitType[data[RouteToken.SPLITS][key][SplitToken.SPLIT_TYPE]])
+        split = Split(
+            title=key,
+            star_count=star_count,
+            fadeout=fadeout,
+            fadein=fadein,
+            xcam=xcam,
+            split_type=SplitType(data[RouteToken.SPLITS][key][SplitToken.SPLIT_TYPE])
+        )
         
         splits.append(split)
-        
-    print("SPLTS!", splits, flush=True)
         
     route = Route(title=data[RouteToken.TITLE],
                   splits=splits,
@@ -186,7 +213,7 @@ BLJ_TOKENS = [
     'blj'
 ]
 
-
+@rpc.register("route.translate_lss", processor=route_rpc_processor)
 def translate_lss(file_path):
     try:
         if not path.exists(file_path):
