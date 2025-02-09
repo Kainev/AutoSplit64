@@ -12,3 +12,5 @@ from as64.ipc.pipe import (
     NamedPipeError,
     NamedPipeTimeoutError
 )
+
+enqueue_ui_message = None

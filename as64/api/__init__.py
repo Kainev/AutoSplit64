@@ -23,11 +23,11 @@ from as64.enums import (
 
 
 from as64.plugins import (
-    LifecyclePlugin,
-    RealtimePlugin,
+    Plugin,
     CapturePlugin,
     SplitPlugin,
-    GameStatePlugin
+    GameStatePlugin,
+    PluginMetaData
 )
 
 

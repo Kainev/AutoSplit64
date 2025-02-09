@@ -7,4 +7,4 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
-from as64.core.capture import get_handle
+from as64.helpers.windows import visible_process_names, get_handle
