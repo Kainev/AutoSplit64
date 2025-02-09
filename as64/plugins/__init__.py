@@ -7,5 +7,6 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
-from as64.plugins.base import BasePlugin, LifecyclePlugin, RealtimePlugin, CapturePlugin, GameStatePlugin, SplitPlugin
-from as64.plugins.manager import PluginManager
+from as64.plugins.base import BasePlugin, Plugin, CapturePlugin, GameStatePlugin, SplitPlugin
+from as64.plugins.management import PluginManager
+from as64.plugins.metadata import PluginMetaData

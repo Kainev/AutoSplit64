@@ -8,6 +8,7 @@
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
 from abc import ABC, abstractmethod
+from typing import List
 
 from as64.plugins.metadata import PluginMetaData
 
@@ -29,7 +30,7 @@ class BasePlugin(ABC):
         return True
     
     
-class LifecyclePlugin(BasePlugin):
+class Plugin(BasePlugin):
     def initialize(self):
         """
         Initialize the plugin.
@@ -40,7 +41,7 @@ class LifecyclePlugin(BasePlugin):
         """
         pass
     
-    def start(self):
+    def start(self, game, controller):
         """
         Start the plugin.
         
@@ -70,17 +71,19 @@ class LifecyclePlugin(BasePlugin):
         """
         pass
     
+    @property
+    def is_realtime(self) -> bool:
+        return callable(getattr(self, "execute", None))
     
-class RealtimePlugin(LifecyclePlugin):
-    @abstractmethod
-    def execute(self, ev):
-        """
-        Execute logic on each frame
-        """
-        pass
+    # def execute(self, *args, **kwargs):
+    #     """
+    #     Execute logic on each frame
+    #     """
+    #     pass
+    
+    
 
-
-class GameStatePlugin(RealtimePlugin):
+class GameStatePlugin(Plugin):
     pass
 
 
@@ -116,4 +119,8 @@ class CapturePlugin(BasePlugin):
         """
         Capture functionality
         """
+        pass
+
+    @abstractmethod
+    def get_available_sources(self) -> List[str]:
         pass
