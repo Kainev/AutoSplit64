@@ -168,6 +168,8 @@ class AsyncPipe:
         overlapped = pywintypes.OVERLAPPED()
         event = win32event.CreateEvent(None, True, False, None)
         overlapped.hEvent = event
+        
+        payload += "\n"
 
         payload_bytes = payload.encode("utf-8")
 
