@@ -90,3 +90,8 @@ class SplitType(Enum):
     LBLJ = "LBLJ"
     MIPS = "Mips"
     CUSTOM = "Custom"
+
+class AS64Status(Enum):
+    RUNNING = "Running"
+    STOPPED = "Stopped"
+    INITIALIZING = "Initializing"
