@@ -17,7 +17,8 @@ from pymitter import EventEmitter
 
 from as64 import config, log, api
 from as64.core import AS64
-from as64.plugins import PluginManager
+from as64.plugins import Plugin, PluginValidationError
+from as64.plugins.management import plugin_manager
 from as64.ipc import rpc
 from as64.ipc.pipe import (
     AsyncPipe,
@@ -25,6 +26,9 @@ from as64.ipc.pipe import (
     PipeWriteError,
     PipeReadError,
 )
+from as64.enums import AS64Status
+
+from as64 import helpers
 
 logger = logging.getLogger(__name__)
 
@@ -46,20 +50,26 @@ class AS64Coordinator:
         self.as64_thread: threading.Thread = None
         self.as64_stop_event = threading.Event()
         
-        self.plugin_manager = PluginManager("plugins")
-        self.plugin_manager.load_plugins()
+        # Emitter
+        self.emitter = EventEmitter()
+        
+        # Export to API and config
+        api.emitter._emitter = self.emitter
+        api.ipc.enqueue_ui_message = self.enqueue_message
+        config._enqueue_message = self.enqueue_message
+        
+        #
+        self.plugin_manager = plugin_manager
                 
         # Event loop reference
         self.event_loop: asyncio.AbstractEventLoop = None
         
-        # Emitter
-        self.emitter = EventEmitter()
-        
-        # Register emitter with API
-        api.emitter._emitter = self.emitter
-        
         # Requests
         self.pending_requests = {}
+        
+        # State Locking
+        self._state_lock = threading.Lock()
+        self._state_mutating = False
 
     async def pipe_reader(self):
         """Asynchronously reads messages from the pipe."""
@@ -153,36 +163,55 @@ class AS64Coordinator:
         """
         Start the AS64 processing thread
         """
-        if self.as64_thread and self.as64_thread.is_alive():
-            logger.warning("[AS64Coordinator.start_as64] AS64 thread is already running.")
-            return False
-
-        logger.info("[AS64Coordinator.start_as64] Starting AS64 processing thread.")
-        self.as64_stop_event.clear()
-        self.as64_thread = threading.Thread(
-            target=self.as64_loop,
-            args=(),
-            daemon=True
-        )
-        self.as64_thread.start()
         
-        return True
+        with self._state_lock:
+            if self._state_mutating:
+                return False
+            self._state_mutating = True
+        
+        try:
+            if self.as64_thread and self.as64_thread.is_alive():
+                logger.warning("[AS64Coordinator.start_as64] AS64 thread is already running.")
+                return False
 
+            logger.info("[AS64Coordinator.start_as64] Starting AS64 processing thread.")
+            self.as64_stop_event.clear()
+            self.as64_thread = threading.Thread(
+                target=self.as64_loop,
+                args=(),
+                daemon=True
+            )
+            self.as64_thread.start()
+            
+            return True
+        finally:
+            with self._state_lock:
+                self._state_mutating = False
+        
     def stop_as64(self):
         """
         Stop the AS64 processing thread
         """
-        if self.as64_thread and self.as64_thread.is_alive():
-            logger.info("[AS64Coordinator.stop_as64] Stopping AS64 processing thread.")
-            self.as64_stop_event.set()
-            self.as64_thread.join()
-            self.as64_thread = None
-            logger.info("[AS64Coordinator.stop_as64] AS64 processing thread stopped.")
-            
-            return True
-        else:
-            logger.warning("[AS64Coordinator.stop_as64] AS64 thread is not running.")
-            return False
+        with self._state_lock:
+            if self._state_mutating:
+                return False
+            self._state_mutating = True
+        
+        try:
+            if self.as64_thread and self.as64_thread.is_alive():
+                logger.info("[AS64Coordinator.stop_as64] Stopping AS64 processing thread.")
+                self.as64_stop_event.set()
+                self.as64_thread.join(timeout=2)
+                self.as64_thread = None
+                logger.info("[AS64Coordinator.stop_as64] AS64 processing thread stopped.")
+                
+                return True
+            else:
+                logger.warning("[AS64Coordinator.stop_as64] AS64 thread is not running.")
+                return False
+        finally:
+            with self._state_lock:
+                self._state_mutating = False
 
     def as64_loop(self):
         """
@@ -190,24 +219,39 @@ class AS64Coordinator:
         """
         logger.info("[AS64Coordinator.as64_loop] AS64 Loop started.")
         
-        _as64 = AS64(self.plugin_manager, None)
+        self.enqueue_message({"event": "status", "data": AS64Status.INITIALIZING.value})
+        _as64 = AS64(self.plugin_manager, self.enqueue_message)
         
         try:
-            while not self.as64_stop_event.is_set():
-                _as64.run()
+            valid = _as64.is_valid()
+            if not valid:
+                raise PluginValidationError("An unknown error occurred.")
+        except PluginValidationError as e:
+            self.enqueue_message({"event": "error", "data": str(e)})
+            self.as64_stop_event.set()
+            
+        try:
+            _as64.run(self.as64_stop_event)
         finally:
+            self.enqueue_message({"event": "status", "data": AS64Status.STOPPED.value})
             logger.info("[AS64Coordinator.as64_loop] AS64 loop exiting.")
 
     async def run(self):
         """Main controller logic."""
         try:
             self.event_loop = asyncio.get_running_loop()
-
+            
             await self.pipe.create()
             await self.pipe.connect()
+            
+            self.plugin_manager.load_plugins()
+            self.plugin_manager.instantiate_plugins(category=Plugin)
+            self.plugin_manager.run_method(Plugin, "initialize")
 
             read_task = asyncio.create_task(self.pipe_reader())
             write_task = asyncio.create_task(self.pipe_writer())
+            
+            self.enqueue_message({"event": "loaded"})
 
             await asyncio.gather(read_task, write_task)
 
@@ -221,7 +265,8 @@ class AS64Coordinator:
             self.enqueue_message(None)  # Enqueue sentinel
 
             await self.pipe.close()
-            
+                
+                       
 
 if __name__ == "__main__":
     log.configure_logging()
