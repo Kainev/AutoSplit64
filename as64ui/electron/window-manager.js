@@ -9,13 +9,45 @@
  * For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
  */
 
-const { BrowserWindow } = require("electron");
+const { BrowserWindow, screen } = require("electron");
 const path = require("path");
 const { isDev } = require("./env");
 const log = require("./logger");
 
+let splashWindow = null;
 let mainWindow = null;
 const secondaryWindows = {};
+
+function createSplashWindow() {
+  splashWindow = new BrowserWindow({
+    width: 500,
+    height: 240,
+    backgroundColor: "#181818",
+    frame: false,
+    alwaysOnTop: true,
+    resizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      enableRemoteModule: false,
+      webSecurity: !isDev,
+    },
+  });
+
+  if (isDev) {
+    splashWindow.loadURL("http://localhost:5173/#splash");
+  } else {
+    const indexHtmlPath = path.join(__dirname, "../dist/index.html");
+    splashWindow.loadURL(`file://${indexHtmlPath}#splash`);
+  }
+
+  splashWindow.on("closed", () => {
+    splashWindow = null;
+  });
+
+  return splashWindow;
+}
 
 /**
  * Creates the main BrowserWindow (single instance).
@@ -28,6 +60,7 @@ function createMainWindow() {
     height: 576,
     titleBarStyle: "hidden",
     backgroundColor: "#181818",
+    resizable: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -54,16 +87,16 @@ function createMainWindow() {
 /**
  * Creates (or focuses) a secondary window, identified by a unique key.
  *
- * @param {Object} options - e.g. { key: "myWindow", route: "/editor", width: 800, height: 600, title: "Editor" }
+ * @param {Object} options - e.g. { key: "MyWindow", route: "/editor", width: 800, height: 600, title: "Editor" }
  * @returns {BrowserWindow} The created (or focused) BrowserWindow
  */
 function createSecondaryWindow(options = {}) {
   const {
-    key = "secondary", // unique identifier for this window
+    key = "secondary",
     route = "",
-    width = 800,
-    height = 600,
-    title = "New Window",
+    autoCloseOnBlur = false,
+    position = "center",
+    ...browserWindowOverrides
   } = options;
 
   // If already open, just focus it
@@ -74,17 +107,15 @@ function createSecondaryWindow(options = {}) {
 
   log.info(`Creating secondary window for key: ${key}`);
 
-  const newWindow = new BrowserWindow({
-    width,
-    height,
-    titleBarStyle: "hidden",
-    titleBarOverlay: {
-      color: "#1F1F1F",
-      symbolColor: "#5E5E5E",
-      height: 47,
-    },
-    title,
+  const encodedData = encodeURIComponent(JSON.stringify(options.data));
+  const params = `?data=${encodedData}`;
+
+  const defaultOptions = {
+    width: 800,
+    height: 600,
+    title: "AS64",
     backgroundColor: "#181818",
+    titleBarStyle: "hidden",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -92,19 +123,48 @@ function createSecondaryWindow(options = {}) {
       enableRemoteModule: false,
       webSecurity: !isDev,
     },
+  };
+
+  const titleBarOverlay = autoCloseOnBlur
+    ? {}
+    : {
+        titleBarOverlay: {
+          color: "#1F1F1F",
+          symbolColor: "#5E5E5E",
+          height: 47,
+        },
+      };
+
+  let windowCoordinates = {};
+  if (position === "cursor") {
+    const { x, y } = screen.getCursorScreenPoint();
+    windowCoordinates = { x, y };
+  }
+
+  const newWindow = new BrowserWindow({
+    ...defaultOptions,
+    ...windowCoordinates,
+    ...titleBarOverlay,
+    ...browserWindowOverrides,
   });
 
   if (isDev) {
-    newWindow.loadURL(`http://localhost:5173/#${route}`);
-    newWindow.webContents.openDevTools();
+    newWindow.loadURL(`http://localhost:5173/#${route}${params}`);
   } else {
-    const distPath = path.join(__dirname, "../dist/index.html");
-    newWindow.loadURL(`file://${distPath}#${route}`);
+    const indexHtmlPath = path.join(__dirname, "../dist/index.html");
+    newWindow.loadURL(`file://${indexHtmlPath}#${route}${params}`);
   }
 
   newWindow.on("closed", () => {
     delete secondaryWindows[key];
   });
+
+  if (autoCloseOnBlur) {
+    newWindow.on("blur", () => {
+      secondaryWindows[key].close();
+      delete secondaryWindows[key];
+    });
+  }
 
   secondaryWindows[key] = newWindow;
   return newWindow;
@@ -117,12 +177,11 @@ function createSecondaryWindow(options = {}) {
 function closeSecondaryWindow(key) {
   if (secondaryWindows[key]) {
     secondaryWindows[key].close();
-    // The "closed" event will remove it from the registry
   }
 }
 
 /**
- * Closes all secondary windows (optional utility if needed).
+ * Closes all secondary windows.
  */
 function closeAllSecondaryWindows() {
   Object.keys(secondaryWindows).forEach((key) => {
@@ -133,6 +192,12 @@ function closeAllSecondaryWindows() {
 }
 
 module.exports = {
+  // Splash Screen
+  createSplashWindow,
+  get splashWindow() {
+    return splashWindow;
+  },
+
   // Main window
   createMainWindow,
   get mainWindow() {
