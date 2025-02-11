@@ -23,8 +23,7 @@ from .base import (
 from .discovery import (
     DiscoveredPlugin,
     DirectoryPluginDiscovery,
-    FilePluginDiscovery,
-    DefaultPluginDiscovery
+    FilePluginDiscovery
 )
 
 
