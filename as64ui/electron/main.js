@@ -10,20 +10,19 @@
 //  */
 
 const { app } = require("electron");
-const log = require("./logger");
-const { isDev } = require("./env");
-const { createMainWindow } = require("./window-manager");
-const { spawnAS64 } = require("./backend");
+
+const { createSplashWindow } = require("./window-manager");
+
+const { spawnAS64, killAS64 } = require("./backend");
 const { connectToAS64 } = require("./pipe");
+
 const { setupIPC } = require("./ipc-handlers");
 
-log.info("Starting AutoSplit64...");
-
 function onAppReady() {
-  createMainWindow();
-  spawnAS64();
+  createSplashWindow();
 
-  setTimeout(() => connectToAS64(), 500);
+  spawnAS64();
+  setTimeout(() => connectToAS64(), 1000);
 
   setupIPC();
 }
@@ -31,7 +30,6 @@ function onAppReady() {
 app.whenReady().then(onAppReady);
 
 app.on("window-all-closed", () => {
-  log.info("All windows closed. Cleaning up...");
-  killPythonBackend();
+  killAS64();
   app.quit();
 });
