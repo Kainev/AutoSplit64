@@ -77,3 +77,8 @@ untracked/
 config.toml
 as64.dist/
 as64ui/dist/
+
+
+templates/*
+!templates/default_reset_one.jpg
+!templates/default_reset_two.jpg
