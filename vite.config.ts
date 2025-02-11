@@ -14,6 +14,9 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    global: {},
+  },
   base: "./",
   root: "./as64ui/react",
   build: {
@@ -27,6 +30,7 @@ export default defineConfig({
         format: "cjs",
       },
     },
+    assetsInlineLimit: 51200,
   },
   resolve: {
     alias: {
