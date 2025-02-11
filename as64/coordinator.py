@@ -28,7 +28,9 @@ from as64.ipc.pipe import (
 )
 from as64.enums import AS64Status
 
+# RPC Registration Imports
 from as64 import helpers
+from as64 import calibration
 
 logger = logging.getLogger(__name__)
 
