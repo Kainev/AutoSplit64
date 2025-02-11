@@ -76,3 +76,4 @@ Thumbs.db
 untracked/
 config.toml
 as64.dist/
+as64ui/dist/
