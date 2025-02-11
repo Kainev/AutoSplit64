@@ -78,6 +78,8 @@ config.toml
 as64.dist/
 as64ui/dist/
 
+plugins/
+
 
 templates/*
 !templates/default_reset_one.jpg
