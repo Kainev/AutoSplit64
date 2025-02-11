@@ -11,7 +11,7 @@
 
 const net = require("net");
 const log = require("./logger");
-const { mainWindow } = require("./window-manager");
+const windowManager = require("./window-manager");
 
 const PIPE_NAME = process.env.PIPE_NAME || "\\\\.\\pipe\\AutoSplit64";
 let as64Pipe = null;
@@ -49,7 +49,7 @@ function handlePipeClose() {
   as64Pipe = null;
 }
 
-// Handler for inbound data:
+// Inbound buffer
 let buffer = "";
 
 function handleData(data) {
@@ -69,8 +69,27 @@ function handleData(data) {
         handleIncomingResponse(parsedData);
       }
 
-      if (mainWindow && mainWindow.webContents) {
-        mainWindow.webContents.send("message", parsedData);
+      if (parsedData.event && parsedData.event === "loaded") {
+        if (!windowManager.mainWindow) {
+          windowManager.createMainWindow();
+        }
+
+        if (windowManager.splashWindow) {
+          windowManager.splashWindow.close();
+        }
+      }
+
+      if (windowManager.mainWindow && windowManager.mainWindow.webContents) {
+        windowManager.mainWindow.webContents.send("message", parsedData);
+      }
+
+      if (windowManager.secondaryWindows) {
+        Object.keys(windowManager.secondaryWindows).forEach((key) => {
+          const win = windowManager.secondaryWindows[key];
+          if (win && win.webContents) {
+            win.webContents.send("message", parsedData);
+          }
+        });
       }
     } catch (err) {
       log.error("Failed to parse JSON line:", line, err);
