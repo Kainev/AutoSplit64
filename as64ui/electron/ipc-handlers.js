@@ -10,86 +10,15 @@
  */
 
 const { ipcMain, dialog, app } = require("electron");
-const path = require("path");
 const fs = require("fs");
 const log = require("./logger");
 const { sendMessage, sendRequest } = require("./pipe");
-const { isDev } = require("./env");
-const { createSecondaryWindow, mainWindow } = require("./window-manager");
+const windowManager = require("./window-manager");
 
-function setupIPC() {
-  const pluginsDir = isDev
-    ? path.resolve(__dirname, process.env.PLUGINS_DEV_PATH || "../../plugins")
-    : path.join(
-        app.getPath("exe"),
-        process.env.PLUGINS_PROD_PATH || "../plugins"
-      );
-
-  ipcMain.on("send-message", (event, message) => {
-    log.debug("IPC received send-message:", message);
-    sendMessage(message);
-  });
-
-  ipcMain.handle("send-request", async (event, message) => {
-    try {
-      const result = await sendRequest(message);
-      return result;
-    } catch (err) {
-      log.error("Error handling send-request:", err);
-      throw err;
-    }
-  });
-
-  ipcMain.handle("get-plugins", () => {
-    log.debug(`IPC: 'get-plugins' called. Checking directory: ${pluginsDir}`);
-    try {
-      if (!fs.existsSync(pluginsDir)) {
-        log.info("Plugins directory does not exist.");
-        return [];
-      }
-      const pluginList = fs.readdirSync(pluginsDir).filter((pluginName) => {
-        const pluginPath = path.join(
-          pluginsDir,
-          pluginName,
-          `${pluginName}.mjs`
-        );
-        return fs.existsSync(pluginPath);
-      });
-      log.debug("Found plugins:", pluginList);
-      return pluginList;
-    } catch (err) {
-      log.error(`Error reading plugins directory '${pluginsDir}':`, err);
-      return [];
-    }
-  });
-
-  ipcMain.handle("get-plugins-base-path", () => {
-    return pluginsDir;
-  });
-
-  ipcMain.on("resize-window", (event, { width, height }) => {
-    if (mainWindow) {
-      const currentBounds = mainWindow.getBounds();
-      mainWindow.setBounds({
-        width,
-        height,
-        x: currentBounds.x,
-        y: currentBounds.y,
-      });
-    }
-  });
-
-  ipcMain.handle("open-new-window", (event, options) => {
-    return createSecondaryWindow(options);
-  });
-
-  ipcMain.handle("close-window", (event, key) => {
-    closeSecondaryWindow(key);
-  });
-
-  ipcMain.handle("dialog:openFile", async () => {
+function setupFileHandling() {
+  ipcMain.handle("dialog:openFile", async (options = {}) => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
-      filters: [{ name: "TOML Files", extensions: ["toml"] }],
+      ...options,
       properties: ["openFile"],
     });
     if (canceled) {
@@ -99,6 +28,19 @@ function setupIPC() {
       const data = fs.readFileSync(filePath, "utf-8");
       return { filePath, data };
     }
+  });
+
+  ipcMain.handle("file:read", async (event, filePath) => {
+    return new Promise((resolve, reject) => {
+      fs.readFile(filePath, "utf-8", (err, data) => {
+        if (err) {
+          console.error("Error reading file:", err);
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
   });
 
   ipcMain.handle("dialog:saveFile", async (event, filePath, content, title) => {
@@ -123,6 +65,60 @@ function setupIPC() {
       }
     }
   });
+}
+
+function setupWindowHandling() {
+  ipcMain.on("resize-window", (event, { width, height }) => {
+    if (windowManager.mainWindow) {
+      const currentBounds = windowManager.mainWindow.getBounds();
+      windowManager.mainWindow.setBounds({
+        width,
+        height,
+        x: currentBounds.x,
+        y: currentBounds.y,
+      });
+    }
+  });
+
+  ipcMain.handle("open-new-window", (event, options) => {
+    windowManager.createSecondaryWindow(options);
+  });
+
+  ipcMain.handle("close-window", (event, key) => {
+    windowManager.closeSecondaryWindow(key);
+  });
+}
+
+function setupCommunicationHandling() {
+  ipcMain.on("send-message", (event, message) => {
+    log.debug("IPC received send-message:", message);
+    sendMessage(message);
+  });
+
+  ipcMain.handle("send-request", async (event, message) => {
+    try {
+      const result = await sendRequest(message);
+      return result;
+    } catch (err) {
+      log.error("Error handling send-request:", err);
+      throw err;
+    }
+  });
+}
+
+function setupPathHandling() {
+  const appDir = app.getPath("exe");
+
+  ipcMain.handle("get-app-dir", () => {
+    return appDir;
+  });
+}
+
+function setupIPC() {
+  setupCommunicationHandling();
+  setupWindowHandling();
+  setupFileHandling();
+  setupPathHandling();
 }
 
 module.exports = {
