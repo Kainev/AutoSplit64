@@ -13,7 +13,12 @@
 module.exports = {
   content: ["./as64ui/react/**/*.{js,ts,jsx,tsx}", "./as64ui/react/index.html"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        base: "#181818",
+        card: "#1F1F1F",
+      },
+    },
   },
   plugins: [],
 };
