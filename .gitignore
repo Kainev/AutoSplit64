@@ -75,3 +75,4 @@ Thumbs.db
 /*.bak
 untracked/
 config.toml
+as64.dist/
