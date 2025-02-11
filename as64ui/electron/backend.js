@@ -8,12 +8,10 @@
  *
  * For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
  */
+const { app, dialog } = require("electron");
 
-const { app } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
-
-const { dialog } = require("electron");
 
 const { isDev } = require("./env");
 const log = require("./logger");

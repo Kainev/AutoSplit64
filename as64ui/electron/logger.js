@@ -18,4 +18,4 @@ log.transports.file.format = "{h}:{i}:{s} [{level}] {text}";
 log.transports.console.level = isDev ? "debug" : "info";
 log.transports.file.level = isDev ? "debug" : "info";
 
-module.exports = { log };
+module.exports = log;
