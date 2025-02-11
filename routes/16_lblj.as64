@@ -1,46 +1,70 @@
 __route__ = true
-title = "16 LBLJ"
-category = "16 Star"
-initial_star = 0
-version = "JP"
 logic_plugin = "RTA"
+title = "16 LBLJ"
+initial_star = 0.0
+version = "JP"
+category = "16 Star"
 
-[SPLIT.LBLJ]
-split_type = "LBLJ"
+[SPLIT]
 
-[SPLIT.DW]
-split_type = "BOWSER"
+  [SPLIT.split_1]
+  id = "1"
+  title = "LBLJ"
+  split_type = "LBLJ"
 
-[SPLIT.WF]
-star_count = 4
-split_type = "STAR"
+  [SPLIT.split_2]
+  id = "2"
+  split_type = "Bowser"
+  title = "DW"
 
-[SPLIT.SSL]
-star_count = 7
-split_type = "STAR"
+  [SPLIT.split_3]
+  id = "3"
+  star_count = 4.0
+  split_type = "Star"
+  title = "WF"
 
-[SPLIT.LLL]
-star_count = 11
-split_type = "STAR"
+  [SPLIT.split_4]
+  id = "4"
+  star_count = 7.0
+  split_type = "Star"
+  title = "SSL"
 
-[SPLIT.HMC]
-star_count = 15
-split_type = "STAR"
+  [SPLIT.split_5]
+  id = "5"
+  star_count = 11.0
+  split_type = "Star"
+  title = "LLL"
 
-[SPLIT.Mips]
-split_type = "MIPS"
+  [SPLIT.split_6]
+  id = "6"
+  star_count = 15.0
+  split_type = "Star"
+  title = "HMC"
 
-[SPLIT.DDD]
-star_count = 16
-split_type = "STAR"
+  [SPLIT.split_7]
+  id = "7"
+  split_type = "Mips"
+  title = "Mips"
 
-[SPLIT.FS]
-split_type = "BOWSER"
+  [SPLIT.split_8]
+  id = "8"
+  star_count = 16.0
+  split_type = "Star"
+  title = "DDD"
 
-[SPLIT.BLJs]
-star_count = 16
-fade_out = 4
-split_type = "CUSTOM"
+  [SPLIT.split_9]
+  id = "9"
+  split_type = "Bowser"
+  title = "FS"
 
-[SPLIT.BiTS]
-split_type = "BOWSER"
+  [SPLIT.split_10]
+  id = "10"
+  star_count = 16.0
+  fade_out = 4.0
+  split_type = "Custom"
+  title = "BLJs"
+
+  [SPLIT.split_11]
+  id = "11"
+  split_type = "Bowser"
+  title = "BiTs"
