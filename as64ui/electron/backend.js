@@ -9,6 +9,7 @@
  * For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
  */
 
+const { app } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 
@@ -20,23 +21,21 @@ const log = require("./logger");
 let as64Process = null;
 
 function spawnAS64() {
-  const pythonExePath = isDev
-    ? process.env.PYTHON_DEV_EXE_PATH
-    : process.env.PYTHON_PROD_EXE_PATH;
+  const basePath = isDev ? __dirname : path.dirname(app.getPath("exe"));
 
-  const backendScriptPath = isDev
-    ? process.env.PYTHON_DEV_APP_PATH
-    : process.env.PYTHON_PROD_APP_PATH;
+  const python = process.platform === "win32" ? "python.exe" : "python";
+  const pythonPath = isDev
+    ? path.join(__dirname, "..", "..", "py", python)
+    : path.join(basePath, "py", python);
 
-  const resolvedPythonExePath = path.resolve(__dirname, pythonExePath);
-  const resolvedBackendScriptPath = path.resolve(__dirname, backendScriptPath);
+  const as64Path = isDev
+    ? path.join(__dirname, "..", "..", "as64", "coordinator.py")
+    : path.join(basePath, "as64");
 
-  log.info(
-    `Attempting to spawn AS64 process: ${resolvedPythonExePath} ${resolvedBackendScriptPath}`
-  );
+  log.info(`Attempting to spawn AS64 process: ${pythonPath} ${as64Path}`);
 
   try {
-    as64Process = spawn(resolvedPythonExePath, [resolvedBackendScriptPath]);
+    as64Process = spawn(pythonPath, [as64Path]);
 
     as64Process.on("error", (err) => {
       log.error("Failed to spawn AS64 process:", err);
