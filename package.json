@@ -49,7 +49,8 @@
         "from": "resources",
         "to": "resources",
         "filter": [
-          "**/*"
+          "**/*",
+          "!capture.jpg"
         ]
       },
       {
@@ -63,7 +64,8 @@
         "from": "templates",
         "to": "templates",
         "filter": [
-          "**/*"
+          "default_reset_one.jpg",
+          "default_reset_two.jpg"
         ]
       }
     ],
