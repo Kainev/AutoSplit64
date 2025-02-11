@@ -7,13 +7,6 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
-import os
-
-import win32api
-import win32con
-import win32gui
-import win32process
-
 import as64.config as config
 
 from as64.enums import Region, Version
