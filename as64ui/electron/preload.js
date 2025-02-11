@@ -12,14 +12,12 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
-  getPlugins: async () => {
-    return await ipcRenderer.invoke("get-plugins");
+  // Paths
+  getAppDir: async () => {
+    return await ipcRenderer.invoke("get-app-dir");
   },
 
-  getPluginsBasePath: async () => {
-    return await ipcRenderer.invoke("get-plugins-base-path");
-  },
-
+  // Back-End Communication
   rpc(procName, ...args) {
     return ipcRenderer.invoke("send-request", {
       rpc: procName,
@@ -27,14 +25,25 @@ contextBridge.exposeInMainWorld("api", {
     });
   },
 
-  sendMessage: (message) => ipcRenderer.send("send-message", message),
-  sendRequest: (message) => ipcRenderer.invoke("send-request", message),
+  onMessage: (callback) => {
+    ipcRenderer.on("message", (event, data) => {
+      callback(data);
+    });
+  },
 
-  openFile: () => ipcRenderer.invoke("dialog:openFile"),
+  // File Handling
+  openFile: (options) => ipcRenderer.invoke("dialog:openFile", options),
+
   saveFile: (defaultPath, content, title = "") =>
     ipcRenderer.invoke("dialog:saveFile", defaultPath, content, title),
 
+  readFile: async (filePath) => {
+    return await ipcRenderer.invoke("file:read", filePath);
+  },
+
+  // Window Handling
   openNewWindow: (options) => ipcRenderer.invoke("open-new-window", options),
+
   closeWindow: (key) => ipcRenderer.invoke("close-window", key),
 
   resizeWindow: (width, height) =>
