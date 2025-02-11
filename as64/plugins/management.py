@@ -7,7 +7,7 @@
 #
 # For more information see https://github.com/Kainev/AutoSplit64?tab=readme#license
 
-
+import os
 import logging
 from typing import Type, List, Dict
 from collections import defaultdict
@@ -23,7 +23,8 @@ from .base import (
 from .discovery import (
     DiscoveredPlugin,
     DirectoryPluginDiscovery,
-    FilePluginDiscovery
+    FilePluginDiscovery,
+    DefaultPluginDiscovery
 )
 
 
@@ -44,7 +45,8 @@ class PluginManager:
         
         self.discoverers = [
             DirectoryPluginDiscovery(plugins_directory, logger),
-            FilePluginDiscovery(plugins_directory, logger)
+            FilePluginDiscovery(plugins_directory, logger),
+            FilePluginDiscovery(os.path.join(plugins_directory, "default"), logger),
         ]
         
         self.plugin_class_map: Dict[str, Type[BasePlugin]] = {}
@@ -175,6 +177,8 @@ class PluginManager:
         Call `method_name` on each plugin in the specified category, with optional positional
         and keyword arguments.
         """
+        # logger.debug(f"[run_method] Running method on {category_class.__name__}: method_name")
+        # try:
         for instance in self.plugins[category_class]:
             method = getattr(instance, method_name, None)
             if callable(method):
@@ -183,6 +187,8 @@ class PluginManager:
                 logger.warning(
                     f"{instance.__class__.__name__} does not have a method '{method_name}'. Skipping."
                 )
+        # except Exception as e:
+        #     logger.error(f"[run_method] ERROR {str(e)}")
                 
     def set_plugin_loaded_by_name(
         self,

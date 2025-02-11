@@ -23,6 +23,8 @@ from .loader import PluginLoader
 
 
 class IPluginDiscovery(ABC):
+    accepted_extensions = ('.py', '.pyc', '.pyz')
+    
     @abstractmethod
     def discover(self) -> List[DiscoveredPlugin]:
         """Discover plugins and return a list of DiscoveredPlugin objects."""
@@ -83,8 +85,13 @@ class FilePluginDiscovery(IPluginDiscovery):
         for entry in entries:
             entry_path = os.path.join(self.plugins_directory, entry)
             
-            if os.path.isfile(entry_path) and entry.endswith(".py") and entry != "__init__.py":
-                module_name = f"plugins.{entry[:-3]}"  # remove .py extension - TODO: do this properly
+            if not os.path.isfile(entry_path):
+                continue
+            
+            base, ext = os.path.splitext(entry)
+            
+            if ext in self.accepted_extensions and entry != "__init__.py":
+                module_name = f"plugins.{base}"
                 
                 try:
                     module = PluginLoader.import_module(module_name, entry_path)
